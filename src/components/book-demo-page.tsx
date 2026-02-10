@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
@@ -18,7 +19,7 @@ function fadeUp(shouldReduceMotion: boolean, delay = 0) {
       y: 0,
       transition: {
         delay: shouldReduceMotion ? 0 : delay,
-        duration: shouldReduceMotion ? 0 : 0.52,
+        duration: shouldReduceMotion ? 0 : 0.56,
         ease: [0.22, 1, 0.36, 1] as const,
       },
     },
@@ -31,6 +32,20 @@ function linkedInIcon() {
       <path
         d="M6.94 8.24a1.44 1.44 0 110-2.88 1.44 1.44 0 010 2.88zM5.64 9.6h2.6v8.75h-2.6V9.6zM9.88 9.6h2.49v1.2h.03c.35-.66 1.2-1.35 2.47-1.35 2.64 0 3.13 1.74 3.13 4v4.9h-2.6V14c0-1.03-.02-2.35-1.43-2.35-1.43 0-1.65 1.11-1.65 2.27v4.43h-2.44V9.6z"
         fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function arrowIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M2.5 8h10M8.5 3.5 13 8l-4.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -52,34 +67,78 @@ export function BookDemoPage() {
   }, [has15MinuteLink, selectedDuration]);
 
   return (
-    <div className="pb-16">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-8 sm:px-8">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-slate-900">
-          Lev
-        </Link>
-        <Link
-          href="/"
-          className="rounded-full border border-slate-900/15 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-900/25 hover:text-slate-900"
-        >
-          Back to home
-        </Link>
+    <div className="relative overflow-x-clip pb-20">
+      <div className="pointer-events-none absolute -left-16 top-16 h-64 w-64 rounded-full bg-cyan-300/35 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 top-12 h-72 w-72 rounded-full bg-blue-300/35 blur-3xl" />
+
+      <header className="sticky top-0 z-30 border-b border-slate-900/7 bg-[rgba(247,243,235,0.82)] backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-6 py-4 sm:px-8">
+          <Link
+            href="/"
+            className="text-[1.08rem] font-semibold tracking-[-0.02em] text-slate-900"
+            aria-label="Lev home"
+          >
+            Lev
+          </Link>
+          <Link href="/" className="lev-button lev-button--light">
+            Back to home
+            {arrowIcon()}
+          </Link>
+        </div>
       </header>
 
-      <main className="mx-auto mt-10 w-full max-w-6xl px-6 sm:px-8">
+      <main className="mx-auto mt-8 w-full max-w-[1200px] px-6 sm:px-8">
         <motion.section
           initial="hidden"
           animate="visible"
-          className="rounded-4xl border border-slate-200/70 bg-[linear-gradient(120deg,#fffef9_0%,#f0fdf4_100%)] px-6 py-12 shadow-[0_30px_80px_-60px_rgba(15,23,42,0.7)] sm:px-10"
+          className="lev-soft-outline relative overflow-hidden rounded-[34px] px-6 py-10 sm:px-10 sm:py-11"
         >
-          <motion.h1
-            variants={fadeUp(shouldReduceMotion)}
-            className="max-w-2xl text-4xl leading-tight font-semibold text-slate-900 sm:text-5xl"
-          >
-            Schedule a 30 min call with Levvy
-          </motion.h1>
-          <motion.p variants={fadeUp(shouldReduceMotion, 0.1)} className="mt-4 max-w-2xl text-lg">
-            We will show how Levvy closes your books and proactively flags GST and cash risks.
-          </motion.p>
+          <div className="lev-grid-field pointer-events-none absolute inset-0 opacity-[0.16]" />
+          <div className="pointer-events-none absolute -right-14 -top-16 h-56 w-56 rounded-full bg-emerald-300/30 blur-3xl" />
+          <div className="relative grid gap-7 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+            <div>
+              <motion.p
+                variants={fadeUp(shouldReduceMotion)}
+                initial="hidden"
+                animate="visible"
+                className="inline-flex rounded-full border border-slate-900/15 bg-white/88 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700"
+              >
+                Book Founder Demo
+              </motion.p>
+              <motion.h1
+                variants={fadeUp(shouldReduceMotion, 0.08)}
+                initial="hidden"
+                animate="visible"
+                className="mt-4 text-[clamp(2.2rem,5vw,4rem)] leading-[0.96] font-semibold tracking-[-0.03em] text-slate-950"
+              >
+                <span className="block">Schedule a 30 min call</span>
+                <span className="lev-highlight block">with Levvy</span>
+              </motion.h1>
+              <motion.p
+                variants={fadeUp(shouldReduceMotion, 0.16)}
+                initial="hidden"
+                animate="visible"
+                className="mt-4 max-w-xl text-lg leading-relaxed"
+              >
+                We will show how Levvy closes your books and proactively flags GST and cash risks.
+              </motion.p>
+            </div>
+
+            <motion.div
+              variants={fadeUp(shouldReduceMotion, 0.2)}
+              initial="hidden"
+              animate="visible"
+              className="rounded-[26px] border border-slate-900/10 bg-white/86 p-3"
+            >
+              <Image
+                src="/lev-network.svg"
+                alt="Lev operations overview visual"
+                width={900}
+                height={520}
+                className="w-full rounded-[18px]"
+              />
+            </motion.div>
+          </div>
         </motion.section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[0.38fr_0.62fr] lg:items-start">
@@ -87,11 +146,9 @@ export function BookDemoPage() {
             initial="hidden"
             animate="visible"
             variants={fadeUp(shouldReduceMotion)}
-            className="rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-[0_24px_60px_-50px_rgba(15,23,42,0.75)]"
+            className="lev-soft-outline rounded-[28px] p-6"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Founder
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Founder</p>
             <div className="mt-3 flex items-center justify-between gap-4">
               <div>
                 <p className="text-xl font-semibold text-slate-900">{siteConfig.founderName}</p>
@@ -107,13 +164,18 @@ export function BookDemoPage() {
                 {linkedInIcon()}
               </a>
             </div>
+            <div className="mt-6 space-y-2 text-sm text-slate-600">
+              <p>- Live walkthrough of Lev workflows</p>
+              <p>- How alerts + close process run weekly</p>
+              <p>- Exact setup for your current tools</p>
+            </div>
           </motion.article>
 
           <motion.section
             initial="hidden"
             animate="visible"
             variants={fadeUp(shouldReduceMotion, 0.08)}
-            className="rounded-3xl border border-slate-200/70 bg-white p-4 shadow-[0_24px_60px_-52px_rgba(15,23,42,0.8)] sm:p-6"
+            className="lev-soft-outline rounded-[28px] p-4 sm:p-6"
           >
             <div className="mb-4 flex items-center justify-between gap-4">
               <p className="text-sm font-semibold text-slate-700">Meeting duration</p>
@@ -151,7 +213,7 @@ export function BookDemoPage() {
                 width="100%"
                 height="760"
                 loading="lazy"
-                className="h-[760px] w-full rounded-2xl border border-slate-200"
+                className="h-[760px] w-full rounded-[18px] border border-slate-200 bg-white"
               />
             ) : (
               <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">

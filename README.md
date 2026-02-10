@@ -30,7 +30,7 @@ cp .env.example .env.local
 3. Fill these values in `.env.local`:
 
 ```bash
-NEXT_PUBLIC_CALCOM_30MIN_URL=https://cal.com/<your-handle>/30min
+NEXT_PUBLIC_CALCOM_30MIN_URL=https://cal.com/lev.demo
 NEXT_PUBLIC_CALCOM_15MIN_URL=https://cal.com/<your-handle>/15min
 NEXT_PUBLIC_FOUNDER_LINKEDIN_URL=https://www.linkedin.com/in/prasoonpathak
 ```

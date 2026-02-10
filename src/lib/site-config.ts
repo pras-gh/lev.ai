@@ -1,4 +1,4 @@
-const DEFAULT_CALCOM_30MIN_URL = "https://cal.com/flaim-lshjgd";
+const DEFAULT_CALCOM_30MIN_URL = "https://cal.com/lev.demo";
 
 function cleanRawUrl(url: string): string {
   return url.trim().replace(/[.,;:!?]+$/, "");
