@@ -103,7 +103,7 @@ export function BookDemoPage() {
                 animate="visible"
                 className="inline-flex rounded-full border border-slate-900/15 bg-white/88 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700"
               >
-                Book Founder Demo
+                Get Lev
               </motion.p>
               <motion.h1
                 variants={fadeUp(shouldReduceMotion, 0.08)}
@@ -112,7 +112,7 @@ export function BookDemoPage() {
                 className="mt-4 text-[clamp(2.2rem,5vw,4rem)] leading-[0.96] font-semibold tracking-[-0.03em] text-slate-950"
               >
                 <span className="block">Schedule a 30 min call</span>
-                <span className="lev-highlight block">with Levvy</span>
+                <span className="lev-highlight block">with Lev</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp(shouldReduceMotion, 0.16)}
@@ -120,7 +120,7 @@ export function BookDemoPage() {
                 animate="visible"
                 className="mt-4 max-w-xl text-lg leading-relaxed"
               >
-                We will show how Levvy closes your books and proactively flags GST and cash risks.
+                We will show how Lev closes your books and proactively flags GST and cash risks.
               </motion.p>
             </div>
 
@@ -208,7 +208,7 @@ export function BookDemoPage() {
 
             {has30MinuteLink ? (
               <iframe
-                title="Book a demo with Lev"
+                title="Get Lev call"
                 src={selectedBookingUrl}
                 width="100%"
                 height="760"
@@ -229,6 +229,15 @@ export function BookDemoPage() {
             )}
           </motion.section>
         </section>
+
+        <footer className="mt-10 pb-2">
+          <div className="flex items-center justify-between border-t border-slate-900/12 pt-5 text-sm">
+            <p className="font-medium text-slate-600">© 2026 Lev</p>
+            <Link href="/get-lev" className="text-slate-700 transition hover:text-slate-900">
+              Get Lev
+            </Link>
+          </div>
+        </footer>
       </main>
     </div>
   );

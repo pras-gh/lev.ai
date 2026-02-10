@@ -1,5 +1,5 @@
-import { BookDemoPage } from "@/components/book-demo-page";
+import { redirect } from "next/navigation";
 
 export default function BookDemo() {
-  return <BookDemoPage />;
+  redirect("/get-lev");
 }

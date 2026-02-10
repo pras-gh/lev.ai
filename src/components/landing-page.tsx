@@ -34,24 +34,30 @@ const chatSimulation = [
 const financeUpdateBullets = [
   "Budget 2026 change impacts your depreciation",
   "GST claim applied automatically",
-  "Your books are ready for close",
+  "Books ready for month close",
 ];
 
-const integrationLogos = [
-  "Banks",
-  "Razorpay",
-  "Tally Exports",
-  "Zoho Books",
-  "WhatsApp",
-  "Slack",
-  "Google Drive",
-  "Gmail",
+const integrationApps = [
+  { name: "Banks", short: "Ba", tone: "bg-[#0D355D] text-white" },
+  { name: "Razorpay", short: "Rz", tone: "bg-[#1165F1] text-white" },
+  { name: "Tally", short: "Ta", tone: "bg-[#2C5E3F] text-white" },
+  { name: "Zoho Books", short: "Zo", tone: "bg-[#C11E38] text-white" },
+  { name: "WhatsApp", short: "Wa", tone: "bg-[#159A4A] text-white" },
+  { name: "Slack", short: "Sl", tone: "bg-[#512BD4] text-white" },
+  { name: "Gmail", short: "Gm", tone: "bg-[#D04D39] text-white" },
+  { name: "Drive", short: "Dr", tone: "bg-[#1A73E8] text-white" },
+];
+
+const integrationOutcomes = [
+  "GST and compliance risks flagged early",
+  "Books kept clean and close-ready",
+  "Cash questions answered with context",
 ];
 
 const heroStats = [
-  { label: "Month close", value: "Always on time" },
-  { label: "GST + ITC alerts", value: "Before deadlines" },
-  { label: "Cash decisions", value: "Operator-level clarity" },
+  { label: "Competent accounting", value: "Quietly handled" },
+  { label: "Fractional finance team", value: "Always available" },
+  { label: "Business decisions", value: "Backed by clean numbers" },
 ];
 
 function arrowIcon() {
@@ -98,15 +104,48 @@ function stagger(shouldReduceMotion: boolean, delayChildren = 0, gap = 0.12) {
   };
 }
 
+function AppChip({
+  label,
+  short,
+  tone,
+  shouldReduceMotion,
+  index,
+}: {
+  label: string;
+  short: string;
+  tone: string;
+  shouldReduceMotion: boolean;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.65 }}
+      variants={fadeUp(shouldReduceMotion, 0.08 + index * 0.05)}
+      className="rounded-[14px] border border-slate-900/10 bg-white p-2.5"
+    >
+      <div className="flex items-center gap-2.5">
+        <div
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-[10px] text-[0.62rem] font-semibold uppercase tracking-[0.12em] ${tone}`}
+        >
+          {short}
+        </div>
+        <p className="text-xs font-semibold text-slate-700">{label}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export function LandingPage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
 
   return (
-    <div className="relative overflow-x-clip pb-24">
+    <div className="relative overflow-x-clip pb-18">
       <div className="pointer-events-none absolute -left-28 top-28 h-64 w-64 rounded-full bg-cyan-300/35 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 top-20 h-72 w-72 rounded-full bg-blue-300/40 blur-3xl" />
 
-      <header className="sticky top-0 z-30 border-b border-slate-900/7 bg-[rgba(247,243,235,0.82)] backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-slate-900/7 bg-[rgba(247,243,235,0.84)] backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-6 py-4 sm:px-8">
           <Link
             href="/"
@@ -123,8 +162,8 @@ export function LandingPage() {
               Integrations
             </a>
           </nav>
-          <Link href="/book-demo" className="lev-button">
-            Book a demo
+          <Link href="/get-lev" className="lev-button">
+            Get Lev
             {arrowIcon()}
           </Link>
         </div>
@@ -147,29 +186,29 @@ export function LandingPage() {
                 variants={fadeUp(shouldReduceMotion)}
                 className="inline-flex rounded-full border border-slate-900/15 bg-white/86 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700"
               >
-                In-house finance hire
+                Competent accounting, quietly handled
               </motion.p>
               <motion.h1
                 variants={fadeUp(shouldReduceMotion, 0.08)}
-                className="mt-5 max-w-2xl text-[clamp(2.5rem,7vw,4.9rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-slate-950"
+                className="mt-5 max-w-2xl text-[clamp(2.45rem,7vw,4.9rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-slate-950"
               >
-                <span className="block">Finance should not</span>
-                <span className="block">be stressful.</span>
-                <span className="lev-highlight mt-2 block">Lev runs it for you.</span>
+                <span className="block">Accounting for</span>
+                <span className="block">the modern era.</span>
+                <span className="lev-highlight mt-2 block">Powered by Lev.</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp(shouldReduceMotion, 0.16)}
                 className="mt-5 max-w-2xl text-[1.06rem] leading-relaxed"
               >
-                Lev is an AI finance hire that proactively flags GST and cash risks, keeps your
-                books clean, and answers your questions 24/7.
+                Lev is your in-house AI finance hire: it keeps books accurate, closes month on
+                time, flags GST and cash risks early, and gives decision-ready answers in seconds.
               </motion.p>
               <motion.div
                 variants={fadeUp(shouldReduceMotion, 0.22)}
                 className="mt-8 flex flex-wrap items-center gap-3"
               >
-                <Link href="/book-demo" className="lev-button">
-                  Book a demo
+                <Link href="/get-lev" className="lev-button">
+                  Get Lev
                   {arrowIcon()}
                 </Link>
                 <a href="#what-lev-does" className="lev-button lev-button--light">
@@ -246,8 +285,8 @@ export function LandingPage() {
                 Most teams discover finance risk too late. Lev catches it early.
               </motion.h2>
               <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-xl text-lg leading-relaxed">
-                Lev watches your numbers continuously and sends clear alerts before GST dues, ITC
-                mismatches, or cash pressure become expensive decisions.
+                Lev monitors your finance stack continuously and alerts you before GST dues, ITC
+                mismatches, or cash pressure become expensive.
               </motion.p>
             </motion.div>
 
@@ -324,11 +363,11 @@ export function LandingPage() {
                 variants={fadeUp(shouldReduceMotion, 0.08)}
                 className="mt-3 max-w-xl text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-slate-950"
               >
-                Ask finance questions at any time. Get direct, decision-ready answers.
+                Ask finance questions any time. Get direct, decision-ready answers.
               </motion.h2>
               <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-xl text-lg leading-relaxed">
-                Lev behaves like your always-on in-house finance lead, so founders can move faster
-                without guessing through hiring plans, compliance calls, or spending decisions.
+                Lev behaves like your always-on in-house finance lead, so founders move faster
+                without guessing on hiring, compliance, or spending.
               </motion.p>
             </motion.div>
           </div>
@@ -344,7 +383,7 @@ export function LandingPage() {
                 variants={fadeUp(shouldReduceMotion)}
                 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600"
               >
-                3. Clear your doubts + clean books
+                3. Clear doubts + clean books
               </motion.p>
               <motion.h2
                 variants={fadeUp(shouldReduceMotion, 0.08)}
@@ -353,8 +392,8 @@ export function LandingPage() {
                 Fast founder clarity. Audit-ready books in the background.
               </motion.h2>
               <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-xl text-lg leading-relaxed">
-                Founders no longer wait for updates to understand risk. Lev answers instantly and
-                keeps books clean so month close stays predictable.
+                Lev gives instant answers and keeps your accounting clean so month close stays
+                predictable and confidence stays high.
               </motion.p>
             </motion.div>
 
@@ -366,7 +405,7 @@ export function LandingPage() {
               className="lev-soft-outline rounded-[30px] p-6 sm:p-7"
             >
               <motion.p variants={fadeUp(shouldReduceMotion)} className="text-xs font-semibold text-slate-500">
-                Subject: Levvy Finance Update
+                Subject: Lev Finance Update
               </motion.p>
               <motion.p variants={fadeUp(shouldReduceMotion, 0.08)} className="mt-4 text-sm leading-relaxed text-slate-600">
                 Your operations digest is ready:
@@ -395,50 +434,91 @@ export function LandingPage() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             variants={stagger(shouldReduceMotion)}
-            className="grid gap-7 lg:grid-cols-[0.92fr_1.08fr] lg:items-center"
+            className="space-y-8"
           >
-            <div>
+            <div className="max-w-3xl">
               <motion.p
                 variants={fadeUp(shouldReduceMotion)}
                 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-600"
               >
-                Integrations
+                Integrations flowing through Lev
               </motion.p>
               <motion.h2
                 variants={fadeUp(shouldReduceMotion, 0.08)}
                 className="mt-3 text-[clamp(2rem,4.5vw,3.5rem)] leading-[0.98] font-semibold text-slate-950"
               >
-                We work where your team already works.
+                Your apps flow into Lev. Lev turns data into action.
               </motion.h2>
-              <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-xl text-lg leading-relaxed">
-                Lev connects to existing tools and keeps data synced quietly behind the scenes.
-                Finance stays accurate and current without another dashboard to manage.
+              <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-2xl text-lg leading-relaxed">
+                No extra dashboards. Lev connects to your existing stack, runs finance workflows in
+                the background, and outputs clean decisions your team can trust.
               </motion.p>
-              <motion.div
-                variants={stagger(shouldReduceMotion, 0.22, 0.08)}
-                className="mt-7 grid gap-2.5 sm:grid-cols-2"
-              >
-                {integrationLogos.map((logo) => (
-                  <motion.div
-                    key={logo}
-                    variants={fadeUp(shouldReduceMotion)}
-                    className="rounded-[14px] border border-slate-900/10 bg-white px-4 py-3 text-sm font-semibold tracking-[0.01em] text-slate-700"
-                  >
-                    {logo}
-                  </motion.div>
-                ))}
-              </motion.div>
             </div>
 
-            <motion.div variants={fadeUp(shouldReduceMotion, 0.16)} className="rounded-[26px] border border-slate-900/10 bg-white/80 p-3">
-              <Image
-                src="/lev-network.svg"
-                alt="Lev integration network map"
-                width={900}
-                height={520}
-                className="w-full rounded-[20px]"
+            <div className="relative rounded-[28px] border border-slate-900/10 bg-white/86 px-4 py-6 sm:px-7 sm:py-8">
+              <div className="grid gap-5 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {integrationApps.map((app, index) => (
+                    <AppChip
+                      key={app.name}
+                      label={app.name}
+                      short={app.short}
+                      tone={app.tone}
+                      shouldReduceMotion={shouldReduceMotion}
+                      index={index}
+                    />
+                  ))}
+                </div>
+
+                <motion.div
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.65 }}
+                  variants={fadeUp(shouldReduceMotion, 0.18)}
+                  className="mx-auto flex h-28 w-28 items-center justify-center rounded-[26px] border border-slate-900/18 bg-slate-950 text-center text-sm font-semibold tracking-[0.1em] text-white shadow-[0_22px_60px_-45px_rgba(15,23,42,1)]"
+                >
+                  LEV
+                </motion.div>
+
+                <motion.ul
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.65 }}
+                  variants={stagger(shouldReduceMotion, 0.2, 0.12)}
+                  className="space-y-2.5"
+                >
+                  {integrationOutcomes.map((outcome) => (
+                    <motion.li
+                      key={outcome}
+                      variants={fadeUp(shouldReduceMotion)}
+                      className="rounded-[14px] border border-emerald-600/16 bg-emerald-50 px-4 py-3 text-sm font-medium text-slate-800"
+                    >
+                      {outcome}
+                    </motion.li>
+                  ))}
+                </motion.ul>
+              </div>
+
+              <div className="pointer-events-none absolute left-1/2 top-1/2 hidden w-[80%] -translate-x-1/2 -translate-y-1/2 lg:block">
+                <div className="h-[1px] w-[42%] bg-gradient-to-r from-transparent via-slate-400/60 to-slate-900/0" />
+                <div className="ml-auto h-[1px] w-[42%] bg-gradient-to-r from-slate-900/0 via-slate-400/60 to-transparent" />
+              </div>
+
+              <motion.span
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.75 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.7, delay: shouldReduceMotion ? 0 : 0.25 }}
+                className="pointer-events-none absolute left-[43%] top-1/2 hidden h-2 w-2 -translate-y-1/2 rounded-full bg-emerald-500 lg:block"
               />
-            </motion.div>
+              <motion.span
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : -24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.75 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.7, delay: shouldReduceMotion ? 0 : 0.48 }}
+                className="pointer-events-none absolute left-[57%] top-1/2 hidden h-2 w-2 -translate-y-1/2 rounded-full bg-blue-500 lg:block"
+              />
+            </div>
           </motion.div>
         </section>
 
@@ -453,19 +533,28 @@ export function LandingPage() {
             variants={fadeUp(shouldReduceMotion)}
             className="max-w-2xl text-[clamp(1.8rem,3.8vw,2.8rem)] leading-[1.02] font-semibold"
           >
-            Ready to run finance like you hired an in-house operator?
+            Ready to run finance like a serious in-house team?
           </motion.h3>
           <motion.p variants={fadeUp(shouldReduceMotion, 0.08)} className="mt-4 max-w-2xl text-[1.05rem] text-slate-300">
-            Book a 30 minute demo and see how Lev closes books on time, flags GST and cash risks,
-            and answers finance questions in seconds.
+            Get Lev and see how books stay accurate, close stays on time, and decisions stop being
+            finance guesswork.
           </motion.p>
           <motion.div variants={fadeUp(shouldReduceMotion, 0.14)} className="mt-7">
-            <Link href="/book-demo" className="lev-button bg-white text-slate-900 hover:bg-slate-200">
-              Book a demo
+            <Link href="/get-lev" className="lev-button bg-white text-slate-900 hover:bg-slate-200">
+              Get Lev
               {arrowIcon()}
             </Link>
           </motion.div>
         </motion.section>
+
+        <footer className="mt-10 pb-2">
+          <div className="flex items-center justify-between border-t border-slate-900/12 pt-5 text-sm">
+            <p className="font-medium text-slate-600">© 2026 Lev</p>
+            <Link href="/get-lev" className="text-slate-700 transition hover:text-slate-900">
+              Get Lev
+            </Link>
+          </div>
+        </footer>
       </main>
     </div>
   );
