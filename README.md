@@ -1,11 +1,12 @@
 # Lev Website pre live 
+Lev
+Lev an AI accountant designed to help SMBs close their monthly books automatically, proactively surface GST/cash risks and provide finance clarity like an in-house finance hire.
 
+## stack 
+
+flag compliance and cash-flow issues before they worsen
+answer founder finance
 M lev pre live:
-
-- Landing page with problem-first narrative and motion sections
-- `/book-demo` page with Cal.com embed
-- Founder card with LinkedIn icon CTA
-- Responsive design + reduced-motion support
 
 ## Stack
 
@@ -25,23 +26,7 @@ npm install
 
 ```bash
 cp .env.example .env.local
-```
 
-3. Fill these values in `.env.local`:
-
-```bash
-NEXT_PUBLIC_CALCOM_30MIN_URL=https://cal.com/lev.demo
-NEXT_PUBLIC_CALCOM_15MIN_URL=https://cal.com/<your-handle>/15min
-NEXT_PUBLIC_FOUNDER_LINKEDIN_URL=https://www.linkedin.com/in/prasoonpathak
-```
-
-4. Start development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ## Main Files
 
@@ -61,9 +46,4 @@ npm run start
 
 ## Deploy
 
-Deploy on Vercel:
 
-1. Push this repository to GitHub.
-2. Import project into Vercel.
-3. Add the same `NEXT_PUBLIC_*` environment variables in Vercel Project Settings.
-4. Deploy.
