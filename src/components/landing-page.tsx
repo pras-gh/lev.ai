@@ -78,7 +78,7 @@ const integrationFlow: IntegrationFlowItem[] = [
   { key: "whatsapp", label: "WhatsApp", top: "84%" },
 ];
 
-const integrationOutcomes = [
+const emailNotifications = [
   "GST risk warnings before deadlines",
   "Month-close books ready for review",
   "Founder-ready answers in plain English",
@@ -94,6 +94,18 @@ function ArrowIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function GmailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
+      <rect x="2" y="5" width="20" height="14" rx="2.8" fill="#ffffff" />
+      <path d="M2 7.4v9.2l5.7-4.4V8.3L2 7.4Z" fill="#34A853" />
+      <path d="M22 7.4v9.2l-5.7-4.4V8.3L22 7.4Z" fill="#4285F4" />
+      <path d="M2 6.8 12 14.1 22 6.8V5.8c0-1.2-.9-2.1-2.1-2.1H4.1C2.9 3.7 2 4.6 2 5.8v1Z" fill="#EA4335" />
+      <path d="m7.7 8.2 4.3 3.1 4.3-3.1V5.2L12 8.1 7.7 5.2v3Z" fill="#FBBC05" />
     </svg>
   );
 }
@@ -230,6 +242,28 @@ export function LandingPage() {
           });
         }
       }
+
+      const notificationCards = gsap.utils.toArray<HTMLElement>("[data-gmail-notice]");
+      if (notificationCards.length > 0) {
+        const notificationsTimeline = gsap.timeline({ repeat: -1, repeatDelay: 1.3 });
+        notificationsTimeline.set(notificationCards, { autoAlpha: 0, y: 14 });
+
+        notificationCards.forEach((card, index) => {
+          notificationsTimeline.to(
+            card,
+            { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
+            index === 0 ? 0.2 : ">"
+          );
+          notificationsTimeline.to(card, { scale: 1.01, duration: 0.18, ease: "power1.out" }, "-=0.06");
+          notificationsTimeline.to(card, { scale: 1, duration: 0.2, ease: "power1.out" });
+        });
+
+        notificationsTimeline.to(
+          notificationCards,
+          { autoAlpha: 0, y: -8, duration: 0.3, stagger: 0.1, ease: "power1.in" },
+          "+=1.2"
+        );
+      }
     });
 
     return () => {
@@ -254,7 +288,7 @@ export function LandingPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(34,197,94,0.12),transparent_36%),radial-gradient(circle_at_84%_14%,rgba(16,185,129,0.08),transparent_34%),linear-gradient(180deg,#020404_0%,#030505_52%,#060b08_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(34,197,94,0.05),transparent_36%),radial-gradient(circle_at_84%_14%,rgba(22,163,74,0.03),transparent_34%),linear-gradient(180deg,#010202_0%,#020303_52%,#030403_100%)]" />
 
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">
@@ -344,7 +378,7 @@ export function LandingPage() {
         <section id="features" className="mt-18" data-gsap="reveal">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Feature carousel</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">About Lev</p>
               <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
                 Full finance flow, without hiring full-time too early.
               </h2>
@@ -364,8 +398,8 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="glass-panel rounded-[26px] border border-white/12 p-6 sm:p-8">
+          <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="glass-panel rounded-[24px] border border-white/12 p-5 sm:p-6 lg:max-w-[520px]">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
                 0{activeSlide + 1} / 03
               </p>
@@ -373,7 +407,7 @@ export function LandingPage() {
               <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-300">
                 {featureSlides[activeSlide].description}
               </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {featureSlides[activeSlide].points.map((point) => (
                   <div
                     key={point}
@@ -470,22 +504,57 @@ export function LandingPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {integrationOutcomes.map((outcome) => (
-                  <div
-                    key={outcome}
-                    className="rounded-xl border border-white/12 bg-white/[0.05] px-4 py-4 text-sm font-medium text-slate-100"
-                  >
-                    {outcome}
+              <div className="flex items-center justify-center">
+                <div className="w-full max-w-[320px] rounded-[34px] border border-white/18 bg-[#050606] p-3 shadow-[0_30px_65px_-42px_rgba(0,0,0,0.95)]">
+                  <div className="mx-auto mb-3 h-1.5 w-20 rounded-full bg-white/20" />
+                  <div className="rounded-[26px] border border-white/10 bg-[#090a0c] px-3 py-4">
+                    <div
+                      className="mb-3 flex items-center justify-between px-1 text-[11px] font-medium text-slate-300"
+                      style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+                    >
+                      <div className="inline-flex items-center gap-1.5">
+                        <GmailIcon />
+                        <span className="text-[#f1f3f4]">Gmail</span>
+                      </div>
+                      <span className="text-slate-400">now</span>
+                    </div>
+                    <div className="space-y-2.5">
+                      {emailNotifications.map((notice) => (
+                        <div
+                          key={notice}
+                          data-gmail-notice
+                          className="rounded-xl border border-[#d2d5d8] bg-[#f8f9fa] p-3 shadow-[0_12px_24px_-20px_rgba(32,33,36,0.65)]"
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-[#dadce0] bg-white text-[#5f6368]">
+                              <GmailIcon />
+                            </span>
+                            <div
+                              className="min-w-0 flex-1"
+                              style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-[11px] font-medium text-[#5f6368]">Gmail</p>
+                                <p className="text-[10px] font-medium text-[#5f6368]">now</p>
+                              </div>
+                              <p className="truncate text-[12px] font-semibold text-[#202124]">
+                                Lev Finance Update
+                              </p>
+                              <p className="mt-0.5 text-[12px] leading-[1.3] text-[#3c4043]">{notice}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <section className="mt-18" data-gsap="reveal">
-          <div className="rounded-[28px] border border-white/14 bg-gradient-to-r from-emerald-500/15 via-emerald-500/8 to-black px-6 py-9 sm:px-9">
+          <div className="rounded-[28px] border border-white/14 bg-gradient-to-r from-emerald-500/8 via-emerald-500/4 to-black px-6 py-9 sm:px-9">
             <h3 className="max-w-2xl text-[clamp(1.8rem,3.5vw,2.7rem)] leading-[1.02] font-semibold text-white">
               Ready to make finance feel handled?
             </h3>
