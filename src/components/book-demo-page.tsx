@@ -68,7 +68,7 @@ export function BookDemoPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-18 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_8%,rgba(16,185,129,0.2),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(20,184,166,0.16),transparent_34%),linear-gradient(180deg,#040b09_0%,#081512_52%,#0a1916_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_8%,rgba(34,197,94,0.12),transparent_40%),radial-gradient(circle_at_88%_12%,rgba(21,128,61,0.08),transparent_34%),linear-gradient(180deg,#020303_0%,#030505_54%,#050805_100%)]" />
 
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/55 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">

@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #030807;
+  --background: #020303;
   --foreground: #f4f7f6;
-  --muted: #9faeaa;
-  --accent: #10b981;
-  --accent-2: #0ea5a6;
+  --muted: #98a39f;
+  --accent: #22c55e;
+  --accent-2: #15803d;
   --font-body: "Avenir Next", "Avenir", "Trebuchet MS", "Segoe UI", sans-serif;
   --font-display: "Avenir Next Condensed", "Avenir Next", "Trebuchet MS", sans-serif;
 }
@@ -24,9 +24,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 14% 7%, rgba(16, 185, 129, 0.17), transparent 38%),
-    radial-gradient(circle at 87% 10%, rgba(20, 184, 166, 0.14), transparent 34%),
-    linear-gradient(180deg, #040b09 0%, #071310 48%, #0a1814 100%);
+    radial-gradient(circle at 16% 9%, rgba(34, 197, 94, 0.1), transparent 38%),
+    radial-gradient(circle at 82% 12%, rgba(21, 128, 61, 0.08), transparent 34%),
+    linear-gradient(180deg, #020303 0%, #030505 52%, #050805 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
 }
@@ -58,8 +58,8 @@ img {
 }
 
 .glass-panel {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  backdrop-filter: blur(7px);
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(8px);
 }
 
 .lev-highlight {
@@ -71,16 +71,16 @@ img {
 
 .lev-soft-outline {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
   box-shadow:
-    0 28px 70px -58px rgba(16, 185, 129, 0.45),
+    0 28px 70px -58px rgba(34, 197, 94, 0.35),
     0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 .lev-grid-field {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
   background-size: 34px 34px;
 }
 
@@ -106,14 +106,14 @@ img {
 }
 
 .lev-button--emerald {
-  background: linear-gradient(130deg, #10b981 0%, #14b8a6 100%);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #012019;
-  box-shadow: 0 15px 32px -18px rgba(16, 185, 129, 0.8);
+  background: linear-gradient(130deg, #22c55e 0%, #16a34a 100%);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #02180a;
+  box-shadow: 0 15px 32px -18px rgba(34, 197, 94, 0.7);
 }
 
 .lev-button--emerald:hover {
-  box-shadow: 0 20px 42px -20px rgba(16, 185, 129, 0.95);
+  box-shadow: 0 20px 42px -20px rgba(34, 197, 94, 0.82);
 }
 
 .lev-button--dark {
@@ -133,8 +133,8 @@ img {
 }
 
 .lev-button--outline:hover {
-  border-color: rgba(16, 185, 129, 0.7);
-  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(34, 197, 94, 0.65);
+  background: rgba(34, 197, 94, 0.1);
 }
 
 .lev-button--light {
