@@ -1,15 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4efe7;
-  --surface: #f8f4ee;
-  --surface-strong: #ffffff;
-  --foreground: #10141a;
-  --muted: #3f4b57;
-  --accent: #0f8a75;
-  --accent-2: #2f7cd0;
+  --background: #030807;
+  --foreground: #f4f7f6;
+  --muted: #9faeaa;
+  --accent: #10b981;
+  --accent-2: #0ea5a6;
   --font-body: "Avenir Next", "Avenir", "Trebuchet MS", "Segoe UI", sans-serif;
-  --font-display: "Avenir Next Condensed", "Gill Sans", "Trebuchet MS", sans-serif;
+  --font-display: "Avenir Next Condensed", "Avenir Next", "Trebuchet MS", sans-serif;
 }
 
 @theme inline {
@@ -18,22 +16,26 @@
   --font-sans: var(--font-body);
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 7% 8%, rgba(18, 131, 112, 0.15), transparent 42%),
-    radial-gradient(circle at 93% 10%, rgba(47, 124, 208, 0.16), transparent 36%),
-    linear-gradient(180deg, #f7f3eb 0%, var(--background) 58%, #f2ece3 100%);
+    radial-gradient(circle at 14% 7%, rgba(16, 185, 129, 0.17), transparent 38%),
+    radial-gradient(circle at 87% 10%, rgba(20, 184, 166, 0.14), transparent 34%),
+    linear-gradient(180deg, #040b09 0%, #071310 48%, #0a1814 100%);
   color: var(--foreground);
-  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-family: var(--font-body), sans-serif;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-display), "Segoe UI", sans-serif;
+  font-family: var(--font-display), sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -41,8 +43,8 @@ p {
   color: var(--muted);
 }
 
-* {
-  box-sizing: border-box;
+a {
+  color: inherit;
 }
 
 img {
@@ -51,38 +53,40 @@ img {
 }
 
 ::selection {
-  background: #0f766e;
-  color: #f8fafc;
+  background: #10b981;
+  color: #00120d;
+}
+
+.glass-panel {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  backdrop-filter: blur(7px);
 }
 
 .lev-highlight {
-  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+  background: linear-gradient(124deg, var(--accent) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .lev-soft-outline {
-  border: 1px solid rgba(35, 46, 62, 0.12);
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 250, 255, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
   box-shadow:
-    0 28px 70px -58px rgba(15, 23, 42, 0.9),
-    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    0 28px 70px -58px rgba(16, 185, 129, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 .lev-grid-field {
   background-image:
-    linear-gradient(rgba(27, 43, 67, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(27, 43, 67, 0.09) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 34px 34px;
 }
 
 .lev-button {
   align-items: center;
-  background: var(--foreground);
-  border: 1px solid rgba(16, 20, 26, 0.08);
   border-radius: 999px;
-  color: #f8fafc;
   display: inline-flex;
   font-size: 0.875rem;
   font-weight: 600;
@@ -91,18 +95,52 @@ img {
   padding: 0.82rem 1.2rem;
   text-decoration: none;
   transition:
-    transform 0.25s ease,
-    background 0.25s ease;
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    background 0.24s ease,
+    border-color 0.24s ease;
 }
 
 .lev-button:hover {
-  background: #1d2430;
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.lev-button--emerald {
+  background: linear-gradient(130deg, #10b981 0%, #14b8a6 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #012019;
+  box-shadow: 0 15px 32px -18px rgba(16, 185, 129, 0.8);
+}
+
+.lev-button--emerald:hover {
+  box-shadow: 0 20px 42px -20px rgba(16, 185, 129, 0.95);
+}
+
+.lev-button--dark {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f4f7f6;
+}
+
+.lev-button--dark:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lev-button--outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #f4f7f6;
+}
+
+.lev-button--outline:hover {
+  border-color: rgba(16, 185, 129, 0.7);
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .lev-button--light {
-  background: rgba(255, 255, 255, 0.86);
-  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: #02110d;
 }
 
 .lev-button--light:hover {
@@ -113,5 +151,6 @@ img {
   * {
     animation: none !important;
     transition-duration: 0s !important;
+    scroll-behavior: auto !important;
   }
 }

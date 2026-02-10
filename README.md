@@ -6,6 +6,7 @@ Marketing website for Lev, an AI accounting product for SMBs.
 
 - Next.js (App Router + TypeScript)
 - Tailwind CSS v4
+- GSAP + ScrollTrigger
 - Framer Motion
 
 ## Routes
@@ -57,5 +58,6 @@ npm run start
 - `/Users/prasoonpathak/Documents/lev.ai/src/app/book-demo/page.tsx`
 - `/Users/prasoonpathak/Documents/lev.ai/src/components/landing-page.tsx`
 - `/Users/prasoonpathak/Documents/lev.ai/src/components/book-demo-page.tsx`
+- `/Users/prasoonpathak/Documents/lev.ai/src/components/brand-mark.tsx`
 - `/Users/prasoonpathak/Documents/lev.ai/src/lib/site-config.ts`
 - `/Users/prasoonpathak/Documents/lev.ai/src/app/globals.css`
