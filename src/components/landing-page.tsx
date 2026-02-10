@@ -54,10 +54,33 @@ const integrationOutcomes = [
   "Cash questions answered with context",
 ];
 
+const financeFlowSteps = [
+  {
+    title: "Ingest",
+    detail: "Lev syncs banks, payouts, books, and chat inputs.",
+  },
+  {
+    title: "Reconcile",
+    detail: "Entries are cleaned and categorized in real time.",
+  },
+  {
+    title: "Detect",
+    detail: "GST, ITC, and cash anomalies are flagged before deadline risk.",
+  },
+  {
+    title: "Decide",
+    detail: "Founders ask questions and get direct finance answers.",
+  },
+  {
+    title: "Deliver",
+    detail: "Close-ready books and clear updates are sent to the team.",
+  },
+];
+
 const heroStats = [
-  { label: "Competent accounting", value: "Quietly handled" },
-  { label: "Fractional finance team", value: "Always available" },
-  { label: "Business decisions", value: "Backed by clean numbers" },
+  { label: "Month close", value: "On time" },
+  { label: "GST and cash risks", value: "Flagged early" },
+  { label: "Founder decisions", value: "Answer-ready" },
 ];
 
 function arrowIcon() {
@@ -186,7 +209,7 @@ export function LandingPage() {
                 variants={fadeUp(shouldReduceMotion)}
                 className="inline-flex rounded-full border border-slate-900/15 bg-white/86 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700"
               >
-                Competent accounting, quietly handled
+                In-house finance hire
               </motion.p>
               <motion.h1
                 variants={fadeUp(shouldReduceMotion, 0.08)}
@@ -194,7 +217,10 @@ export function LandingPage() {
               >
                 <span className="block">Accounting for</span>
                 <span className="block">the modern era.</span>
-                <span className="lev-highlight mt-2 block">Powered by Lev.</span>
+                <span className="mt-2 block">
+                  Introducing <span className="lev-highlight">Lev</span>
+                  <span className="text-orange-500">.</span>
+                </span>
               </motion.h1>
               <motion.p
                 variants={fadeUp(shouldReduceMotion, 0.16)}
@@ -208,7 +234,7 @@ export function LandingPage() {
                 className="mt-8 flex flex-wrap items-center gap-3"
               >
                 <Link href="/get-lev" className="lev-button">
-                  Get Lev
+                  Book demo
                   {arrowIcon()}
                 </Link>
                 <a href="#what-lev-does" className="lev-button lev-button--light">
@@ -297,22 +323,31 @@ export function LandingPage() {
               variants={stagger(shouldReduceMotion, 0.1)}
               className="lev-soft-outline rounded-[30px] p-5 sm:p-6"
             >
-              <div className="mx-auto max-w-[360px] rounded-[30px] border border-slate-900/15 bg-slate-950 p-4">
-                <p className="mb-3 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-cyan-200">
-                  Risk Feed
-                </p>
-                <motion.ul variants={stagger(shouldReduceMotion, 0.12, 0.12)} className="space-y-2.5">
-                  {gstAndCashAlerts.map((alert) => (
-                    <motion.li
-                      key={alert}
-                      variants={fadeUp(shouldReduceMotion)}
-                      className="rounded-2xl border border-cyan-300/30 bg-cyan-500/14 px-3 py-3 text-sm leading-relaxed text-cyan-50"
-                    >
-                      {alert}
-                    </motion.li>
-                  ))}
-                </motion.ul>
-              </div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-600">
+                Finance flow in Lev
+              </p>
+              <motion.ol variants={stagger(shouldReduceMotion, 0.08, 0.08)} className="space-y-2.5">
+                {financeFlowSteps.map((step, index) => (
+                  <motion.li
+                    key={step.title}
+                    variants={fadeUp(shouldReduceMotion)}
+                    className="relative rounded-[18px] border border-slate-900/10 bg-white px-4 py-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="mt-[2px] inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-950 text-[11px] font-semibold text-white">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{step.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-slate-600">{step.detail}</p>
+                      </div>
+                    </div>
+                    {index < financeFlowSteps.length - 1 ? (
+                      <span className="pointer-events-none absolute -bottom-2 left-7 h-3 w-[1px] bg-slate-300" />
+                    ) : null}
+                  </motion.li>
+                ))}
+              </motion.ol>
             </motion.article>
           </div>
 
@@ -536,8 +571,8 @@ export function LandingPage() {
             Ready to run finance like a serious in-house team?
           </motion.h3>
           <motion.p variants={fadeUp(shouldReduceMotion, 0.08)} className="mt-4 max-w-2xl text-[1.05rem] text-slate-300">
-            Get Lev and see how books stay accurate, close stays on time, and decisions stop being
-            finance guesswork.
+            See how books stay accurate, close stays on time, and decisions stop being finance
+            guesswork.
           </motion.p>
           <motion.div variants={fadeUp(shouldReduceMotion, 0.14)} className="mt-7">
             <Link href="/get-lev" className="lev-button bg-white text-slate-900 hover:bg-slate-200">
@@ -551,7 +586,7 @@ export function LandingPage() {
           <div className="flex items-center justify-between border-t border-slate-900/12 pt-5 text-sm">
             <p className="font-medium text-slate-600">© 2026 Lev</p>
             <Link href="/get-lev" className="text-slate-700 transition hover:text-slate-900">
-              Get Lev
+              Book demo
             </Link>
           </div>
         </footer>
