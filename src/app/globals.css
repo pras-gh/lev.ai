@@ -62,6 +62,35 @@ img {
   backdrop-filter: blur(8px);
 }
 
+.lev-hero-deep {
+  background:
+    radial-gradient(circle at 20% 16%, rgba(0, 234, 100, 0.09), transparent 38%),
+    radial-gradient(circle at 80% 18%, rgba(0, 234, 100, 0.05), transparent 40%),
+    linear-gradient(180deg, #030405 0%, #040507 52%, #030405 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 24px 72px -52px rgba(0, 0, 0, 0.92),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.lev-torch-text {
+  color: transparent;
+  background-image: radial-gradient(
+    circle at 14% 50%,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.95) 12%,
+    rgba(215, 220, 229, 0.8) 24%,
+    rgba(150, 160, 178, 0.46) 42%,
+    rgba(255, 255, 255, 0.08) 66%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: levTorchSweep 5.8s ease-in-out infinite;
+}
+
 .lev-highlight {
   background: linear-gradient(124deg, var(--accent) 0%, var(--accent-2) 100%);
   -webkit-background-clip: text;
@@ -147,6 +176,23 @@ img {
   background: #ffffff;
 }
 
+.lev-button--hero-dark {
+  background:
+    linear-gradient(180deg, #050607, #050607) padding-box,
+    linear-gradient(132deg, rgba(0, 234, 100, 0.84), rgba(0, 234, 100, 0.26)) border-box;
+  border: 1px solid transparent;
+  color: #f4f7f6;
+  box-shadow:
+    0 14px 34px -24px rgba(0, 234, 100, 0.45),
+    0 0 0 1px rgba(0, 234, 100, 0.14) inset;
+}
+
+.lev-button--hero-dark:hover {
+  box-shadow:
+    0 20px 44px -24px rgba(0, 234, 100, 0.7),
+    0 0 0 1px rgba(0, 234, 100, 0.26) inset;
+}
+
 .lev-cta-pulse {
   animation: levPulse 2.8s ease-in-out infinite;
 }
@@ -188,6 +234,18 @@ img {
     box-shadow:
       0 20px 44px -18px rgba(0, 234, 100, 0.9),
       0 0 0 10px rgba(0, 234, 100, 0);
+  }
+}
+
+@keyframes levTorchSweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 

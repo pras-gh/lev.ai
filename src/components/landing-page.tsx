@@ -493,7 +493,7 @@ export function LandingPage() {
       </header>
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
-        <section className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center py-14 sm:py-18">
+        <section className="lev-hero-deep relative flex min-h-[calc(100vh-8rem)] items-center justify-center rounded-[32px] px-6 py-14 sm:px-10 sm:py-18">
           <div className="relative z-10 mx-auto max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
@@ -511,7 +511,7 @@ export function LandingPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)]"
+                    className="lev-torch-text text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em]"
                   >
                     trai\
                   </motion.p>
@@ -526,7 +526,7 @@ export function LandingPage() {
                     }
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)] [transform-style:preserve-3d]"
+                    className="lev-torch-text text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] [transform-style:preserve-3d]"
                   >
                     {INTRO_WORD.slice(0, displayIntroCount)}
                     {displayIntroPhase === "typing" ? (
@@ -569,7 +569,7 @@ export function LandingPage() {
               variants={heroItem(shouldReduceMotion, 0.45)}
               className="mt-10 flex justify-center"
             >
-              <a href={calBookingUrl} className="lev-button lev-button--emerald lev-cta-pulse">
+              <a href={calBookingUrl} className="lev-button lev-button--hero-dark lev-cta-pulse">
                 get trai\
                 <ArrowIcon />
               </a>
