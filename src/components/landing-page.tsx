@@ -21,6 +21,12 @@ type IntegrationFlowItem = {
   top: string;
 };
 
+type LevNotification = {
+  id: string;
+  title: string;
+  message: string;
+};
+
 const gstAndCashAlerts = [
   "GST payment due in 5 days - Rs 1.2L",
   "ITC claim ready - Rs 42,300",
@@ -78,10 +84,37 @@ const integrationFlow: IntegrationFlowItem[] = [
   { key: "whatsapp", label: "WhatsApp", top: "84%" },
 ];
 
-const emailNotifications = [
-  "GST risk warnings before deadlines",
-  "Month-close books ready for review",
-  "Founder-ready answers in plain English",
+const levNotifications: LevNotification[] = [
+  {
+    id: "refund-spike",
+    title: "High Refund Spike",
+    message: "Refunds increased 18% this week. Margin impact estimated: ₹32k.",
+  },
+  {
+    id: "gateway-charges",
+    title: "Gateway Charge Spike",
+    message: "Gateway charges crossed ₹21k this month (+22%). Worth renegotiating plan.",
+  },
+  {
+    id: "gstr-ready",
+    title: "GSTR-3B Draft Ready",
+    message: "GSTR-3B draft is ready. Filing after 20th may trigger interest + penalty.",
+  },
+  {
+    id: "budget-update",
+    title: "Budget 2026 Update",
+    message: "Budget 2026: Books updated automatically.",
+  },
+  {
+    id: "healthy-month",
+    title: "Monthly Health Snapshot",
+    message: "This month looks healthy: Profit ₹3.1L, GST payable ₹1.2L, no compliance red flags.",
+  },
+  {
+    id: "crunch-warning",
+    title: "Crunch Warning",
+    message: "At current inflows, cash will fall below 20 day runway by next Friday.",
+  },
 ];
 
 function ArrowIcon() {
@@ -170,6 +203,7 @@ function IntegrationIcon({ integration }: { integration: IntegrationKey }) {
 export function LandingPage() {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [activeSlide, setActiveSlide] = useState(0);
+  const [activeNotification, setActiveNotification] = useState(0);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) {
@@ -243,27 +277,6 @@ export function LandingPage() {
         }
       }
 
-      const notificationCards = gsap.utils.toArray<HTMLElement>("[data-gmail-notice]");
-      if (notificationCards.length > 0) {
-        const notificationsTimeline = gsap.timeline({ repeat: -1, repeatDelay: 1.3 });
-        notificationsTimeline.set(notificationCards, { autoAlpha: 0, y: 14 });
-
-        notificationCards.forEach((card, index) => {
-          notificationsTimeline.to(
-            card,
-            { autoAlpha: 1, y: 0, duration: 0.45, ease: "power2.out" },
-            index === 0 ? 0.2 : ">"
-          );
-          notificationsTimeline.to(card, { scale: 1.01, duration: 0.18, ease: "power1.out" }, "-=0.06");
-          notificationsTimeline.to(card, { scale: 1, duration: 0.2, ease: "power1.out" });
-        });
-
-        notificationsTimeline.to(
-          notificationCards,
-          { autoAlpha: 0, y: -8, duration: 0.3, stagger: 0.1, ease: "power1.in" },
-          "+=1.2"
-        );
-      }
     });
 
     return () => {
@@ -505,46 +518,79 @@ export function LandingPage() {
               </div>
 
               <div className="flex items-center justify-center">
-                <div className="w-full max-w-[320px] rounded-[34px] border border-white/18 bg-[#050606] p-3 shadow-[0_30px_65px_-42px_rgba(0,0,0,0.95)]">
-                  <div className="mx-auto mb-3 h-1.5 w-20 rounded-full bg-white/20" />
-                  <div className="rounded-[26px] border border-white/10 bg-[#090a0c] px-3 py-4">
+                <div className="relative w-full max-w-[338px] rounded-[40px] border border-white/18 bg-[#070708] p-3 shadow-[0_34px_70px_-42px_rgba(0,0,0,0.98)]">
+                  <div className="absolute left-1/2 top-3 h-7 w-[120px] -translate-x-1/2 rounded-full bg-black/85" />
+                  <div className="rounded-[31px] border border-white/10 bg-[linear-gradient(180deg,#181b22_0%,#101319_44%,#0b0d12_100%)] px-3 pb-3 pt-12">
                     <div
-                      className="mb-3 flex items-center justify-between px-1 text-[11px] font-medium text-slate-300"
+                      className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-200"
+                      style={{ fontFamily: '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif' }}
+                    >
+                      <span>9:41</span>
+                      <span>5G</span>
+                    </div>
+
+                    <div
+                      className="mb-2 rounded-xl border border-white/12 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-200"
                       style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
                     >
-                      <div className="inline-flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1.5">
                         <GmailIcon />
-                        <span className="text-[#f1f3f4]">Gmail</span>
-                      </div>
-                      <span className="text-slate-400">now</span>
+                        Notification Bar • Gmail • Lev
+                      </span>
                     </div>
-                    <div className="space-y-2.5">
-                      {emailNotifications.map((notice) => (
-                        <div
-                          key={notice}
-                          data-gmail-notice
-                          className="rounded-xl border border-[#d2d5d8] bg-[#f8f9fa] p-3 shadow-[0_12px_24px_-20px_rgba(32,33,36,0.65)]"
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-[#dadce0] bg-white text-[#5f6368]">
-                              <GmailIcon />
-                            </span>
-                            <div
-                              className="min-w-0 flex-1"
-                              style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <p className="text-[11px] font-medium text-[#5f6368]">Gmail</p>
-                                <p className="text-[10px] font-medium text-[#5f6368]">now</p>
+
+                    <p
+                      className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400"
+                      style={{ fontFamily: '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif' }}
+                    >
+                      Notification Center
+                    </p>
+
+                    <div className="h-[430px] space-y-2.5 overflow-y-auto pr-1">
+                      {levNotifications.map((notice, index) => {
+                        const isActive = activeNotification === index;
+
+                        return (
+                          <button
+                            key={notice.id}
+                            type="button"
+                            onMouseEnter={() =>
+                              setActiveNotification((current) => (current === index ? current : index))
+                            }
+                            onMouseMove={() =>
+                              setActiveNotification((current) => (current === index ? current : index))
+                            }
+                            onFocus={() =>
+                              setActiveNotification((current) => (current === index ? current : index))
+                            }
+                            onClick={() =>
+                              setActiveNotification((current) => (current === index ? current : index))
+                            }
+                            className={`w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
+                              isActive
+                                ? "scale-[1.03] border-white/30 bg-white/24 opacity-100 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.35)]"
+                                : "scale-[0.94] border-white/10 bg-white/10 opacity-65"
+                            }`}
+                          >
+                            <div className="flex items-start gap-2.5">
+                              <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-white/20 bg-white/90 text-[#5f6368]">
+                                <GmailIcon />
+                              </span>
+                              <div
+                                className="min-w-0 flex-1"
+                                style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="text-[11px] font-medium text-slate-200">Gmail • Lev</p>
+                                  <p className="text-[10px] font-medium text-slate-400">now</p>
+                                </div>
+                                <p className="truncate text-[12px] font-semibold text-white">{notice.title}</p>
+                                <p className="mt-0.5 text-[12px] leading-[1.35] text-slate-200">{notice.message}</p>
                               </div>
-                              <p className="truncate text-[12px] font-semibold text-[#202124]">
-                                Lev Finance Update
-                              </p>
-                              <p className="mt-0.5 text-[12px] leading-[1.3] text-[#3c4043]">{notice}</p>
                             </div>
-                          </div>
-                        </div>
-                      ))}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
