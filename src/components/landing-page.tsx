@@ -24,14 +24,18 @@ type Callout = {
   glyph: "ledger" | "shield" | "cash" | "statement";
 };
 
-type FlowLogo = {
-  id: string;
-  src: string;
-  alt: string;
-  top: string;
-  width: number;
-  height: number;
-};
+type FlowItem =
+  | {
+      id: string;
+      kind: "logo";
+      src: string;
+      alt: string;
+    }
+  | {
+      id: string;
+      kind: "tag";
+      label: string;
+    };
 
 const easing = [0.22, 1, 0.36, 1] as const;
 
@@ -136,16 +140,30 @@ const callouts: Callout[] = [
   },
 ];
 
-const integrationFlowLogos: FlowLogo[] = [
-  { id: "upload-mark", src: "/integrations/uploaded-mark.svg", alt: "Uploaded integration logo", top: "7%", width: 34, height: 34 },
-  { id: "slack", src: "/integrations/slack-logo.svg", alt: "Slack logo", top: "16%", width: 34, height: 34 },
-  { id: "shopify", src: "/integrations/shopify-logo.svg", alt: "Shopify logo", top: "25%", width: 34, height: 34 },
-  { id: "telegram", src: "/integrations/telegram-logo.svg", alt: "Telegram logo", top: "34%", width: 34, height: 34 },
-  { id: "stripe", src: "/integrations/stripe-logo.svg", alt: "Stripe logo", top: "45%", width: 80, height: 34 },
-  { id: "whatsapp", src: "/integrations/whatsapp-logo.svg", alt: "WhatsApp logo", top: "56%", width: 34, height: 34 },
-  { id: "hdfc", src: "/integrations/hdfc-bank-logo.svg", alt: "HDFC Bank logo", top: "67%", width: 74, height: 20 },
-  { id: "cognism", src: "/integrations/cognism.svg", alt: "Cognism logo", top: "78%", width: 88, height: 20 },
-  { id: "tally", src: "/integrations/tally-logo-black.svg", alt: "Tally logo", top: "89%", width: 90, height: 20 },
+const integrationFlowItems: FlowItem[] = [
+  { id: "upload-mark", kind: "logo", src: "/integrations/uploaded-mark.svg", alt: "Uploaded integration icon" },
+  { id: "slack", kind: "logo", src: "/integrations/slack-logo.svg", alt: "Slack icon" },
+  { id: "shopify", kind: "logo", src: "/integrations/shopify-logo.svg", alt: "Shopify icon" },
+  { id: "telegram", kind: "logo", src: "/integrations/telegram-logo.svg", alt: "Telegram icon" },
+  { id: "whatsapp", kind: "logo", src: "/integrations/whatsapp-logo.svg", alt: "WhatsApp icon" },
+  { id: "stripe", kind: "logo", src: "/integrations/stripe-icon.svg", alt: "Stripe icon" },
+  { id: "hdfc", kind: "logo", src: "/integrations/hdfc-icon.svg", alt: "HDFC Bank icon" },
+  { id: "cognism", kind: "logo", src: "/integrations/cognism-icon.svg", alt: "Cognism icon" },
+  { id: "tally", kind: "logo", src: "/integrations/tally-icon.svg", alt: "Tally icon" },
+  { id: "and-more", kind: "tag", label: "and more" },
+];
+
+const integrationFlowLanes = [
+  "8%",
+  "16%",
+  "24%",
+  "32%",
+  "40%",
+  "48%",
+  "56%",
+  "64%",
+  "72%",
+  "80%",
 ];
 
 const resourceLinks = [
@@ -662,27 +680,39 @@ export function LandingPage() {
                   trai\ processing
                 </div>
 
-                {integrationFlowLogos.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    style={{ top: item.top }}
-                    initial={{ x: shouldReduceMotion ? 0 : -24, opacity: shouldReduceMotion ? 1 : 0 }}
-                    animate={{
-                      x: shouldReduceMotion ? 0 : [-24, 120, 252],
-                      opacity: shouldReduceMotion ? 1 : [0, 1, 1, 0],
-                    }}
-                    transition={{
-                      duration: shouldReduceMotion ? 0 : 4.4,
-                      delay: shouldReduceMotion ? 0 : index * 0.42,
-                      repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
-                      repeatDelay: shouldReduceMotion ? 0 : 0.55,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute left-4 rounded-xl border border-white/18 bg-white px-2 py-2 shadow-[0_8px_22px_-14px_rgba(0,0,0,0.8)]"
-                  >
-                    <Image src={item.src} alt={item.alt} width={item.width} height={item.height} className="h-auto w-auto object-contain" />
-                  </motion.div>
-                ))}
+                {integrationFlowItems.map((item, index) => {
+                  const laneTop = integrationFlowLanes[index % integrationFlowLanes.length];
+
+                  return (
+                    <motion.div
+                      key={item.id}
+                      style={{ top: laneTop }}
+                      initial={{ x: shouldReduceMotion ? 0 : -24, opacity: shouldReduceMotion ? 1 : 0 }}
+                      animate={{
+                        x: shouldReduceMotion ? 0 : [-24, 120, 252],
+                        opacity: shouldReduceMotion ? 1 : [0, 1, 1, 0],
+                      }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0 : 4.4,
+                        delay: shouldReduceMotion ? 0 : index * 0.42,
+                        repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
+                        repeatDelay: shouldReduceMotion ? 0 : 0.55,
+                        ease: "easeInOut",
+                      }}
+                      className={`absolute left-4 flex h-11 items-center rounded-xl border shadow-[0_8px_22px_-14px_rgba(0,0,0,0.8)] ${
+                        item.kind === "logo"
+                          ? "w-11 justify-center border-white/20 bg-white/95 p-2"
+                          : "border-white/20 bg-[#121923]/95 px-3.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-200"
+                      }`}
+                    >
+                      {item.kind === "logo" ? (
+                        <Image src={item.src} alt={item.alt} width={22} height={22} className="h-[22px] w-[22px] object-contain" />
+                      ) : (
+                        <span className="whitespace-nowrap">{item.label}</span>
+                      )}
+                    </motion.div>
+                  );
+                })}
 
                 <motion.div
                   animate={
