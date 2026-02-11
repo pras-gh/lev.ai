@@ -673,9 +673,6 @@ export function LandingPage() {
                 <div className="lev-grid-field absolute inset-0 opacity-[0.14]" />
                 <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/70 to-transparent" />
                 <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/70 to-transparent" />
-                <div className="absolute left-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Connected logos
-                </div>
                 <div className="absolute right-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   trai\ processing
                 </div>
