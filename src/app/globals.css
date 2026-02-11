@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020303;
+  --background: #0a0c10;
   --foreground: #f4f7f6;
-  --muted: #98a39f;
-  --accent: #22c55e;
-  --accent-2: #15803d;
-  --font-body: "Avenir Next", "Avenir", "Trebuchet MS", "Segoe UI", sans-serif;
-  --font-display: "Avenir Next Condensed", "Avenir Next", "Trebuchet MS", sans-serif;
+  --muted: #a0a8b8;
+  --accent: #00ea64;
+  --accent-2: #1cd67a;
+  --font-body: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Inter", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 @theme inline {
@@ -24,9 +24,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 16% 9%, rgba(34, 197, 94, 0.045), transparent 38%),
-    radial-gradient(circle at 82% 12%, rgba(21, 128, 61, 0.03), transparent 34%),
-    linear-gradient(180deg, #010202 0%, #020303 52%, #030403 100%);
+    radial-gradient(circle at 16% 9%, rgba(0, 234, 100, 0.055), transparent 38%),
+    radial-gradient(circle at 82% 12%, rgba(0, 234, 100, 0.04), transparent 34%),
+    linear-gradient(180deg, #0a0c10 0%, #0d1017 52%, #0a0c10 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
 }
@@ -53,12 +53,12 @@ img {
 }
 
 ::selection {
-  background: #10b981;
-  color: #00120d;
+  background: #00ea64;
+  color: #04140a;
 }
 
 .glass-panel {
-  background: linear-gradient(158deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
   backdrop-filter: blur(8px);
 }
 
@@ -73,7 +73,7 @@ img {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
   box-shadow:
-    0 28px 70px -58px rgba(34, 197, 94, 0.35),
+    0 28px 70px -58px rgba(0, 234, 100, 0.3),
     0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
@@ -106,14 +106,14 @@ img {
 }
 
 .lev-button--emerald {
-  background: linear-gradient(130deg, #22c55e 0%, #16a34a 100%);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #02180a;
-  box-shadow: 0 15px 32px -18px rgba(34, 197, 94, 0.7);
+  background: linear-gradient(130deg, #00ea64 0%, #1cd67a 100%);
+  border: 1px solid rgba(0, 234, 100, 0.35);
+  color: #03150a;
+  box-shadow: 0 15px 32px -18px rgba(0, 234, 100, 0.75);
 }
 
 .lev-button--emerald:hover {
-  box-shadow: 0 20px 42px -20px rgba(34, 197, 94, 0.82);
+  box-shadow: 0 20px 42px -20px rgba(0, 234, 100, 0.92);
 }
 
 .lev-button--dark {
@@ -133,8 +133,8 @@ img {
 }
 
 .lev-button--outline:hover {
-  border-color: rgba(34, 197, 94, 0.65);
-  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(0, 234, 100, 0.72);
+  background: rgba(0, 234, 100, 0.1);
 }
 
 .lev-button--light {
@@ -145,6 +145,50 @@ img {
 
 .lev-button--light:hover {
   background: #ffffff;
+}
+
+.lev-cta-pulse {
+  animation: levPulse 2.8s ease-in-out infinite;
+}
+
+.lev-marquee {
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.lev-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: levMarquee 34s linear infinite;
+  will-change: transform;
+}
+
+.lev-float-soft {
+  will-change: transform;
+}
+
+@keyframes levMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes levPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 16px 36px -20px rgba(0, 234, 100, 0.75),
+      0 0 0 0 rgba(0, 234, 100, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 20px 44px -18px rgba(0, 234, 100, 0.9),
+      0 0 0 10px rgba(0, 234, 100, 0);
+  }
 }
 
 .lev-orange-cursor {
