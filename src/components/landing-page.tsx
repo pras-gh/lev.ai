@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 
@@ -172,6 +172,9 @@ const resourceLinks = [
   { label: "Help Center", href: "mailto:help@gettrail.ai" },
 ];
 
+const INTRO_WORD = "Introducing";
+type IntroPhase = "typing" | "flip" | "get";
+
 function heroItem(shouldReduceMotion: boolean, delay: number) {
   return {
     hidden: {
@@ -326,12 +329,10 @@ export function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeNotification, setActiveNotification] = useState(0);
-  const [heroNotificationCount, setHeroNotificationCount] = useState(1);
-
-  const heroVisibleNotifications = useMemo(
-    () => levNotifications.slice(0, shouldReduceMotion ? 4 : Math.min(heroNotificationCount, 4)),
-    [heroNotificationCount, shouldReduceMotion]
-  );
+  const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
+  const [introCount, setIntroCount] = useState(shouldReduceMotion ? INTRO_WORD.length : 0);
+  const displayIntroPhase = shouldReduceMotion ? "get" : introPhase;
+  const displayIntroCount = shouldReduceMotion ? INTRO_WORD.length : introCount;
 
   useEffect(() => {
     const onScroll = () => {
@@ -349,9 +350,55 @@ export function LandingPage() {
       return;
     }
 
+    const timeouts: number[] = [];
+    let typeInterval = 0;
+
+    const runCycle = () => {
+      setIntroPhase("typing");
+      setIntroCount(0);
+
+      let localCount = 0;
+      typeInterval = window.setInterval(() => {
+        localCount += 1;
+        setIntroCount(localCount);
+
+        if (localCount >= INTRO_WORD.length) {
+          window.clearInterval(typeInterval);
+          timeouts.push(
+            window.setTimeout(() => {
+              setIntroPhase("flip");
+            }, 360)
+          );
+          timeouts.push(
+            window.setTimeout(() => {
+              setIntroPhase("get");
+            }, 900)
+          );
+          timeouts.push(
+            window.setTimeout(() => {
+              runCycle();
+            }, 3200)
+          );
+        }
+      }, 82);
+    };
+
+    runCycle();
+
+    return () => {
+      window.clearInterval(typeInterval);
+      timeouts.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [shouldReduceMotion]);
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
     const interval = window.setInterval(() => {
-      setHeroNotificationCount((prev) => (prev < 4 ? prev + 1 : prev));
-    }, 600);
+      setActiveSlide((prev) => (prev + 1) % featureSlides.length);
+    }, 5200);
 
     return () => {
       window.clearInterval(interval);
@@ -364,8 +411,8 @@ export function LandingPage() {
     }
 
     const interval = window.setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % featureSlides.length);
-    }, 5200);
+      setActiveNotification((prev) => (prev + 1) % levNotifications.length);
+    }, 2500);
 
     return () => {
       window.clearInterval(interval);
@@ -445,8 +492,19 @@ export function LandingPage() {
       </header>
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
-        <section className="grid min-h-[calc(100vh-8rem)] gap-10 py-12 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
-          <div>
+        <section className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center py-14 sm:py-18">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: easing }}
+              className="text-center text-[clamp(4rem,16vw,13rem)] font-semibold tracking-[-0.06em] text-white/[0.04]"
+            >
+              INTRODUCING
+            </motion.p>
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
                 <StarIcon />
@@ -454,23 +512,62 @@ export function LandingPage() {
               </p>
             </motion.div>
 
+            <div className="mt-8 flex min-h-[78px] items-center justify-center sm:min-h-[96px]">
+              <AnimatePresence mode="wait">
+                {displayIntroPhase === "get" ? (
+                  <motion.p
+                    key="intro-get"
+                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14, scale: shouldReduceMotion ? 1 : 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white"
+                  >
+                    <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
+                      get trai\
+                    </span>
+                  </motion.p>
+                ) : (
+                  <motion.p
+                    key="intro-writing"
+                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14, rotateX: shouldReduceMotion ? 0 : 24 }}
+                    animate={
+                      displayIntroPhase === "flip"
+                        ? { opacity: 0, y: shouldReduceMotion ? 0 : -12, rotateX: shouldReduceMotion ? 0 : 90 }
+                        : { opacity: 1, y: 0, rotateX: 0 }
+                    }
+                    exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [transform-style:preserve-3d]"
+                  >
+                    {INTRO_WORD.slice(0, displayIntroCount)}
+                    {displayIntroPhase === "typing" ? (
+                      <motion.span
+                        aria-hidden="true"
+                        animate={shouldReduceMotion ? undefined : { opacity: [1, 0.25, 1] }}
+                        transition={{ duration: 0.9, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                        className="ml-1 inline-block h-[0.92em] w-[2px] translate-y-[0.06em] bg-emerald-300"
+                      />
+                    ) : null}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+
             <motion.h1
               initial="hidden"
               animate="visible"
               variants={heroItem(shouldReduceMotion, 0.15)}
-              className="mt-6 max-w-2xl text-[clamp(2.8rem,8.2vw,4.6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-white"
+              className="mx-auto mt-4 max-w-[980px] text-[clamp(2.3rem,6.4vw,4.8rem)] leading-[0.95] font-semibold tracking-[-0.035em] text-white"
             >
-              Introducing trai\
-              <span className="block bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-                your personal accountant 24/7
-              </span>
+              your personal accountant 24/7
             </motion.h1>
 
             <motion.p
               initial="hidden"
               animate="visible"
               variants={heroItem(shouldReduceMotion, 0.3)}
-              className="mt-6 max-w-xl text-[1.08rem] leading-relaxed text-slate-300"
+              className="mx-auto mt-6 max-w-3xl text-[1.08rem] leading-relaxed text-slate-300 sm:text-[1.16rem]"
             >
               Close your books on time, stay ahead of GST surprises, and get clear answers before
               you question.
@@ -480,7 +577,7 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={heroItem(shouldReduceMotion, 0.45)}
-              className="mt-8 flex flex-wrap items-center gap-3"
+              className="mt-10 flex justify-center"
             >
               <a href={calBookingUrl} className="lev-button lev-button--emerald lev-cta-pulse">
                 get trai\
@@ -488,52 +585,6 @@ export function LandingPage() {
               </a>
             </motion.div>
           </div>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={heroItem(shouldReduceMotion, 0.6)}
-            className="relative mx-auto w-full max-w-[560px]"
-          >
-            <div className="pointer-events-none absolute inset-x-12 top-10 h-56 rounded-full bg-emerald-500/18 blur-3xl" />
-
-            <motion.div
-              animate={shouldReduceMotion ? undefined : { y: [0, -8, 0] }}
-              transition={{ duration: 5.8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-              className="relative z-10 mx-auto w-full max-w-[330px] rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
-            >
-              <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
-              <div className="rounded-[28px] border border-white/10 bg-[#0f141d] px-3 pb-3 pt-5">
-                <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-300">
-                  <span>9:41</span>
-                  <span>5G</span>
-                </div>
-                <div className="mb-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-100">
-                  <span className="inline-flex items-center gap-1.5">
-                    <GmailIcon />
-                    Notification Bar • Gmail • trai\
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <AnimatePresence>
-                    {heroVisibleNotifications.map((notice) => (
-                      <motion.div
-                        key={notice.id}
-                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16, scale: shouldReduceMotion ? 1 : 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
-                        transition={{ duration: shouldReduceMotion ? 0 : 0.44, ease: easing }}
-                        className="rounded-xl border border-white/14 bg-white/12 px-3 py-3"
-                      >
-                        <p className="text-[11px] font-semibold text-white">{notice.title}</p>
-                        <p className="mt-0.5 text-[11px] leading-relaxed text-slate-300">{notice.message}</p>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
         </section>
 
         <motion.section
@@ -734,26 +785,25 @@ export function LandingPage() {
               </div>
 
               <div className="flex items-center justify-center">
-                <div className="relative w-full max-w-[338px] rounded-[40px] border border-white/18 bg-[#070708] p-3 shadow-[0_34px_70px_-42px_rgba(0,0,0,0.98)]">
-                  <div className="absolute left-1/2 top-3 h-7 w-[120px] -translate-x-1/2 rounded-full bg-black/85" />
-                  <div className="rounded-[31px] border border-white/10 bg-[linear-gradient(180deg,#181b22_0%,#101319_44%,#0b0d12_100%)] px-3 pb-3 pt-12">
-                    <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-200">
+                <motion.div
+                  animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
+                  transition={{ duration: 5.4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                  className="relative w-full max-w-[332px] rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
+                >
+                  <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
+                  <div className="rounded-[28px] border border-white/10 bg-[#0f141d] px-3 pb-3 pt-5">
+                    <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-300">
                       <span>9:41</span>
                       <span>5G</span>
                     </div>
-
-                    <div className="mb-2 rounded-xl border border-white/12 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-200">
+                    <div className="mb-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-100">
                       <span className="inline-flex items-center gap-1.5">
                         <GmailIcon />
                         Notification Bar • Gmail • trai\
                       </span>
                     </div>
 
-                    <p className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                      Notification Center
-                    </p>
-
-                    <div className="h-[356px] space-y-2.5 overflow-y-auto pr-1">
+                    <div className="h-[360px] space-y-2 overflow-y-auto pr-1">
                       {levNotifications.map((notice, index) => {
                         const isActive = activeNotification === index;
 
@@ -763,11 +813,11 @@ export function LandingPage() {
                             layout
                             type="button"
                             animate={{
-                              opacity: isActive ? 1 : 0.64,
-                              scale: isActive ? 1.02 : 0.94,
+                              opacity: isActive ? 1 : 0.58,
+                              scale: isActive ? 1.03 : 0.92,
                             }}
                             transition={{
-                              duration: shouldReduceMotion ? 0 : 0.24,
+                              duration: shouldReduceMotion ? 0 : 0.22,
                               ease: easing,
                             }}
                             onMouseMove={() => setActiveNotification(index)}
@@ -776,7 +826,7 @@ export function LandingPage() {
                             onClick={() => setActiveNotification(index)}
                             className={`w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
                               isActive
-                                ? "border-white/30 bg-white/24 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.32)]"
+                                ? "border-white/28 bg-white/24 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.34)]"
                                 : "border-white/10 bg-white/10"
                             }`}
                           >
@@ -798,7 +848,7 @@ export function LandingPage() {
                       })}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </div>
             </div>
           </div>
