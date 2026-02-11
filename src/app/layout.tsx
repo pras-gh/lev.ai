@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <OrangeCursor />
+        {children}
+      </body>
     </html>
   );
 }

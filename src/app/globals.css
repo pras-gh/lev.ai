@@ -147,6 +147,43 @@ img {
   background: #ffffff;
 }
 
+.lev-orange-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  height: 10px;
+  width: 10px;
+  border-radius: 999px;
+  background: #f97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0);
+  will-change: transform;
+  transition: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role="button"] {
+    cursor: none !important;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .lev-orange-cursor {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
