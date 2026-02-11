@@ -12,8 +12,8 @@ Marketing website for Lev, an AI accounting product for SMBs.
 ## Routes
 
 - `/` - Landing page
-- `/get-lev` - Primary call scheduling page (Cal.com embed)
-- `/book-demo` - Legacy route that redirects to `/get-lev`
+- `/get-trail` - Primary call scheduling page (Cal.com embed)
+- `/book-demo` - Legacy route that redirects to `/get-trail`
 
 ## Local Setup
 
@@ -54,7 +54,8 @@ npm run start
 ## Key Files
 
 - `/Users/prasoonpathak/Documents/lev.ai/src/app/page.tsx`
-- `/Users/prasoonpathak/Documents/lev.ai/src/app/get-lev/page.tsx`
+- `/Users/prasoonpathak/Documents/lev.ai/src/app/get-trail/page.tsx`
+- `/Users/prasoonpathak/Documents/lev.ai/src/app/get-lev/page.tsx` (legacy redirect)
 - `/Users/prasoonpathak/Documents/lev.ai/src/app/book-demo/page.tsx`
 - `/Users/prasoonpathak/Documents/lev.ai/src/components/landing-page.tsx`
 - `/Users/prasoonpathak/Documents/lev.ai/src/components/book-demo-page.tsx`

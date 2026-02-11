@@ -3,9 +3,9 @@ import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lev | AI Accounting for SMBs",
+  title: "trai\\ | AI Accounting for SMBs",
   description:
-    "Lev acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.",
+    "trai\\ acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.",
 };
 
 export default function RootLayout({

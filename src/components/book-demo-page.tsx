@@ -72,7 +72,7 @@ export function BookDemoPage() {
 
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/55 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">
-          <Link href="/" aria-label="Lev home">
+          <Link href="/" aria-label="trai\\ home">
             <BrandMark className="text-[1.1rem] font-semibold tracking-[-0.02em] text-white" />
           </Link>
           <Link href="/" className="lev-button lev-button--outline">
@@ -92,7 +92,7 @@ export function BookDemoPage() {
             variants={fadeUp(shouldReduceMotion)}
             className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200"
           >
-            Get Lev
+            Get trai\
           </motion.p>
           <motion.h1
             variants={fadeUp(shouldReduceMotion, 0.08)}
@@ -101,7 +101,7 @@ export function BookDemoPage() {
             Schedule a 30 min call with <BrandMark compact className="text-white" />
           </motion.h1>
           <motion.p variants={fadeUp(shouldReduceMotion, 0.16)} className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-300">
-            We will show how Lev closes your books, flags GST and cash risk early, and acts like
+            We will show how trai\ closes your books, flags GST and cash risk early, and acts like
             your in-house finance hire.
           </motion.p>
         </motion.section>
@@ -130,7 +130,7 @@ export function BookDemoPage() {
               </a>
             </div>
             <div className="mt-6 space-y-2 text-sm text-slate-300">
-              <p>- Live walkthrough of Lev workflows</p>
+              <p>- Live walkthrough of trai\ workflows</p>
               <p>- Setup for your current integrations</p>
               <p>- Exact scope for your team</p>
             </div>
@@ -173,7 +173,7 @@ export function BookDemoPage() {
 
             {has30MinuteLink ? (
               <iframe
-                title="Get Lev call"
+                title="Get trai\\ call"
                 src={selectedBookingUrl}
                 width="100%"
                 height="760"
@@ -198,7 +198,7 @@ export function BookDemoPage() {
         <footer className="mt-10 pb-2">
           <div className="flex items-center justify-between border-t border-white/12 pt-5 text-sm">
             <p className="font-medium text-slate-400">© 2026 <BrandMark compact className="text-slate-300" /></p>
-            <Link href="/get-lev" className="text-slate-300 transition hover:text-white">
+            <Link href="/get-trail" className="text-slate-300 transition hover:text-white">
               Book Demo
             </Link>
           </div>

@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useState } from "react";
-import { useReducedMotion } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
 
 type FeatureSlide = {
@@ -27,6 +25,14 @@ type LevNotification = {
   message: string;
 };
 
+type Callout = {
+  title: string;
+  description: string;
+  glyph: "ledger" | "shield" | "cash" | "statement";
+};
+
+const easing = [0.22, 1, 0.36, 1] as const;
+
 const gstAndCashAlerts = [
   "GST payment due in 5 days - Rs 1.2L",
   "ITC claim ready - Rs 42,300",
@@ -41,8 +47,7 @@ const chatSimulation = [
   },
   {
     role: "lev",
-    message:
-      "Yes, but GST outflow of Rs 1.1L will reduce free cash. Safe hiring budget: Rs X.",
+    message: "Yes, but GST outflow of Rs 1.1L will reduce free cash. Safe hiring budget: Rs X.",
   },
   {
     role: "founder",
@@ -56,19 +61,19 @@ const chatSimulation = [
 
 const featureSlides: FeatureSlide[] = [
   {
-    title: "Lev keeps books clean in real time",
+    title: "trai\\ keeps books clean in real time",
     description:
       "Instead of month-end scramble, entries are categorized and reconciled continuously.",
     points: ["Live reconciliation", "Auto-clean ledger", "Month-close readiness"],
   },
   {
-    title: "Lev flags GST and cash risk before deadlines",
+    title: "trai\\ flags GST and cash risk before deadlines",
     description:
       "You get early warning on GST dues, ITC mismatches, and cash runway pressure.",
     points: ["GST due alerts", "ITC mismatch checks", "Cash runway warnings"],
   },
   {
-    title: "Lev answers founder finance decisions instantly",
+    title: "trai\\ answers founder finance decisions instantly",
     description:
       "Ask financing, hiring, and compliance questions and get direct answer context.",
     points: ["Hiring affordability", "Compliance confidence", "Cash-safe budgets"],
@@ -76,12 +81,12 @@ const featureSlides: FeatureSlide[] = [
 ];
 
 const integrationFlow: IntegrationFlowItem[] = [
-  { key: "banks", label: "Banks", top: "9%" },
+  { key: "banks", label: "Banks", top: "10%" },
   { key: "razorpay", label: "Razorpay", top: "24%" },
-  { key: "zoho-books", label: "Zoho Books", top: "39%" },
-  { key: "tally", label: "Tally Exports", top: "54%" },
-  { key: "slack", label: "Slack", top: "69%" },
-  { key: "whatsapp", label: "WhatsApp", top: "84%" },
+  { key: "zoho-books", label: "Zoho Books", top: "38%" },
+  { key: "tally", label: "Tally Exports", top: "52%" },
+  { key: "slack", label: "Slack", top: "66%" },
+  { key: "whatsapp", label: "WhatsApp", top: "80%" },
 ];
 
 const levNotifications: LevNotification[] = [
@@ -117,6 +122,65 @@ const levNotifications: LevNotification[] = [
   },
 ];
 
+const callouts: Callout[] = [
+  {
+    title: "Always-on reconciliation",
+    description: "trai\\ cleans entries and keeps books audit-ready all month.",
+    glyph: "ledger",
+  },
+  {
+    title: "Proactive GST intelligence",
+    description: "trai\\ catches filing risk and ITC mismatches before deadline pain.",
+    glyph: "shield",
+  },
+  {
+    title: "Cash-aware decision support",
+    description: "trai\\ turns inflows, outflows, and runway into practical decisions.",
+    glyph: "cash",
+  },
+  {
+    title: "Close-ready statements",
+    description: "trai\\ delivers founder-ready statements without month-end scramble.",
+    glyph: "statement",
+  },
+];
+
+function heroItem(shouldReduceMotion: boolean, delay: number) {
+  return {
+    hidden: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : 30,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: shouldReduceMotion ? 0 : 0.6,
+        delay: shouldReduceMotion ? 0 : delay,
+        ease: easing,
+      },
+    },
+  };
+}
+
+function revealInView(shouldReduceMotion: boolean, delay = 0) {
+  return {
+    hidden: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : 20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: shouldReduceMotion ? 0 : 0.56,
+        delay: shouldReduceMotion ? 0 : delay,
+        ease: easing,
+      },
+    },
+  };
+}
+
 function ArrowIcon() {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="h-4 w-4">
@@ -139,6 +203,43 @@ function GmailIcon() {
       <path d="M22 7.4v9.2l-5.7-4.4V8.3L22 7.4Z" fill="#4285F4" />
       <path d="M2 6.8 12 14.1 22 6.8V5.8c0-1.2-.9-2.1-2.1-2.1H4.1C2.9 3.7 2 4.6 2 5.8v1Z" fill="#EA4335" />
       <path d="m7.7 8.2 4.3 3.1 4.3-3.1V5.2L12 8.1 7.7 5.2v3Z" fill="#FBBC05" />
+    </svg>
+  );
+}
+
+function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
+  if (glyph === "ledger") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
+        <path d="M6 4h9l3 3v13H6V4Zm8 0v3h3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 11h6M9 15h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (glyph === "shield") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
+        <path d="m12 3 7 3.2v5.1c0 4.3-2.8 7.3-7 9.7-4.2-2.4-7-5.4-7-9.7V6.2L12 3Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="m9.7 11.9 1.6 1.6 3.3-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  if (glyph === "cash") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
+        <rect x="3.5" y="6" width="17" height="12" rx="2.2" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="12" cy="12" r="2.4" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M8 9.5h.01M16 14.5h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
+      <path d="M6 4h12v16H6z" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M9 9h6M9 13h6M9 17h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -201,111 +302,77 @@ function IntegrationIcon({ integration }: { integration: IntegrationKey }) {
 }
 
 export function LandingPage() {
-  const prefersReducedMotion = useReducedMotion() ?? false;
+  const shouldReduceMotion = useReducedMotion() ?? false;
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeNotification, setActiveNotification] = useState(0);
+  const [revealedNotifications, setRevealedNotifications] = useState(
+    shouldReduceMotion ? levNotifications.length : 1
+  );
 
-  useLayoutEffect(() => {
-    if (prefersReducedMotion) {
-      return;
+  const visibleNotifications = useMemo(
+    () => levNotifications.slice(0, Math.max(1, revealedNotifications)),
+    [revealedNotifications]
+  );
+  const clampedActiveNotification = Math.min(
+    activeNotification,
+    Math.max(0, visibleNotifications.length - 1)
+  );
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      const timeout = window.setTimeout(() => {
+        setRevealedNotifications(levNotifications.length);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(timeout);
+      };
     }
 
-    gsap.registerPlugin(ScrollTrigger);
+    const resetTimeout = window.setTimeout(() => {
+      setRevealedNotifications(1);
+    }, 0);
 
-    const ctx = gsap.context(() => {
-      const revealElements = gsap.utils.toArray<HTMLElement>("[data-gsap='reveal']");
-      revealElements.forEach((el) => {
-        gsap.fromTo(
-          el,
-          { autoAlpha: 0, y: 42 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: el,
-              start: "top 84%",
-              once: true,
-            },
-          }
-        );
-      });
-
-      const parallaxElements = gsap.utils.toArray<HTMLElement>("[data-gsap='parallax']");
-      parallaxElements.forEach((el, index) => {
-        gsap.to(el, {
-          yPercent: index % 2 === 0 ? -10 : -6,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            scrub: 1,
-          },
-        });
-      });
-
-      const flowArea = document.querySelector<HTMLElement>("[data-flow-area]");
-      if (flowArea) {
-        const flowCards = gsap.utils.toArray<HTMLElement>("[data-flow-chip]");
-        const areaWidth = flowArea.clientWidth;
-        const hub = flowArea.querySelector<HTMLElement>("[data-flow-hub]");
-
-        flowCards.forEach((card, index) => {
-          const cardWidth = card.clientWidth;
-          const startX = 0;
-          const hubX = Math.max(areaWidth * 0.47 - cardWidth / 2, 24);
-          const endX = Math.max(areaWidth - cardWidth - 12, hubX + 80);
-
-          gsap
-            .timeline({ repeat: -1, repeatDelay: 0.45, delay: index * 0.62 })
-            .set(card, { x: startX, autoAlpha: 0 })
-            .to(card, { autoAlpha: 1, duration: 0.28, ease: "power2.out" })
-            .to(card, { x: hubX, duration: 1.45, ease: "power2.inOut" })
-            .to(card, { x: endX, duration: 1.25, ease: "power1.inOut" })
-            .to(card, { autoAlpha: 0, duration: 0.25, ease: "power1.out" }, "-=0.14");
-        });
-
-        if (hub) {
-          gsap.to(hub, {
-            boxShadow: "0 0 0 10px rgba(34, 197, 94, 0.06), 0 20px 50px -24px rgba(34, 197, 94, 0.42)",
-            duration: 1.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
+    const interval = window.setInterval(() => {
+      setRevealedNotifications((prev) => {
+        if (prev >= levNotifications.length) {
+          window.clearInterval(interval);
+          return prev;
         }
-      }
 
-    });
+        return prev + 1;
+      });
+    }, 600);
 
     return () => {
-      ctx.revert();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      window.clearTimeout(resetTimeout);
+      window.clearInterval(interval);
     };
-  }, [prefersReducedMotion]);
+  }, [shouldReduceMotion]);
 
-  useLayoutEffect(() => {
-    if (prefersReducedMotion) {
+  useEffect(() => {
+    if (shouldReduceMotion) {
       return;
     }
 
     const interval = window.setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % featureSlides.length);
-    }, 5000);
+    }, 5200);
 
     return () => {
       window.clearInterval(interval);
     };
-  }, [prefersReducedMotion]);
+  }, [shouldReduceMotion]);
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(34,197,94,0.05),transparent_36%),radial-gradient(circle_at_84%_14%,rgba(22,163,74,0.03),transparent_34%),linear-gradient(180deg,#010202_0%,#020303_52%,#030403_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_9%,rgba(34,197,94,0.05),transparent_32%),radial-gradient(circle_at_84%_16%,rgba(34,197,94,0.03),transparent_34%),linear-gradient(180deg,#010202_0%,#020303_52%,#030403_100%)]" />
+      <div className="pointer-events-none absolute -left-28 top-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 top-48 h-72 w-72 rounded-full bg-emerald-500/8 blur-3xl" />
 
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur-md">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-black/58 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">
-          <Link href="/" aria-label="Lev home">
+          <Link href="/" aria-label="trai\\ home">
             <BrandMark className="text-[1.1rem] font-semibold tracking-[-0.02em] text-white" />
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
@@ -316,7 +383,7 @@ export function LandingPage() {
               Integrations
             </a>
           </nav>
-          <Link href="/get-lev" className="lev-button lev-button--dark">
+          <Link href="/get-trail" className="lev-button lev-button--dark">
             Book Demo
             <ArrowIcon />
           </Link>
@@ -325,22 +392,36 @@ export function LandingPage() {
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
         <section className="grid min-h-[calc(100vh-8rem)] gap-10 py-10 lg:grid-cols-[1fr_1fr] lg:items-center">
-          <div data-gsap="reveal">
-            <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">
-              In-house finance hire
-            </p>
-            <h1 className="mt-5 max-w-xl text-[clamp(2.6rem,8vw,5.2rem)] leading-[0.92] font-semibold tracking-[-0.03em] text-white">
-              Finance should not be stressful.
-              <span className="mt-2 block text-emerald-200">
-                Introducing <BrandMark compact className="text-white" />
-              </span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
-              Lev continuously keeps books accurate, closes month on time, flags GST and cash risk
+          <div>
+            <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
+              <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">
+                In-house finance hire
+              </p>
+              <h1 className="mt-5 max-w-xl text-[clamp(2.6rem,8vw,5.2rem)] leading-[0.92] font-semibold tracking-[-0.03em] text-white">
+                Finance should not be stressful.
+                <span className="mt-2 block text-emerald-200">
+                  Introducing <BrandMark compact className="text-white" />
+                </span>
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial="hidden"
+              animate="visible"
+              variants={heroItem(shouldReduceMotion, 0.15)}
+              className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300"
+            >
+              trai\ continuously keeps books accurate, closes month on time, flags GST and cash risk
               early, and answers founder finance questions 24/7.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/get-lev" className="lev-button lev-button--emerald">
+            </motion.p>
+
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={heroItem(shouldReduceMotion, 0.3)}
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <Link href="/get-trail" className="lev-button lev-button--emerald">
                 Book Demo
                 <ArrowIcon />
               </Link>
@@ -348,50 +429,75 @@ export function LandingPage() {
                 See live flow
                 <ArrowIcon />
               </a>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="relative" data-gsap="reveal">
-            <div
-              data-gsap="parallax"
-              className="glass-panel relative overflow-hidden rounded-[30px] border border-emerald-200/16 p-5 shadow-[0_34px_80px_-56px_rgba(34,197,94,0.44)]"
-            >
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={heroItem(shouldReduceMotion, 0.45)}
+            className="relative"
+          >
+            <div className="glass-panel relative overflow-hidden rounded-[30px] border border-emerald-200/16 p-5 shadow-[0_34px_80px_-56px_rgba(34,197,94,0.44)]">
               <div className="mb-4 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">Lev Live Desk</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                  trai\ Live Desk
+                </p>
                 <span className="rounded-full border border-emerald-300/30 bg-emerald-300/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-100">
                   Live
                 </span>
               </div>
               <div className="space-y-3">
                 {gstAndCashAlerts.map((alert) => (
-                  <div
+                  <motion.div
                     key={alert}
-                    className="rounded-2xl border border-emerald-200/14 bg-black/35 px-4 py-3 text-sm text-emerald-50 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/26"
+                    whileHover={
+                      shouldReduceMotion
+                        ? undefined
+                        : {
+                            y: -2,
+                            scale: 1.01,
+                            borderColor: "rgba(110, 231, 183, 0.4)",
+                          }
+                    }
+                    transition={{ duration: 0.2, ease: easing }}
+                    className="rounded-2xl border border-emerald-200/14 bg-black/35 px-4 py-3 text-sm text-emerald-50"
                   >
                     {alert}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-            <div
-              data-gsap="parallax"
+            <motion.div
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.55, delay: shouldReduceMotion ? 0 : 0.62, ease: easing }}
               className="absolute -bottom-6 -left-4 hidden rounded-2xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-xs text-emerald-100 backdrop-blur-sm sm:block"
             >
               Cash runway impact forecast ready
-            </div>
-            <div
-              data-gsap="parallax"
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.55, delay: shouldReduceMotion ? 0 : 0.7, ease: easing }}
               className="absolute -right-3 -top-5 hidden rounded-2xl border border-emerald-300/25 bg-emerald-400/8 px-4 py-3 text-xs text-emerald-100 backdrop-blur-sm sm:block"
             >
               ITC mismatch caught before filing
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
-        <section id="features" className="mt-18" data-gsap="reveal">
-          <div className="mb-6 flex items-end justify-between gap-4">
+        <motion.section
+          id="features"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={revealInView(shouldReduceMotion)}
+          className="mt-20 border-t border-white/10 pt-18"
+        >
+          <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">About Lev</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">About trai\</p>
               <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
                 Full finance flow, without hiring full-time too early.
               </h2>
@@ -411,8 +517,12 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
-            <div className="glass-panel rounded-[24px] border border-white/12 p-5 sm:p-6 lg:max-w-[520px]">
+          <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+            <motion.div
+              whileHover={shouldReduceMotion ? undefined : { y: -3, boxShadow: "0 24px 52px -34px rgba(34,197,94,0.45)" }}
+              transition={{ duration: 0.2, ease: easing }}
+              className="glass-panel rounded-[24px] border border-white/12 p-5 sm:p-6 lg:max-w-[520px]"
+            >
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
                 0{activeSlide + 1} / 03
               </p>
@@ -430,14 +540,22 @@ export function LandingPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
-            <div className="glass-panel rounded-[26px] border border-white/12 p-5">
+            <motion.div
+              whileHover={shouldReduceMotion ? undefined : { y: -3, boxShadow: "0 24px 52px -34px rgba(34,197,94,0.45)" }}
+              transition={{ duration: 0.2, ease: easing }}
+              className="glass-panel rounded-[26px] border border-white/12 p-5"
+            >
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Live conversation</p>
               <div className="mt-4 space-y-3">
                 {chatSimulation.map((entry, index) => (
-                  <div
+                  <motion.div
                     key={`${entry.role}-${index}`}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.7 }}
+                    variants={revealInView(shouldReduceMotion, index * 0.08)}
                     className={`max-w-[95%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       entry.role === "founder"
                         ? "ml-auto border border-white/12 bg-white/8 text-slate-200"
@@ -445,33 +563,69 @@ export function LandingPage() {
                     }`}
                   >
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] opacity-70">
-                      {entry.role === "founder" ? "You" : "Lev"}
+                      {entry.role === "founder" ? "You" : "trai\\"}
                     </p>
                     {entry.message}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="mt-18 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-gsap="reveal">
-          {[
-            "Always-on reconciliation",
-            "Proactive GST intelligence",
-            "Cash-aware decision support",
-            "Clean close-ready financials",
-          ].map((item) => (
-            <div
-              key={item}
-              className="glass-panel rounded-2xl border border-white/10 px-4 py-4 text-sm font-semibold text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/40 hover:shadow-[0_18px_36px_-24px_rgba(34,197,94,0.48)]"
-            >
-              {item}
-            </div>
-          ))}
-        </section>
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={revealInView(shouldReduceMotion)}
+          className="mt-20 border-t border-white/10 bg-black/20 pt-18"
+        >
+          <motion.div
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: shouldReduceMotion ? 0 : 0.1,
+                },
+              },
+            }}
+            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {callouts.map((item) => (
+              <motion.article
+                key={item.title}
+                variants={revealInView(shouldReduceMotion)}
+                whileHover={
+                  shouldReduceMotion
+                    ? undefined
+                    : {
+                        y: -4,
+                        scale: 1.02,
+                        borderColor: "rgba(110, 231, 183, 0.42)",
+                        boxShadow: "0 24px 44px -30px rgba(34,197,94,0.6)",
+                      }
+                }
+                transition={{ duration: 0.2, ease: easing }}
+                className="glass-panel rounded-2xl border border-white/10 px-4 py-4"
+              >
+                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+                  <CalloutGlyph glyph={item.glyph} />
+                </div>
+                <h3 className="text-sm font-semibold text-slate-100">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-300">{item.description}</p>
+              </motion.article>
+            ))}
+          </motion.div>
+        </motion.section>
 
-        <section id="integrations" className="mt-18" data-gsap="reveal">
+        <motion.section
+          id="integrations"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={revealInView(shouldReduceMotion)}
+          className="mt-20 border-t border-white/10 pt-18"
+        >
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
@@ -481,40 +635,60 @@ export function LandingPage() {
 
           <div className="glass-panel rounded-[26px] border border-white/12 p-5 sm:p-6">
             <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
-              <div
-                data-flow-area
-                className="relative h-[360px] overflow-hidden rounded-2xl border border-white/12 bg-black/35"
-              >
+              <div className="relative h-[360px] overflow-hidden rounded-2xl border border-white/12 bg-black/35">
                 <div className="lev-grid-field absolute inset-0 opacity-[0.14]" />
-                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/65 to-transparent" />
-                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/65 to-transparent" />
+                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/70 to-transparent" />
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/70 to-transparent" />
                 <div className="absolute left-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   Connected apps
                 </div>
                 <div className="absolute right-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Lev outputs
+                  trai\ processing
                 </div>
 
-                {integrationFlow.map((item) => (
-                  <div
+                {integrationFlow.map((item, index) => (
+                  <motion.div
                     key={item.key}
-                    data-flow-chip
                     style={{ top: item.top }}
+                    initial={{ x: shouldReduceMotion ? 0 : -18, opacity: shouldReduceMotion ? 1 : 0 }}
+                    animate={{
+                      x: shouldReduceMotion ? 0 : [-18, 110, 254],
+                      opacity: shouldReduceMotion ? 1 : [0, 1, 1, 0],
+                    }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 4.4,
+                      delay: shouldReduceMotion ? 0 : index * 0.54,
+                      repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
+                      repeatDelay: shouldReduceMotion ? 0 : 1.15,
+                      ease: "easeInOut",
+                    }}
                     className="absolute left-4 flex items-center gap-3 rounded-xl border border-white/14 bg-black/75 px-3 py-2 text-sm text-slate-100 shadow-[0_8px_22px_-14px_rgba(0,0,0,0.8)]"
                   >
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/6 text-emerald-200">
                       <IntegrationIcon integration={item.key} />
                     </span>
                     <span className="font-semibold">{item.label}</span>
-                  </div>
+                  </motion.div>
                 ))}
 
-                <div
-                  data-flow-hub
+                <motion.div
+                  animate={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                          scale: [1, 1.03, 1],
+                          boxShadow: [
+                            "0 10px 30px -18px rgba(34,197,94,0.35)",
+                            "0 18px 46px -20px rgba(34,197,94,0.5)",
+                            "0 10px 30px -18px rgba(34,197,94,0.35)",
+                          ],
+                        }
+                  }
+                  transition={{ duration: 2.2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                   className="absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[22px] border border-emerald-300/35 bg-emerald-300/10 text-base font-semibold text-white"
                 >
                   <BrandMark compact className="text-white" />
-                </div>
+                </motion.div>
               </div>
 
               <div className="flex items-center justify-center">
@@ -523,7 +697,10 @@ export function LandingPage() {
                   <div className="rounded-[31px] border border-white/10 bg-[linear-gradient(180deg,#181b22_0%,#101319_44%,#0b0d12_100%)] px-3 pb-3 pt-12">
                     <div
                       className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-200"
-                      style={{ fontFamily: '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif' }}
+                      style={{
+                        fontFamily:
+                          '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif',
+                      }}
                     >
                       <span>9:41</span>
                       <span>5G</span>
@@ -535,72 +712,106 @@ export function LandingPage() {
                     >
                       <span className="inline-flex items-center gap-1.5">
                         <GmailIcon />
-                        Notification Bar • Gmail • Lev
+                        Notification Bar • Gmail • trai\
                       </span>
                     </div>
 
                     <p
                       className="mb-3 px-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400"
-                      style={{ fontFamily: '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif' }}
+                      style={{
+                        fontFamily:
+                          '"SF Pro Text", "-apple-system", "BlinkMacSystemFont", "Segoe UI", sans-serif',
+                      }}
                     >
                       Notification Center
                     </p>
 
-                    <div className="h-[430px] space-y-2.5 overflow-y-auto pr-1">
-                      {levNotifications.map((notice, index) => {
-                        const isActive = activeNotification === index;
+                    <div className="h-[356px] space-y-2.5 overflow-y-auto pr-1">
+                      <AnimatePresence mode="popLayout">
+                        {visibleNotifications.map((notice, index) => {
+                          const isActive = clampedActiveNotification === index;
 
-                        return (
-                          <button
-                            key={notice.id}
-                            type="button"
-                            onMouseEnter={() =>
-                              setActiveNotification((current) => (current === index ? current : index))
-                            }
-                            onMouseMove={() =>
-                              setActiveNotification((current) => (current === index ? current : index))
-                            }
-                            onFocus={() =>
-                              setActiveNotification((current) => (current === index ? current : index))
-                            }
-                            onClick={() =>
-                              setActiveNotification((current) => (current === index ? current : index))
-                            }
-                            className={`w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
-                              isActive
-                                ? "scale-[1.03] border-white/30 bg-white/24 opacity-100 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.35)]"
-                                : "scale-[0.94] border-white/10 bg-white/10 opacity-65"
-                            }`}
-                          >
-                            <div className="flex items-start gap-2.5">
-                              <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-white/20 bg-white/90 text-[#5f6368]">
-                                <GmailIcon />
-                              </span>
-                              <div
-                                className="min-w-0 flex-1"
-                                style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
-                              >
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-[11px] font-medium text-slate-200">Gmail • Lev</p>
-                                  <p className="text-[10px] font-medium text-slate-400">now</p>
+                          return (
+                            <motion.button
+                              key={notice.id}
+                              layout
+                              type="button"
+                              initial={{
+                                opacity: 0,
+                                y: shouldReduceMotion ? 0 : 16,
+                                scale: shouldReduceMotion ? 1 : 0.97,
+                              }}
+                              animate={{
+                                opacity: isActive ? 1 : 0.67,
+                                y: 0,
+                                scale: isActive ? 1.02 : 0.94,
+                              }}
+                              exit={{
+                                opacity: 0,
+                                y: shouldReduceMotion ? 0 : -14,
+                                scale: shouldReduceMotion ? 1 : 0.95,
+                              }}
+                              transition={{
+                                duration: shouldReduceMotion ? 0 : 0.45,
+                                ease: easing,
+                              }}
+                              onMouseMove={() => setActiveNotification(index)}
+                              onMouseEnter={() => setActiveNotification(index)}
+                              onFocus={() => setActiveNotification(index)}
+                              onClick={() => setActiveNotification(index)}
+                              className={`w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
+                                isActive
+                                  ? "border-white/30 bg-white/24 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.32)]"
+                                  : "border-white/10 bg-white/10"
+                              }`}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-white/20 bg-white/90 text-[#5f6368]">
+                                  <GmailIcon />
+                                </span>
+                                <div
+                                  className="min-w-0 flex-1"
+                                  style={{ fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif' }}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <p className="text-[11px] font-medium text-slate-200">Gmail • trai\</p>
+                                    <p className="text-[10px] font-medium text-slate-400">now</p>
+                                  </div>
+                                  <p className="truncate text-[12px] font-semibold text-white">{notice.title}</p>
+                                  <p className="mt-0.5 text-[12px] leading-[1.35] text-slate-200">{notice.message}</p>
                                 </div>
-                                <p className="truncate text-[12px] font-semibold text-white">{notice.title}</p>
-                                <p className="mt-0.5 text-[12px] leading-[1.35] text-slate-200">{notice.message}</p>
                               </div>
-                            </div>
-                          </button>
-                        );
-                      })}
+                            </motion.button>
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
-        <section className="mt-18" data-gsap="reveal">
-          <div className="rounded-[28px] border border-white/14 bg-gradient-to-r from-emerald-500/8 via-emerald-500/4 to-black px-6 py-9 sm:px-9">
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={revealInView(shouldReduceMotion)}
+          className="mt-20 border-t border-white/10 pt-18"
+        >
+          <motion.div
+            whileHover={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: -3,
+                    boxShadow: "0 26px 55px -34px rgba(34,197,94,0.42)",
+                  }
+            }
+            transition={{ duration: 0.2, ease: easing }}
+            className="rounded-[28px] border border-white/14 bg-gradient-to-r from-emerald-500/8 via-emerald-500/4 to-black px-6 py-9 sm:px-9"
+          >
             <h3 className="max-w-2xl text-[clamp(1.8rem,3.5vw,2.7rem)] leading-[1.02] font-semibold text-white">
               Ready to make finance feel handled?
             </h3>
@@ -609,17 +820,19 @@ export function LandingPage() {
               in-house finance hire.
             </p>
             <div className="mt-7">
-              <Link href="/get-lev" className="lev-button lev-button--emerald">
+              <Link href="/get-trail" className="lev-button lev-button--emerald">
                 Book Demo
                 <ArrowIcon />
               </Link>
             </div>
-          </div>
-        </section>
+          </motion.div>
+        </motion.section>
 
         <footer className="mt-12 pb-2">
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/12 pt-5 text-sm">
-            <p className="font-medium text-slate-400">© 2026 <BrandMark compact className="text-slate-300" /></p>
+            <p className="font-medium text-slate-400">
+              © 2026 <BrandMark compact className="text-slate-300" />
+            </p>
             <div className="flex items-center gap-5 text-slate-300">
               <a href="#features" className="transition hover:text-white">
                 Features
@@ -627,7 +840,7 @@ export function LandingPage() {
               <a href="#integrations" className="transition hover:text-white">
                 Integrations
               </a>
-              <Link href="/get-lev" className="transition hover:text-white">
+              <Link href="/get-trail" className="transition hover:text-white">
                 Book Demo
               </Link>
             </div>

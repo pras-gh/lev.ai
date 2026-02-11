@@ -4,10 +4,17 @@ type BrandMarkProps = {
 };
 
 export function BrandMark({ className = "", compact = false }: BrandMarkProps) {
+  const spacingClass = compact ? "ml-[0.03em]" : "ml-[0.05em]";
+
   return (
-    <span className={className}>
-      Lev
-      <span className={compact ? "text-orange-500" : "ml-[1px] text-orange-500"}>.</span>
+    <span
+      className={`inline-flex items-baseline lowercase tracking-[-0.04em] text-white ${className}`}
+      style={{ fontWeight: 560 }}
+    >
+      trai
+      <span className={spacingClass} aria-hidden>
+        {"\\"}
+      </span>
     </span>
   );
 }

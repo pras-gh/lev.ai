@@ -1,5 +1,5 @@
-import { BookDemoPage } from "@/components/book-demo-page";
+import { redirect } from "next/navigation";
 
 export default function GetLevPage() {
-  return <BookDemoPage />;
+  redirect("/get-trail");
 }
