@@ -368,12 +368,12 @@ export function LandingPage() {
           timeouts.push(
             window.setTimeout(() => {
               setIntroPhase("flip");
-            }, 360)
+            }, 240)
           );
           timeouts.push(
             window.setTimeout(() => {
               setIntroPhase("get");
-            }, 900)
+            }, 560)
           );
           timeouts.push(
             window.setTimeout(() => {
@@ -381,7 +381,7 @@ export function LandingPage() {
             }, 3200)
           );
         }
-      }, 82);
+      }, 72);
     };
 
     runCycle();
@@ -493,7 +493,7 @@ export function LandingPage() {
       </header>
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
-        <section className="lev-hero-deep relative flex min-h-[calc(100vh-8rem)] items-center justify-center rounded-[32px] px-6 py-14 sm:px-10 sm:py-18">
+        <section className="lev-hero-deep relative flex min-h-[calc(100vh-8rem)] items-center justify-center px-6 py-14 sm:px-10 sm:py-18">
           <div className="relative z-10 mx-auto max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
@@ -582,7 +582,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-4 border-y border-white/10 py-6"
+          className="mt-2 py-6"
         >
           <div className="lev-marquee">
             <div className="lev-marquee-track">
@@ -610,7 +610,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="mt-16 pt-14"
         >
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
@@ -701,7 +701,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="mt-16 pt-14"
         >
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
@@ -851,7 +851,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="mt-16 pt-14"
         >
           <div className="rounded-[30px] border border-white/14 bg-[linear-gradient(135deg,rgba(0,234,100,0.3)_0%,rgba(20,184,166,0.18)_45%,rgba(12,16,24,0.95)_100%)] px-6 py-10 text-center sm:px-9">
             <h3 className="text-[clamp(1.9rem,4vw,2.8rem)] font-semibold text-white">Books that never fall</h3>

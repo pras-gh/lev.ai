@@ -67,10 +67,6 @@ img {
     radial-gradient(circle at 20% 16%, rgba(0, 234, 100, 0.09), transparent 38%),
     radial-gradient(circle at 80% 18%, rgba(0, 234, 100, 0.05), transparent 40%),
     linear-gradient(180deg, #030405 0%, #040507 52%, #030405 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 24px 72px -52px rgba(0, 0, 0, 0.92),
-    0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 .lev-torch-text {
