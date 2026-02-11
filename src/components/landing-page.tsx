@@ -1,22 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
 
 type FeatureSlide = {
   title: string;
   description: string;
   points: string[];
-};
-
-type IntegrationKey = "banks" | "razorpay" | "zoho-books" | "tally" | "slack" | "whatsapp";
-
-type IntegrationFlowItem = {
-  key: IntegrationKey;
-  label: string;
-  top: string;
 };
 
 type LevNotification = {
@@ -31,6 +24,15 @@ type Callout = {
   glyph: "ledger" | "shield" | "cash" | "statement";
 };
 
+type FlowLogo = {
+  id: string;
+  src: string;
+  alt: string;
+  top: string;
+  width: number;
+  height: number;
+};
+
 const easing = [0.22, 1, 0.36, 1] as const;
 
 const navLinks = [
@@ -38,33 +40,9 @@ const navLinks = [
   { href: "#integrations", label: "Integrations" },
 ];
 
-const heroIntegrations = [
-  "Razorpay",
-  "HDFC Bank",
-  "ICICI",
-  "SBI",
-  "WhatsApp",
-  "Telegram",
-  "Zoho Books",
-  "Stripe",
-  "Rippling",
-  "Shopify",
-  "Metadata.io",
-  "Cognism",
-  "Slack",
-  "and more",
-];
-
-const gstAndCashAlerts = [
-  "GST payment due in 5 days - Rs 1.2L",
-  "ITC claim ready - Rs 42,300",
-  "Vendor mismatch may block ITC",
-  "Cash runway tightening next week",
-];
-
 const chatSimulation = [
   {
-    role: "founder",
+    role: "you",
     message: "Can we afford to hire next month?",
   },
   {
@@ -72,7 +50,7 @@ const chatSimulation = [
     message: "Yes, but GST outflow of Rs 1.1L will reduce free cash. Safe hiring budget: Rs X.",
   },
   {
-    role: "founder",
+    role: "you",
     message: "Do we need to worry about compliance this month?",
   },
   {
@@ -95,20 +73,11 @@ const featureSlides: FeatureSlide[] = [
     points: ["GST due alerts", "ITC mismatch checks", "Cash runway warnings"],
   },
   {
-    title: "trai\\ answers founder finance decisions instantly",
+    title: "trai\\ answer instantly",
     description:
       "Ask financing, hiring, and compliance questions and get direct answer context.",
     points: ["Hiring affordability", "Compliance confidence", "Cash-safe budgets"],
   },
-];
-
-const integrationFlow: IntegrationFlowItem[] = [
-  { key: "banks", label: "Banks", top: "10%" },
-  { key: "razorpay", label: "Razorpay", top: "24%" },
-  { key: "zoho-books", label: "Zoho Books", top: "38%" },
-  { key: "tally", label: "Tally Exports", top: "52%" },
-  { key: "slack", label: "Slack", top: "66%" },
-  { key: "whatsapp", label: "WhatsApp", top: "80%" },
 ];
 
 const levNotifications: LevNotification[] = [
@@ -167,78 +136,21 @@ const callouts: Callout[] = [
   },
 ];
 
-const featureCards = [
-  {
-    title: "AI scoring engine",
-    description: "Automatic evaluation plus context-aware review notes for every candidate test.",
-    glyph: "shield" as const,
-  },
-  {
-    title: "Role-based test flows",
-    description: "Create custom tracks for backend, frontend, data, and finance operations roles.",
-    glyph: "ledger" as const,
-  },
-  {
-    title: "Candidate signal dashboard",
-    description: "See quality, speed, and consistency metrics in one clean review panel.",
-    glyph: "statement" as const,
-  },
-  {
-    title: "Compliance-first workflows",
-    description: "Track GST, filings, and internal controls through one always-on operating layer.",
-    glyph: "shield" as const,
-  },
-  {
-    title: "Decision-ready exports",
-    description: "Share hiring and finance reports instantly with stakeholders and advisors.",
-    glyph: "cash" as const,
-  },
-  {
-    title: "Automated follow-ups",
-    description: "Push alerts to Gmail, WhatsApp, and Slack when critical thresholds are crossed.",
-    glyph: "ledger" as const,
-  },
+const integrationFlowLogos: FlowLogo[] = [
+  { id: "upload-mark", src: "/integrations/uploaded-mark.svg", alt: "Uploaded integration logo", top: "7%", width: 34, height: 34 },
+  { id: "slack", src: "/integrations/slack-logo.svg", alt: "Slack logo", top: "16%", width: 34, height: 34 },
+  { id: "shopify", src: "/integrations/shopify-logo.svg", alt: "Shopify logo", top: "25%", width: 34, height: 34 },
+  { id: "telegram", src: "/integrations/telegram-logo.svg", alt: "Telegram logo", top: "34%", width: 34, height: 34 },
+  { id: "stripe", src: "/integrations/stripe-logo.svg", alt: "Stripe logo", top: "45%", width: 80, height: 34 },
+  { id: "whatsapp", src: "/integrations/whatsapp-logo.svg", alt: "WhatsApp logo", top: "56%", width: 34, height: 34 },
+  { id: "hdfc", src: "/integrations/hdfc-bank-logo.svg", alt: "HDFC Bank logo", top: "67%", width: 74, height: 20 },
+  { id: "cognism", src: "/integrations/cognism.svg", alt: "Cognism logo", top: "78%", width: 88, height: 20 },
+  { id: "tally", src: "/integrations/tally-logo-black.svg", alt: "Tally logo", top: "89%", width: 90, height: 20 },
 ];
 
-const pricingPlans = [
-  {
-    name: "Starter",
-    price: "₹29,000/mo",
-    description: "For early teams that need clean books and alert-driven finance operations.",
-    points: ["Up to 3 entities", "Daily sync", "Gmail + Slack alerts"],
-  },
-  {
-    name: "Growth",
-    price: "₹79,000/mo",
-    description: "For scaling teams running multi-account operations with tighter control.",
-    points: ["Up to 10 entities", "Real-time risk flags", "Priority support"],
-    featured: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    description: "For high-volume operations with advanced workflow and compliance coverage.",
-    points: ["Unlimited entities", "Custom integrations", "Dedicated onboarding"],
-  },
-];
-
-const footerColumns = [
-  {
-    title: "Product",
-    links: ["Assessments", "Automations", "Integrations", "Analytics"],
-  },
-  {
-    title: "Solutions",
-    links: ["Startups", "Agencies", "Finance Teams", "Enterprise"],
-  },
-  {
-    title: "Company",
-    links: ["About", "Careers", "Partners", "Contact"],
-  },
-  {
-    title: "Resources",
-    links: ["Docs", "Pricing", "Security", "Help Center"],
-  },
+const resourceLinks = [
+  { label: "Pricing", href: "/get-trail" },
+  { label: "Help Center", href: "mailto:help@gettrail.ai" },
 ];
 
 function heroItem(shouldReduceMotion: boolean, delay: number) {
@@ -295,14 +207,6 @@ function StarIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="h-4 w-4 text-emerald-300">
       <path d="m10 2.6 2 4 4.4.7-3.2 3.1.8 4.4-4-2.1-4 2.1.8-4.4-3.2-3.1 4.4-.7 2-4Z" fill="currentColor" />
-    </svg>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" className="h-4 w-4">
-      <path d="M7 5.2 14.4 10 7 14.8V5.2Z" fill="currentColor" />
     </svg>
   );
 }
@@ -393,140 +297,6 @@ function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
       <path d="M6 4h12v16H6z" stroke="currentColor" strokeWidth="1.8" />
       <path d="M9 9h6M9 13h6M9 17h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function IntegrationIcon({ integration }: { integration: IntegrationKey }) {
-  if (integration === "banks") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-        <path d="M3.5 9 12 4.5 20.5 9M5.5 10v7M10 10v7M14 10v7M18.5 10v7M3 19.5h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  if (integration === "razorpay") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-        <path d="M7.5 4.5h7.5l1.5 3.2-4 8.3h-3l2.8-5.8H9.2L7.5 4.5Z" fill="currentColor" />
-      </svg>
-    );
-  }
-
-  if (integration === "zoho-books") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-        <rect x="2.2" y="7" width="4.6" height="10" rx="0.9" fill="#e53e3e" />
-        <rect x="7.8" y="6" width="4.6" height="11" rx="0.9" fill="#38a169" />
-        <rect x="13.4" y="7.5" width="4.6" height="9.5" rx="0.9" fill="#f59e0b" />
-        <rect x="19" y="6.5" width="2.8" height="10.5" rx="0.8" fill="#3b82f6" />
-      </svg>
-    );
-  }
-
-  if (integration === "tally") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-        <circle cx="12" cy="12" r="9" fill="currentColor" opacity="0.2" />
-        <path d="M7 8h10M12 8v8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (integration === "slack") {
-    return (
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-        <rect x="4.5" y="10.2" width="5.2" height="3.5" rx="1.4" fill="#36C5F0" />
-        <rect x="8.6" y="14" width="3.5" height="5.2" rx="1.4" fill="#2EB67D" />
-        <rect x="10.3" y="4.6" width="3.5" height="5.2" rx="1.4" fill="#E01E5A" />
-        <rect x="14.2" y="8.7" width="5.2" height="3.5" rx="1.4" fill="#ECB22E" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M8.2 11.2c0-2.2 1.7-3.8 3.8-3.8s3.8 1.6 3.8 3.8V16h-1.7v-2.3h-4.2V16H8.2v-4.8Z" fill="currentColor" />
-      <path d="M10 13.1h4" stroke="#0a1b14" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CounterCard({
-  label,
-  target,
-  prefix = "",
-  suffix = "",
-  shouldReduceMotion,
-}: {
-  label: string;
-  target: number;
-  prefix?: string;
-  suffix?: string;
-  shouldReduceMotion: boolean;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [value, setValue] = useState(() => (shouldReduceMotion ? target : 0));
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const node = ref.current;
-    if (!node) {
-      return;
-    }
-
-    let frame = 0;
-    let started = false;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting || started) {
-            return;
-          }
-
-          started = true;
-          const startTime = performance.now();
-          const duration = 900;
-
-          const step = (now: number) => {
-            const progress = Math.min((now - startTime) / duration, 1);
-            setValue(Math.round(progress * target));
-            if (progress < 1) {
-              frame = window.requestAnimationFrame(step);
-            }
-          };
-
-          frame = window.requestAnimationFrame(step);
-          observer.disconnect();
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(node);
-
-    return () => {
-      observer.disconnect();
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-      }
-    };
-  }, [shouldReduceMotion, target]);
-
-  return (
-    <div ref={ref} className="glass-panel rounded-2xl border border-white/10 px-5 py-5">
-      <p className="text-3xl font-semibold text-white">
-        {prefix}
-        {value.toLocaleString()}
-        {suffix}
-      </p>
-      <p className="mt-2 text-sm text-slate-300">{label}</p>
-    </div>
   );
 }
 
@@ -670,9 +440,9 @@ export function LandingPage() {
               variants={heroItem(shouldReduceMotion, 0.15)}
               className="mt-6 max-w-2xl text-[clamp(2.8rem,8.2vw,4.6rem)] leading-[0.95] font-semibold tracking-[-0.03em] text-white"
             >
-              Hire Developers.
+              Introducing trai\
               <span className="block bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-                Faster. Smarter.
+                your personal accountant 24/7
               </span>
             </motion.h1>
 
@@ -682,8 +452,8 @@ export function LandingPage() {
               variants={heroItem(shouldReduceMotion, 0.3)}
               className="mt-6 max-w-xl text-[1.08rem] leading-relaxed text-slate-300"
             >
-              Screen, assess, and hire top technical talent with AI-powered coding tests and
-              automated evaluations.
+              Close your books on time, stay ahead of GST surprises, and get clear answers before
+              you question.
             </motion.p>
 
             <motion.div
@@ -696,23 +466,6 @@ export function LandingPage() {
                 get trai\
                 <ArrowIcon />
               </Link>
-              <Link href="/get-trail" className="lev-button lev-button--outline">
-                <PlayIcon />
-                bookdemo
-              </Link>
-            </motion.div>
-
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={heroItem(shouldReduceMotion, 0.58)}
-              className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-slate-400"
-            >
-              {heroIntegrations.map((company) => (
-                <span key={company} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1">
-                  {company}
-                </span>
-              ))}
             </motion.div>
           </div>
 
@@ -760,36 +513,6 @@ export function LandingPage() {
                 </div>
               </div>
             </motion.div>
-
-            <motion.div
-              animate={shouldReduceMotion ? undefined : { y: [0, 7, 0] }}
-              transition={{ duration: 4.8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-              className="lev-float-soft absolute -left-2 top-16 w-[250px] rotate-[-7deg] rounded-2xl border border-white/12 bg-[#171c27]/95 px-4 py-3"
-            >
-              <p className="text-xs font-semibold text-emerald-200">High Refund Spike</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                Refunds increased 18% this week. Margin impact estimated: ₹32k.
-              </p>
-            </motion.div>
-
-            <motion.div
-              animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
-              transition={{ duration: 4.2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 0.3 }}
-              className="lev-float-soft absolute -right-3 bottom-12 w-[240px] rotate-[6deg] rounded-2xl border border-white/12 bg-[#171c27]/95 px-4 py-3"
-            >
-              <p className="text-xs font-semibold text-emerald-200">Crunch Warning</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">
-                At current inflows, cash will fall below 20 day runway by next Friday.
-              </p>
-            </motion.div>
-
-            <div className="absolute -bottom-9 left-1/2 hidden w-full max-w-[460px] -translate-x-1/2 gap-2 lg:flex">
-              {gstAndCashAlerts.slice(0, 2).map((alert) => (
-                <div key={alert} className="rounded-xl border border-white/12 bg-[#141925]/90 px-3 py-2 text-[11px] text-slate-300">
-                  {alert}
-                </div>
-              ))}
-            </div>
           </motion.div>
         </section>
 
@@ -830,10 +553,13 @@ export function LandingPage() {
         >
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">About trai\</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+                About trail\
+              </p>
               <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-                Full finance flow, without hiring full-time too early.
+                trail\ gives you real time audit ready book, with flat pricing
               </h2>
+              <p className="mt-3 text-sm font-medium text-emerald-200">Simple, flat pricing.</p>
             </div>
             <div className="hidden items-center gap-2 sm:flex">
               {featureSlides.map((_, index) => (
@@ -880,7 +606,9 @@ export function LandingPage() {
               transition={{ duration: 0.2, ease: easing }}
               className="glass-panel rounded-[26px] border border-white/12 p-5"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Live conversation</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+                trai\ answer instantly.
+              </p>
               <div className="mt-4 space-y-3">
                 {chatSimulation.map((entry, index) => (
                   <motion.div
@@ -890,13 +618,13 @@ export function LandingPage() {
                     viewport={{ once: true, amount: 0.7 }}
                     variants={revealInView(shouldReduceMotion, index * 0.08)}
                     className={`max-w-[95%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      entry.role === "founder"
+                      entry.role === "you"
                         ? "ml-auto border border-white/12 bg-white/8 text-slate-200"
                         : "border border-emerald-300/20 bg-emerald-300/10 text-emerald-100"
                     }`}
                   >
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] opacity-70">
-                      {entry.role === "founder" ? "You" : "trai\\"}
+                      {entry.role === "you" ? "You" : "trai\\"}
                     </p>
                     {entry.message}
                   </motion.div>
@@ -904,57 +632,6 @@ export function LandingPage() {
               </div>
             </motion.div>
           </div>
-        </motion.section>
-
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.22 }}
-          variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 bg-black/25 pt-18"
-        >
-          <div className="mb-8">
-            <h2 className="text-[clamp(1.8rem,3.4vw,2.5rem)] font-semibold text-white">
-              Built to feel enterprise-grade, yet fast for founders.
-            </h2>
-          </div>
-
-          <motion.div
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: shouldReduceMotion ? 0 : 0.1,
-                },
-              },
-            }}
-            className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
-          >
-            {featureCards.map((card) => (
-              <motion.article
-                key={card.title}
-                variants={revealInView(shouldReduceMotion)}
-                whileHover={
-                  shouldReduceMotion
-                    ? undefined
-                    : {
-                        y: -4,
-                        scale: 1.02,
-                        borderColor: "rgba(0,234,100,0.45)",
-                        boxShadow: "0 24px 44px -30px rgba(0,234,100,0.55)",
-                      }
-                }
-                transition={{ duration: 0.2, ease: easing }}
-                className="glass-panel rounded-2xl border border-white/10 px-5 py-5"
-              >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/12 text-emerald-100">
-                  <CalloutGlyph glyph={card.glyph} />
-                </span>
-                <h3 className="mt-4 text-lg font-semibold text-white">{card.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-300">{card.description}</p>
-              </motion.article>
-            ))}
-          </motion.div>
         </motion.section>
 
         <motion.section
@@ -968,45 +645,42 @@ export function LandingPage() {
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-              Everything flows through <BrandMark compact />.
+              Everything flows through <BrandMark compact />
             </h2>
           </div>
 
           <div className="glass-panel rounded-[26px] border border-white/12 p-5 sm:p-6">
             <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
-              <div className="relative h-[380px] overflow-hidden rounded-2xl border border-white/12 bg-black/35">
+              <div className="relative h-[390px] overflow-hidden rounded-2xl border border-white/12 bg-black/35">
                 <div className="lev-grid-field absolute inset-0 opacity-[0.14]" />
                 <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/70 to-transparent" />
                 <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/70 to-transparent" />
                 <div className="absolute left-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Connected apps
+                  Connected logos
                 </div>
                 <div className="absolute right-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                   trai\ processing
                 </div>
 
-                {integrationFlow.map((item, index) => (
+                {integrationFlowLogos.map((item, index) => (
                   <motion.div
-                    key={item.key}
+                    key={item.id}
                     style={{ top: item.top }}
-                    initial={{ x: shouldReduceMotion ? 0 : -12, opacity: shouldReduceMotion ? 1 : 0 }}
+                    initial={{ x: shouldReduceMotion ? 0 : -24, opacity: shouldReduceMotion ? 1 : 0 }}
                     animate={{
-                      x: shouldReduceMotion ? 0 : [-12, 110, 250],
+                      x: shouldReduceMotion ? 0 : [-24, 120, 252],
                       opacity: shouldReduceMotion ? 1 : [0, 1, 1, 0],
                     }}
                     transition={{
-                      duration: shouldReduceMotion ? 0 : 4.2,
-                      delay: shouldReduceMotion ? 0 : index * 0.52,
+                      duration: shouldReduceMotion ? 0 : 4.4,
+                      delay: shouldReduceMotion ? 0 : index * 0.42,
                       repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
-                      repeatDelay: shouldReduceMotion ? 0 : 0.9,
+                      repeatDelay: shouldReduceMotion ? 0 : 0.55,
                       ease: "easeInOut",
                     }}
-                    className="absolute left-4 flex items-center gap-3 rounded-xl border border-white/14 bg-black/75 px-3 py-2 text-sm text-slate-100 shadow-[0_8px_22px_-14px_rgba(0,0,0,0.8)]"
+                    className="absolute left-4 rounded-xl border border-white/18 bg-white px-2 py-2 shadow-[0_8px_22px_-14px_rgba(0,0,0,0.8)]"
                   >
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/6 text-emerald-200">
-                      <IntegrationIcon integration={item.key} />
-                    </span>
-                    <span className="font-semibold">{item.label}</span>
+                    <Image src={item.src} alt={item.alt} width={item.width} height={item.height} className="h-auto w-auto object-contain" />
                   </motion.div>
                 ))}
 
@@ -1106,75 +780,6 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 bg-black/20 pt-18"
-        >
-          <div className="mb-7">
-            <h2 className="text-[clamp(1.8rem,3.2vw,2.4rem)] font-semibold text-white">
-              Decision velocity, measured.
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <CounterCard label="Refund spike caught before deeper margin loss" target={18} suffix="%" shouldReduceMotion={shouldReduceMotion} />
-            <CounterCard label="Gateway cost increase surfaced for renegotiation" target={22} suffix="%" shouldReduceMotion={shouldReduceMotion} />
-            <CounterCard label="Runway alert window before critical threshold" target={20} suffix="d" shouldReduceMotion={shouldReduceMotion} />
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
-        >
-          <div className="mb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Pricing</p>
-            <h2 className="mt-2 text-[clamp(1.8rem,3.2vw,2.5rem)] font-semibold text-white">
-              Simple, flat pricing
-            </h2>
-          </div>
-          <div className="grid gap-5 lg:grid-cols-3">
-            {pricingPlans.map((plan) => (
-              <motion.article
-                key={plan.name}
-                whileHover={
-                  shouldReduceMotion
-                    ? undefined
-                    : {
-                        y: -4,
-                        scale: 1.015,
-                        boxShadow: "0 24px 46px -30px rgba(0,234,100,0.55)",
-                      }
-                }
-                transition={{ duration: 0.2, ease: easing }}
-                className={`rounded-2xl border px-5 py-5 ${
-                  plan.featured
-                    ? "border-emerald-300/45 bg-emerald-300/[0.12]"
-                    : "border-white/12 bg-[#141925]"
-                }`}
-              >
-                <p className="text-sm font-semibold text-slate-200">{plan.name}</p>
-                <p className="mt-2 text-3xl font-semibold text-white">{plan.price}</p>
-                <p className="mt-3 text-sm leading-relaxed text-slate-300">{plan.description}</p>
-                <div className="mt-5 space-y-2 text-sm text-slate-200">
-                  {plan.points.map((point) => (
-                    <p key={point}>• {point}</p>
-                  ))}
-                </div>
-                <Link href="/get-trail" className="lev-button lev-button--outline mt-6">
-                  Book Demo
-                  <ArrowIcon />
-                </Link>
-              </motion.article>
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={revealInView(shouldReduceMotion)}
           className="mt-20 border-t border-white/10 pt-18"
         >
           <div className="rounded-[30px] border border-white/14 bg-[linear-gradient(135deg,rgba(0,234,100,0.3)_0%,rgba(20,184,166,0.18)_45%,rgba(12,16,24,0.95)_100%)] px-6 py-10 text-center sm:px-9">
@@ -1198,19 +803,21 @@ export function LandingPage() {
                 decisions.
               </p>
             </div>
-            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
-              {footerColumns.map((column) => (
-                <div key={column.title}>
-                  <p className="text-sm font-semibold text-white">{column.title}</p>
-                  <div className="mt-3 space-y-2 text-sm text-slate-300">
-                    {column.links.map((link) => (
-                      <a key={link} href="#" className="block transition hover:text-white">
-                        {link}
-                      </a>
-                    ))}
-                  </div>
+            <div className="grid gap-7 sm:grid-cols-1 lg:grid-cols-1">
+              <div>
+                <p className="text-sm font-semibold text-white">Resources</p>
+                <div className="mt-3 space-y-2 text-sm text-slate-300">
+                  {resourceLinks.map((link) => (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      className="block transition hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
