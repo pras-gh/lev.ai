@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
+import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 
 type FeatureSlide = {
   title: string;
@@ -167,7 +168,7 @@ const integrationFlowLanes = [
 ];
 
 const resourceLinks = [
-  { label: "Pricing", href: "/get-trail" },
+  { label: "Pricing", href: normalizeBookingUrl(siteConfig.calcom30MinUrl) },
   { label: "Help Center", href: "mailto:help@gettrail.ai" },
 ];
 
@@ -320,6 +321,7 @@ function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
 
 export function LandingPage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
+  const calBookingUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -397,10 +399,10 @@ export function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/get-trail" className="lev-button lev-button--dark">
+            <a href={calBookingUrl} className="lev-button lev-button--dark">
               Book Demo
               <ArrowIcon />
-            </Link>
+            </a>
             <button
               type="button"
               onClick={() => setMobileOpen((value) => !value)}
@@ -432,10 +434,10 @@ export function LandingPage() {
                     {link.label}
                   </a>
                 ))}
-                <Link href="/get-trail" onClick={() => setMobileOpen(false)} className="lev-button lev-button--emerald w-fit">
+                <a href={calBookingUrl} onClick={() => setMobileOpen(false)} className="lev-button lev-button--emerald w-fit">
                   Book Demo
                   <ArrowIcon />
-                </Link>
+                </a>
               </div>
             </motion.div>
           ) : null}
@@ -480,10 +482,10 @@ export function LandingPage() {
               variants={heroItem(shouldReduceMotion, 0.45)}
               className="mt-8 flex flex-wrap items-center gap-3"
             >
-              <Link href="/get-trail" className="lev-button lev-button--emerald lev-cta-pulse">
+              <a href={calBookingUrl} className="lev-button lev-button--emerald lev-cta-pulse">
                 get trai\
                 <ArrowIcon />
-              </Link>
+              </a>
             </motion.div>
           </div>
 
@@ -813,10 +815,10 @@ export function LandingPage() {
             <h3 className="text-[clamp(1.9rem,4vw,2.8rem)] font-semibold text-white">Books that never fall</h3>
             <p className="mt-3 text-lg text-slate-100">your 24/7 finance hire</p>
             <div className="mt-7">
-              <Link href="/get-trail" className="lev-button lev-button--light">
+              <a href={calBookingUrl} className="lev-button lev-button--light">
                 book demo
                 <ArrowIcon />
-              </Link>
+              </a>
             </div>
           </div>
         </motion.section>
