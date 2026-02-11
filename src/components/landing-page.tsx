@@ -493,17 +493,6 @@ export function LandingPage() {
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
         <section className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center py-14 sm:py-18">
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: easing }}
-              className="text-center text-[clamp(4rem,16vw,13rem)] font-semibold tracking-[-0.06em] text-white/[0.04]"
-            >
-              INTRODUCING
-            </motion.p>
-          </div>
-
           <div className="relative z-10 mx-auto max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
@@ -521,11 +510,9 @@ export function LandingPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white"
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_26px_rgba(255,255,255,0.2)]"
                   >
-                    <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-                      get trai\
-                    </span>
+                    get trai\
                   </motion.p>
                 ) : (
                   <motion.p
@@ -538,7 +525,7 @@ export function LandingPage() {
                     }
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [transform-style:preserve-3d]"
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_26px_rgba(255,255,255,0.2)] [transform-style:preserve-3d]"
                   >
                     {INTRO_WORD.slice(0, displayIntroCount)}
                     {displayIntroPhase === "typing" ? (
@@ -558,7 +545,7 @@ export function LandingPage() {
               initial="hidden"
               animate="visible"
               variants={heroItem(shouldReduceMotion, 0.15)}
-              className="mx-auto mt-4 max-w-[980px] text-[clamp(2.3rem,6.4vw,4.8rem)] leading-[0.95] font-semibold tracking-[-0.035em] text-white"
+              className="mx-auto mt-4 max-w-[980px] text-[clamp(2.3rem,6.4vw,4.8rem)] leading-[0.95] font-semibold tracking-[-0.035em] text-emerald-300"
             >
               your personal accountant 24/7
             </motion.h1>
