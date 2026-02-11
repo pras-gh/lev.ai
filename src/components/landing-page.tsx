@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import Lenis from "@studio-freight/lenis";
 import { BrandMark } from "@/components/brand-mark";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 
@@ -38,7 +39,17 @@ type FlowItem =
       label: string;
     };
 
+type WalkthroughStep = {
+  id: string;
+  label: string;
+  title: string;
+  description: string;
+  highlights: string[];
+  theme: "risk" | "close" | "answer";
+};
+
 const easing = [0.22, 1, 0.36, 1] as const;
+const easeOutExpo = [0.16, 1, 0.3, 1] as const;
 
 const navLinks = [
   { href: "#features", label: "Features" },
@@ -172,6 +183,36 @@ const resourceLinks = [
   { label: "Help Center", href: "mailto:help@gettrail.ai" },
 ];
 
+const walkthroughSteps: WalkthroughStep[] = [
+  {
+    id: "risk-monitoring",
+    label: "Chapter 01",
+    title: "Risk feed before issues become fires",
+    description:
+      "trai\\ continuously monitors transactions, GST exposure, and runway signals so founders are never surprised late.",
+    highlights: ["GST risk flag in 5 days", "ITC mismatch surfaced early", "Cash runway alert before crunch"],
+    theme: "risk",
+  },
+  {
+    id: "month-close",
+    label: "Chapter 02",
+    title: "Month-close happens in the background",
+    description:
+      "Entries are reconciled throughout the month and statements stay clean, so close-week is review time, not recovery time.",
+    highlights: ["Ledger reconciliation complete", "Expense categorization auto-synced", "Founder-ready statements prepared"],
+    theme: "close",
+  },
+  {
+    id: "instant-answers",
+    label: "Chapter 03",
+    title: "Get operator-grade answers instantly",
+    description:
+      "Ask finance questions in plain language and get context-aware answers grounded in your live books and compliance posture.",
+    highlights: ["Hiring budget with GST impact", "Compliance status summary", "Cash-safe spend recommendation"],
+    theme: "answer",
+  },
+];
+
 const INTRO_WORD = "Introducing";
 type IntroPhase = "typing" | "flip" | "get";
 
@@ -197,13 +238,17 @@ function revealInView(shouldReduceMotion: boolean, delay = 0) {
   return {
     hidden: {
       opacity: 0,
-      y: shouldReduceMotion ? 0 : 20,
+      y: shouldReduceMotion ? 0 : 60,
+      scale: shouldReduceMotion ? 1 : 0.96,
+      filter: shouldReduceMotion ? "blur(0px)" : "blur(12px)",
     },
     visible: {
       opacity: 1,
       y: 0,
+      scale: 1,
+      filter: "blur(0px)",
       transition: {
-        duration: shouldReduceMotion ? 0 : 0.56,
+        duration: shouldReduceMotion ? 0 : 0.88,
         delay: shouldReduceMotion ? 0 : delay,
         ease: easing,
       },
@@ -322,18 +367,122 @@ function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
   );
 }
 
+function WalkthroughDeviceScreen({ step }: { step: WalkthroughStep }) {
+  if (step.theme === "risk") {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-xl border border-amber-300/30 bg-amber-200/10 px-3 py-2 text-[11px] text-amber-100">
+          GST payment due in 5 days • ₹1.2L
+        </div>
+        <div className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-[11px] text-rose-100">
+          Vendor mismatch may block ITC claim
+        </div>
+        <div className="rounded-xl border border-sky-300/30 bg-sky-300/10 px-3 py-2 text-[11px] text-sky-100">
+          Cash runway projected below 20 days next Friday
+        </div>
+      </div>
+    );
+  }
+
+  if (step.theme === "close") {
+    return (
+      <div className="space-y-2.5">
+        {[
+          "Bank and gateway entries reconciled",
+          "Expense rules applied to all new rows",
+          "GSTR-3B draft generated",
+          "P&L and balance sheet ready for review",
+        ].map((item) => (
+          <div key={item} className="flex items-center gap-2 rounded-xl border border-emerald-300/22 bg-emerald-300/10 px-3 py-2">
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-300 text-[10px] font-semibold text-emerald-950">
+              ✓
+            </span>
+            <p className="text-[11px] text-emerald-100">{item}</p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="ml-auto max-w-[78%] rounded-xl border border-white/14 bg-white/8 px-3 py-2 text-[11px] text-slate-200">
+        Can we hire one more engineer next month?
+      </div>
+      <div className="max-w-[84%] rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-[11px] text-emerald-100">
+        Yes. After GST outflow, safe budget is ₹X without reducing runway below 45 days.
+      </div>
+      <div className="ml-auto max-w-[78%] rounded-xl border border-white/14 bg-white/8 px-3 py-2 text-[11px] text-slate-200">
+        Any compliance risk this month?
+      </div>
+      <div className="max-w-[84%] rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-[11px] text-emerald-100">
+        No urgent flags. One vendor ITC mismatch needs follow-up.
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const calBookingUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
+  const walkthroughRef = useRef<HTMLDivElement | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeNotification, setActiveNotification] = useState(0);
   const [isNotificationInteracting, setIsNotificationInteracting] = useState(false);
+  const [walkthroughStepIndex, setWalkthroughStepIndex] = useState(0);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
   const [introCount, setIntroCount] = useState(shouldReduceMotion ? INTRO_WORD.length : 0);
   const displayIntroPhase = shouldReduceMotion ? "get" : introPhase;
   const displayIntroCount = shouldReduceMotion ? INTRO_WORD.length : introCount;
+  const activeWalkthrough = walkthroughSteps[walkthroughStepIndex];
+  const { scrollYProgress: walkthroughProgress } = useScroll({
+    target: walkthroughRef,
+    offset: ["start start", "end end"],
+  });
+  const walkthroughDriftX = useTransform(walkthroughProgress, [0, 1], [-18, 18]);
+  const walkthroughDriftY = useTransform(walkthroughProgress, [0, 1], [-26, 22]);
+  const walkthroughBarWidth = useTransform(walkthroughProgress, [0, 1], ["0%", "100%"]);
+  const walkthroughCardNearX = useTransform(walkthroughProgress, [0, 1], [-28, 28]);
+  const walkthroughCardNearY = useTransform(walkthroughProgress, [0, 1], [14, -14]);
+  const walkthroughCardFarX = useTransform(walkthroughProgress, [0, 1], [24, -24]);
+  const walkthroughCardFarY = useTransform(walkthroughProgress, [0, 1], [-12, 12]);
+
+  useMotionValueEvent(walkthroughProgress, "change", (latest) => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
+    const raw = Math.floor(latest * walkthroughSteps.length);
+    const next = Math.min(walkthroughSteps.length - 1, Math.max(0, raw));
+    setWalkthroughStepIndex((prev) => (prev === next ? prev : next));
+  });
+
+  useEffect(() => {
+    if (shouldReduceMotion) {
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.15,
+      smoothWheel: true,
+      lerp: 0.085,
+    });
+    let rafId = 0;
+
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = window.requestAnimationFrame(raf);
+    };
+
+    rafId = window.requestAnimationFrame(raf);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, [shouldReduceMotion]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -422,7 +571,13 @@ export function LandingPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_9%,rgba(0,234,100,0.07),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(0,234,100,0.04),transparent_34%),linear-gradient(180deg,#0a0c10_0%,#0c0f15_52%,#0a0c10_100%)]" />
+      <div className="lev-noise-overlay pointer-events-none absolute inset-0" />
+      <div className="lev-background-drift pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_9%,rgba(0,234,100,0.07),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(0,234,100,0.04),transparent_34%),linear-gradient(180deg,#0a0c10_0%,#0c0f15_52%,#0a0c10_100%)]" />
+      <motion.div
+        animate={shouldReduceMotion ? undefined : { opacity: [0.18, 0.34, 0.18], scale: [1, 1.06, 1] }}
+        transition={{ duration: 12.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(0,234,100,0.08),transparent_50%)] blur-3xl"
+      />
       <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-28 top-40 h-80 w-80 rounded-full bg-emerald-500/8 blur-3xl" />
 
@@ -493,7 +648,7 @@ export function LandingPage() {
       </header>
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
-        <section className="relative flex min-h-[calc(100vh-8rem)] items-center justify-center py-14 sm:py-18">
+        <section className="lev-story-section relative flex min-h-[calc(100vh-8rem)] items-center justify-center px-6 py-20 sm:px-10 sm:py-24 lg:py-28">
           <div className="relative z-10 mx-auto max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
@@ -511,7 +666,7 @@ export function LandingPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)]"
+                    className="text-[clamp(3.5rem,8.3vw,5.8rem)] leading-[0.88] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)]"
                   >
                     trai\
                   </motion.p>
@@ -526,7 +681,7 @@ export function LandingPage() {
                     }
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)] [transform-style:preserve-3d]"
+                    className="text-[clamp(3.5rem,8.3vw,5.8rem)] leading-[0.88] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)] [transform-style:preserve-3d]"
                   >
                     {INTRO_WORD.slice(0, displayIntroCount)}
                     {displayIntroPhase === "typing" ? (
@@ -545,16 +700,16 @@ export function LandingPage() {
             <motion.h1
               initial="hidden"
               animate="visible"
-              variants={heroItem(shouldReduceMotion, 0.15)}
-              className="mx-auto mt-4 max-w-[980px] text-[clamp(2.3rem,6.4vw,4.8rem)] leading-[0.95] font-semibold tracking-[-0.035em] text-emerald-300"
+              variants={heroItem(shouldReduceMotion, 0.08)}
+              className="mx-auto mt-5 max-w-[980px] text-[clamp(3.5rem,8vw,5rem)] leading-[0.92] font-semibold tracking-[-0.035em] text-slate-300"
             >
-              your personal accountant 24/7
+              your personal accountant <span className="text-emerald-300">24/7</span>
             </motion.h1>
 
             <motion.p
               initial="hidden"
               animate="visible"
-              variants={heroItem(shouldReduceMotion, 0.3)}
+              variants={heroItem(shouldReduceMotion, 0.24)}
               className="mx-auto mt-6 max-w-3xl text-[1.08rem] leading-relaxed text-slate-300 sm:text-[1.16rem]"
             >
               Close your books on time, stay ahead of GST surprises, and get clear answers before
@@ -564,7 +719,7 @@ export function LandingPage() {
             <motion.div
               initial="hidden"
               animate="visible"
-              variants={heroItem(shouldReduceMotion, 0.45)}
+              variants={heroItem(shouldReduceMotion, 0.42)}
               className="mt-10 flex justify-center"
             >
               <a href={calBookingUrl} className="lev-button lev-button--emerald lev-cta-pulse">
@@ -580,7 +735,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-4 border-y border-white/10 py-6"
+          className="lev-story-section mt-36 px-5 py-8 sm:px-8 sm:py-10 lg:px-10"
         >
           <div className="lev-marquee">
             <div className="lev-marquee-track">
@@ -602,13 +757,169 @@ export function LandingPage() {
           </div>
         </motion.section>
 
+        <section ref={walkthroughRef} className="mt-36">
+          <div className="relative lg:h-[250vh]">
+            <div className="lg:sticky lg:top-24 lg:h-[82vh]">
+              <div className="lev-story-section relative h-full overflow-hidden p-4 sm:p-6 lg:p-8">
+                <motion.div
+                  style={{ x: walkthroughDriftX, y: walkthroughDriftY }}
+                  className="pointer-events-none absolute -left-18 top-8 h-64 w-64 rounded-full bg-emerald-400/12 blur-3xl"
+                />
+                <motion.div
+                  style={{ x: walkthroughDriftX, y: walkthroughDriftY }}
+                  className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-cyan-300/8 blur-3xl"
+                />
+
+                <div className="relative z-10 grid h-full gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                  <div className="flex h-full flex-col rounded-[24px] border border-white/12 bg-[#0d1118]/86 p-5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                      Product Walkthrough
+                    </p>
+                    <h3 className="mt-3 text-[clamp(1.65rem,2.8vw,2.6rem)] leading-[1.03] font-semibold text-white">
+                      Scroll through how trai\ runs finance, step by step.
+                    </h3>
+                    <p className="mt-3 max-w-[42ch] text-sm leading-relaxed text-slate-300">
+                      This section is scroll-driven. The frame stays fixed while each chapter changes
+                      like a live product demo.
+                    </p>
+
+                    <div className="mt-6 space-y-2.5">
+                      {walkthroughSteps.map((step, index) => {
+                        const isActive = walkthroughStepIndex === index;
+                        return (
+                          <div
+                            key={step.id}
+                            className={`rounded-xl border px-3 py-2 transition-all duration-300 ${
+                              isActive
+                                ? "border-emerald-300/34 bg-emerald-300/12 text-white"
+                                : "border-white/10 bg-white/5 text-slate-300"
+                            }`}
+                          >
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] opacity-80">
+                              {step.label}
+                            </p>
+                            <p className="mt-1 text-sm font-medium">{step.title}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-auto pt-5">
+                      <div className="h-1 overflow-hidden rounded-full bg-white/10">
+                        <motion.div style={{ width: walkthroughBarWidth }} className="h-full rounded-full bg-emerald-300" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative flex h-full items-center justify-center">
+                    <motion.div
+                      style={{ x: walkthroughCardNearX, y: walkthroughCardNearY }}
+                      className="pointer-events-none absolute -left-1 top-14 hidden xl:block"
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 18, filter: shouldReduceMotion ? "blur(0px)" : "blur(10px)" }}
+                        animate={
+                          shouldReduceMotion
+                            ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                            : { opacity: 1, y: [0, -12, 0], filter: "blur(0px)" }
+                        }
+                        transition={{ duration: shouldReduceMotion ? 0 : 5.2, repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                        className="w-44 rounded-2xl border border-white/16 bg-[#101624]/84 px-3 py-3 shadow-[0_20px_40px_-24px_rgba(0,0,0,0.9)] backdrop-blur-sm"
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">Live Alert</p>
+                        <p className="mt-1 text-[11px] text-slate-200">GST outflow impact mapped before hiring call.</p>
+                      </motion.div>
+                    </motion.div>
+
+                    <motion.div
+                      style={{ x: walkthroughCardFarX, y: walkthroughCardFarY }}
+                      className="pointer-events-none absolute -right-2 bottom-18 hidden xl:block"
+                    >
+                      <motion.div
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 18, filter: shouldReduceMotion ? "blur(0px)" : "blur(10px)" }}
+                        animate={
+                          shouldReduceMotion
+                            ? { opacity: 1, y: 0, filter: "blur(0px)" }
+                            : { opacity: 1, y: [0, -12, 0], filter: "blur(0px)" }
+                        }
+                        transition={{ duration: shouldReduceMotion ? 0 : 4.6, repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                        className="w-48 rounded-2xl border border-white/16 bg-[#101624]/84 px-3 py-3 shadow-[0_20px_40px_-24px_rgba(0,0,0,0.9)] backdrop-blur-sm"
+                      >
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-200">Close Status</p>
+                        <p className="mt-1 text-[11px] text-slate-200">Statements ready without month-end scramble.</p>
+                      </motion.div>
+                    </motion.div>
+
+                    <div className="w-full max-w-[620px] rounded-[28px] border border-white/14 bg-[#090d14]/92 p-4 shadow-[0_42px_78px_-46px_rgba(0,0,0,0.95)] sm:p-5">
+                      <div className="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-2.5 w-2.5 rounded-full bg-rose-300/80" />
+                          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+                          <span className="h-2.5 w-2.5 rounded-full bg-emerald-300/80" />
+                        </div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                          trai\ live frame
+                        </p>
+                      </div>
+
+                      <div className="rounded-[22px] border border-white/12 bg-[linear-gradient(180deg,#121722_0%,#0d121b_52%,#0b0f15_100%)] p-4 sm:p-5">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={activeWalkthrough.id}
+                            initial={{
+                              opacity: 0,
+                              y: shouldReduceMotion ? 0 : 34,
+                              scale: shouldReduceMotion ? 1 : 0.98,
+                              filter: shouldReduceMotion ? "blur(0px)" : "blur(8px)",
+                            }}
+                            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                            exit={{
+                              opacity: 0,
+                              y: shouldReduceMotion ? 0 : -16,
+                              scale: shouldReduceMotion ? 1 : 0.98,
+                              filter: shouldReduceMotion ? "blur(0px)" : "blur(8px)",
+                            }}
+                            transition={{ duration: shouldReduceMotion ? 0 : 0.98, ease: easeOutExpo }}
+                            className="min-h-[390px] space-y-4"
+                          >
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                              {activeWalkthrough.label}
+                            </p>
+                            <h4 className="text-2xl leading-tight font-semibold text-white">{activeWalkthrough.title}</h4>
+                            <p className="max-w-[54ch] text-sm leading-relaxed text-slate-300">
+                              {activeWalkthrough.description}
+                            </p>
+
+                            <WalkthroughDeviceScreen step={activeWalkthrough} />
+
+                            <div className="grid gap-2 pt-2 sm:grid-cols-3">
+                              {activeWalkthrough.highlights.map((item) => (
+                                <div
+                                  key={item}
+                                  className="rounded-xl border border-white/12 bg-white/10 px-3 py-2 text-[11px] text-slate-200"
+                                >
+                                  {item}
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <motion.section
           id="features"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="lev-story-section mt-36 p-8 sm:p-10 lg:p-14"
         >
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
@@ -699,7 +1010,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="lev-story-section mt-36 p-8 sm:p-10 lg:p-14"
         >
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
@@ -849,7 +1160,7 @@ export function LandingPage() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           variants={revealInView(shouldReduceMotion)}
-          className="mt-20 border-t border-white/10 pt-18"
+          className="lev-story-section mt-36 p-8 sm:p-10 lg:p-14"
         >
           <div className="rounded-[30px] border border-white/14 bg-[linear-gradient(135deg,rgba(0,234,100,0.3)_0%,rgba(20,184,166,0.18)_45%,rgba(12,16,24,0.95)_100%)] px-6 py-10 text-center sm:px-9">
             <h3 className="text-[clamp(1.9rem,4vw,2.8rem)] font-semibold text-white">Books that never fall</h3>
@@ -863,7 +1174,7 @@ export function LandingPage() {
           </div>
         </motion.section>
 
-        <footer className="mt-20 border-t border-white/10 pt-12">
+        <footer className="mt-36 border-t border-white/10 pt-14">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
               <BrandMark className="text-[1.3rem]" />

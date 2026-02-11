@@ -24,11 +24,39 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 16% 9%, rgba(0, 234, 100, 0.055), transparent 38%),
-    radial-gradient(circle at 82% 12%, rgba(0, 234, 100, 0.04), transparent 34%),
-    linear-gradient(180deg, #0a0c10 0%, #0d1017 52%, #0a0c10 100%);
+    radial-gradient(circle at 15% 8%, rgba(0, 234, 100, 0.08), transparent 34%),
+    radial-gradient(circle at 86% 16%, rgba(0, 234, 100, 0.06), transparent 38%),
+    linear-gradient(180deg, #06070a 0%, #07090d 52%, #06070a 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
+  position: relative;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lev-noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.2;
+}
+
+.lev-background-drift {
+  background-size: 160% 160%, 170% 170%, 100% 100%;
+  background-position: 18% 10%, 82% 16%, 50% 0%;
+  animation: levGradientDrift 14s ease-in-out infinite;
+  will-change: background-position;
 }
 
 h1,
@@ -58,8 +86,20 @@ img {
 }
 
 .glass-panel {
-  background: linear-gradient(158deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
-  backdrop-filter: blur(8px);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(12px);
+}
+
+.lev-story-section {
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 234, 100, 0.09), transparent 40%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow:
+    0 24px 60px -42px rgba(0, 0, 0, 0.85),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  backdrop-filter: blur(12px);
 }
 
 .lev-highlight {
@@ -86,6 +126,7 @@ img {
 
 .lev-button {
   align-items: center;
+  border: 1px solid transparent;
   border-radius: 999px;
   display: inline-flex;
   font-size: 0.875rem;
@@ -95,25 +136,29 @@ img {
   padding: 0.82rem 1.2rem;
   text-decoration: none;
   transition:
-    transform 0.24s ease,
-    box-shadow 0.24s ease,
-    background 0.24s ease,
-    border-color 0.24s ease;
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lev-button:hover {
-  transform: translateY(-1px) scale(1.01);
+  transform: translateY(-1px) scale(1.03);
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 14px 32px -22px rgba(255, 255, 255, 0.36);
 }
 
 .lev-button--emerald {
-  background: linear-gradient(130deg, #00ea64 0%, #1cd67a 100%);
-  border: 1px solid rgba(0, 234, 100, 0.35);
+  background: linear-gradient(130deg, #00ea64 0%, #16d978 100%);
+  border: 1px solid rgba(0, 234, 100, 0.4);
   color: #03150a;
-  box-shadow: 0 15px 32px -18px rgba(0, 234, 100, 0.75);
+  box-shadow: 0 14px 30px -18px rgba(0, 234, 100, 0.62);
 }
 
 .lev-button--emerald:hover {
-  box-shadow: 0 20px 42px -20px rgba(0, 234, 100, 0.92);
+  box-shadow:
+    0 20px 42px -20px rgba(0, 234, 100, 0.84),
+    0 0 0 1px rgba(0, 234, 100, 0.24) inset;
 }
 
 .lev-button--dark {
@@ -124,6 +169,7 @@ img {
 
 .lev-button--dark:hover {
   background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.46);
 }
 
 .lev-button--outline {
@@ -145,6 +191,8 @@ img {
 
 .lev-button--light:hover {
   background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 20px 42px -26px rgba(255, 255, 255, 0.68);
 }
 
 .lev-cta-pulse {
@@ -188,6 +236,18 @@ img {
     box-shadow:
       0 20px 44px -18px rgba(0, 234, 100, 0.9),
       0 0 0 10px rgba(0, 234, 100, 0);
+  }
+}
+
+@keyframes levGradientDrift {
+  0% {
+    background-position: 18% 10%, 82% 16%, 50% 0%;
+  }
+  50% {
+    background-position: 42% 24%, 60% 34%, 50% 42%;
+  }
+  100% {
+    background-position: 74% 12%, 24% 38%, 50% 100%;
   }
 }
 
