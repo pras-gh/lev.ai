@@ -329,6 +329,7 @@ export function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeNotification, setActiveNotification] = useState(0);
+  const [isNotificationInteracting, setIsNotificationInteracting] = useState(false);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
   const [introCount, setIntroCount] = useState(shouldReduceMotion ? INTRO_WORD.length : 0);
   const displayIntroPhase = shouldReduceMotion ? "get" : introPhase;
@@ -406,7 +407,7 @@ export function LandingPage() {
   }, [shouldReduceMotion]);
 
   useEffect(() => {
-    if (shouldReduceMotion) {
+    if (shouldReduceMotion || isNotificationInteracting) {
       return;
     }
 
@@ -417,7 +418,7 @@ export function LandingPage() {
     return () => {
       window.clearInterval(interval);
     };
-  }, [shouldReduceMotion]);
+  }, [isNotificationInteracting, shouldReduceMotion]);
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
@@ -510,9 +511,9 @@ export function LandingPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_26px_rgba(255,255,255,0.2)]"
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)]"
                   >
-                    get trai\
+                    trai\
                   </motion.p>
                 ) : (
                   <motion.p
@@ -525,7 +526,7 @@ export function LandingPage() {
                     }
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
-                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_26px_rgba(255,255,255,0.2)] [transform-style:preserve-3d]"
+                    className="text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] text-white [text-shadow:0_0_34px_rgba(255,255,255,0.34)] [transform-style:preserve-3d]"
                   >
                     {INTRO_WORD.slice(0, displayIntroCount)}
                     {displayIntroPhase === "typing" ? (
@@ -790,14 +791,17 @@ export function LandingPage() {
                       </span>
                     </div>
 
-                    <div className="h-[360px] space-y-2 overflow-y-auto pr-1">
+                    <div
+                      className="h-[360px] space-y-2 overflow-y-auto pr-1"
+                      onMouseEnter={() => setIsNotificationInteracting(true)}
+                      onMouseLeave={() => setIsNotificationInteracting(false)}
+                    >
                       {levNotifications.map((notice, index) => {
                         const isActive = activeNotification === index;
 
                         return (
                           <motion.button
                             key={notice.id}
-                            layout
                             type="button"
                             animate={{
                               opacity: isActive ? 1 : 0.58,
@@ -807,11 +811,10 @@ export function LandingPage() {
                               duration: shouldReduceMotion ? 0 : 0.22,
                               ease: easing,
                             }}
-                            onMouseMove={() => setActiveNotification(index)}
                             onMouseEnter={() => setActiveNotification(index)}
                             onFocus={() => setActiveNotification(index)}
                             onClick={() => setActiveNotification(index)}
-                            className={`w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
+                            className={`w-full transform-gpu rounded-2xl border px-3 py-3 text-left transition-colors duration-200 [will-change:transform,opacity] ${
                               isActive
                                 ? "border-white/28 bg-white/24 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.34)]"
                                 : "border-white/10 bg-white/10"
