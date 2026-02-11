@@ -113,7 +113,7 @@ export function BookDemoPage() {
             variants={fadeUp(shouldReduceMotion)}
             className="glass-panel rounded-[24px] border border-white/12 p-6"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Founder</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Co-Founder</p>
             <div className="mt-3 flex items-center justify-between gap-4">
               <div>
                 <p className="text-xl font-semibold text-white">{siteConfig.founderName}</p>

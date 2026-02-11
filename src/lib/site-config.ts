@@ -12,7 +12,7 @@ const CALCOM_15MIN_URL = cleanRawUrl(process.env.NEXT_PUBLIC_CALCOM_15MIN_URL ??
 export const siteConfig = {
   productName: "trai\\",
   founderName: "Prasoon Pathak",
-  founderRole: "Founder, trai\\",
+  founderRole: "Co-Founder, trai\\",
   founderLinkedInUrl:
     process.env.NEXT_PUBLIC_FOUNDER_LINKEDIN_URL ??
     "https://www.linkedin.com/in/prasoonpathak",
