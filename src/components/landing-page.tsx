@@ -884,14 +884,6 @@ export function LandingPage() {
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-5 text-sm text-slate-400">
             <p>© 2026 trai\</p>
-            <div className="flex items-center gap-5">
-              <a href="#" className="transition hover:text-white">
-                Privacy Policy
-              </a>
-              <a href="#" className="transition hover:text-white">
-                Terms
-              </a>
-            </div>
             <div className="flex items-center gap-3">
               <a href="#" className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:text-white">
                 <SocialIcon kind="x" />
