@@ -368,20 +368,20 @@ export function LandingPage() {
           timeouts.push(
             window.setTimeout(() => {
               setIntroPhase("flip");
-            }, 240)
+            }, 420)
           );
           timeouts.push(
             window.setTimeout(() => {
               setIntroPhase("get");
-            }, 560)
+            }, 1000)
           );
           timeouts.push(
             window.setTimeout(() => {
               runCycle();
-            }, 3200)
+            }, 4700)
           );
         }
-      }, 72);
+      }, 150);
     };
 
     runCycle();
@@ -493,8 +493,8 @@ export function LandingPage() {
       </header>
 
       <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
-        <section className="lev-hero-deep relative flex min-h-[calc(100vh-8rem)] items-center justify-center px-6 py-14 sm:px-10 sm:py-18">
-          <div className="relative z-10 mx-auto max-w-[1040px] text-center">
+        <section className="lev-hero-deep relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] flex min-h-[calc(100vh-8rem)] w-screen items-center justify-center px-6 py-14 sm:px-8 sm:py-18">
+          <div className="relative z-10 mx-auto w-full max-w-[1040px] text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
                 <StarIcon />
