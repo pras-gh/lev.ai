@@ -352,39 +352,31 @@ export function LandingPage() {
     }
 
     const timeouts: number[] = [];
-    let typeInterval = 0;
+    timeouts.push(
+      window.setTimeout(() => {
+        setIntroPhase("typing");
+        setIntroCount(0);
+      }, 0)
+    );
+    let localCount = 0;
+    const typeInterval = window.setInterval(() => {
+      localCount += 1;
+      setIntroCount(localCount);
 
-    const runCycle = () => {
-      setIntroPhase("typing");
-      setIntroCount(0);
-
-      let localCount = 0;
-      typeInterval = window.setInterval(() => {
-        localCount += 1;
-        setIntroCount(localCount);
-
-        if (localCount >= INTRO_WORD.length) {
-          window.clearInterval(typeInterval);
-          timeouts.push(
-            window.setTimeout(() => {
-              setIntroPhase("flip");
-            }, 420)
-          );
-          timeouts.push(
-            window.setTimeout(() => {
-              setIntroPhase("get");
-            }, 1000)
-          );
-          timeouts.push(
-            window.setTimeout(() => {
-              runCycle();
-            }, 4700)
-          );
-        }
-      }, 150);
-    };
-
-    runCycle();
+      if (localCount >= INTRO_WORD.length) {
+        window.clearInterval(typeInterval);
+        timeouts.push(
+          window.setTimeout(() => {
+            setIntroPhase("flip");
+          }, 520)
+        );
+        timeouts.push(
+          window.setTimeout(() => {
+            setIntroPhase("get");
+          }, 1220)
+        );
+      }
+    }, 150);
 
     return () => {
       window.clearInterval(typeInterval);
@@ -422,9 +414,7 @@ export function LandingPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_9%,rgba(0,234,100,0.07),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(0,234,100,0.04),transparent_34%),linear-gradient(180deg,#0a0c10_0%,#0c0f15_52%,#0a0c10_100%)]" />
-      <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-28 top-40 h-80 w-80 rounded-full bg-emerald-500/8 blur-3xl" />
+      <div className="lev-page-backdrop pointer-events-none absolute inset-0" />
 
       <header
         className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
@@ -510,7 +500,7 @@ export function LandingPage() {
                     initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 14, scale: shouldReduceMotion ? 1 : 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -12 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: easing }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.56, ease: easing }}
                     className="lev-torch-text text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em]"
                   >
                     trai\
@@ -525,7 +515,7 @@ export function LandingPage() {
                         : { opacity: 1, y: 0, rotateX: 0 }
                     }
                     exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : 0.4, ease: easing }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.52, ease: easing }}
                     className="lev-torch-text text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em] [transform-style:preserve-3d]"
                   >
                     {INTRO_WORD.slice(0, displayIntroCount)}
