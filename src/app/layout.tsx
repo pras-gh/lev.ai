@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body className="antialiased">
         <OrangeCursor />
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
