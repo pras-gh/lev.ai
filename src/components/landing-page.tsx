@@ -877,10 +877,6 @@ export function LandingPage() {
               <div>
                 <p className="text-sm font-semibold text-white">Connect</p>
                 <div className="mt-3 flex flex-col gap-2 text-sm text-slate-300">
-                  <a href={calBookingUrl} className="inline-flex items-center gap-2 transition hover:text-white">
-                    Book Demo
-                    <ArrowIcon />
-                  </a>
                   <a
                     href="https://twitter.com/heytrail"
                     target="_blank"
