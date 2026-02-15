@@ -261,7 +261,7 @@ function GmailIcon() {
   );
 }
 
-function SocialIcon({ kind }: { kind: "x" | "linkedin" | "github" }) {
+function SocialIcon({ kind }: { kind: "x" | "linkedin" }) {
   if (kind === "x") {
     return (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
@@ -278,11 +278,6 @@ function SocialIcon({ kind }: { kind: "x" | "linkedin" | "github" }) {
     );
   }
 
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-4 w-4">
-      <path d="M12 3.8a8.5 8.5 0 0 0-2.7 16.6v-2.8c-2.3.5-2.8-1-2.8-1-.4-.9-.9-1.2-.9-1.2-.8-.5 0-.5 0-.5.8 0 1.3.9 1.3.9.8 1.3 2 1 2.4.8.1-.5.3-.9.5-1.1-1.9-.2-3.8-1-3.8-4.2 0-1 .4-1.8 1-2.4-.1-.2-.4-1.1.1-2.2 0 0 .8-.3 2.6 1a8.8 8.8 0 0 1 4.8 0c1.8-1.3 2.6-1 2.6-1 .5 1.1.2 2 .1 2.2.6.6 1 1.4 1 2.4 0 3.2-2 4-3.8 4.2.3.2.6.8.6 1.6v2.4A8.5 8.5 0 0 0 12 3.8Z" fill="currentColor" />
-    </svg>
-  );
 }
 
 function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
@@ -864,7 +859,7 @@ export function LandingPage() {
                 decisions.
               </p>
             </div>
-            <div className="grid gap-7 sm:grid-cols-1 lg:grid-cols-1">
+            <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-2">
               <div>
                 <p className="text-sm font-semibold text-white">Resources</p>
                 <div className="mt-3 space-y-2 text-sm text-slate-300">
@@ -879,19 +874,38 @@ export function LandingPage() {
                   ))}
                 </div>
               </div>
+              <div>
+                <p className="text-sm font-semibold text-white">Connect</p>
+                <div className="mt-3 flex flex-col gap-2 text-sm text-slate-300">
+                  <a href={calBookingUrl} className="inline-flex items-center gap-2 transition hover:text-white">
+                    Book Demo
+                    <ArrowIcon />
+                  </a>
+                  <a
+                    href="https://twitter.com/heytrail"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 transition hover:text-white"
+                  >
+                    <SocialIcon kind="x" />
+                    X
+                  </a>
+                  <a
+                    href="https://linkedin.com/company/get-trail/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 transition hover:text-white"
+                  >
+                    <SocialIcon kind="linkedin" />
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-5 text-sm text-slate-400">
             <p>© 2026 trai\</p>
-            <div className="flex items-center gap-3">
-              <a href="https://twitter.com/heytrail" className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:text-white">
-                <SocialIcon kind="x" />
-              </a>
-              <a href="#" className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/5 text-slate-300 transition hover:text-white">
-                <SocialIcon kind="linkedin" />
-              </a>
-            </div>
           </div>
         </footer>
       </main>
