@@ -1,12 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="trai logo">
-  <defs>
-    <linearGradient id="trailGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0b0d11" />
-      <stop offset="100%" stop-color="#141922" />
-    </linearGradient>
-  </defs>
-  <rect width="128" height="128" rx="26" fill="url(#trailGlow)" />
-  <path d="M44 39v37.8c0 3.4 2.6 6.2 6 6.2h8.5" stroke="#F6FAFF" stroke-width="8.2" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M66 83V45.2c0-3.4 2.6-6.2 6-6.2h5" stroke="#F6FAFF" stroke-width="8.2" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M89 41.5 72.5 86.5" stroke="#00EA64" stroke-width="8" stroke-linecap="round" />
+  <rect width="128" height="128" rx="22" fill="#020203" />
+  <text
+    x="10"
+    y="92"
+    fill="#F3F4F6"
+    font-family="Inter, Avenir Next, Segoe UI, sans-serif"
+    font-size="70"
+    font-weight="500"
+    letter-spacing="-3"
+  >
+    trai\
+  </text>
 </svg>
