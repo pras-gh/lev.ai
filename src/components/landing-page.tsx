@@ -605,10 +605,10 @@ export function LandingPage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
-                About trail\
+                About trai\
               </p>
               <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-                trail\ gives you real time audit ready book, with flat pricing
+                trai\ gives you modern accounting with real time audit ready book and more
               </h2>
               <p className="mt-3 text-sm font-medium text-emerald-200">Simple, flat pricing.</p>
             </div>
