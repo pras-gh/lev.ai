@@ -4,20 +4,20 @@ type BrandMarkProps = {
 };
 
 export function BrandMark({ className = "", compact = false }: BrandMarkProps) {
-  const iconClass = compact ? "h-[0.9em] w-[0.68em]" : "h-[1.02em] w-[0.76em]";
+  const iconClass = compact ? "h-[0.92em] w-[0.86em]" : "h-[1.04em] w-[0.98em]";
 
   return (
     <span
       className={`inline-flex items-center gap-[0.34em] tracking-[-0.03em] text-white ${className}`}
       style={{ fontWeight: 560 }}
     >
-      <svg viewBox="0 0 48 64" aria-hidden="true" className={`${iconClass} translate-y-[0.02em] text-white/92`}>
+      <svg viewBox="0 0 84 84" aria-hidden="true" className={`${iconClass} translate-y-[0.01em] text-white/92`}>
         <path
-          d="M9.3 59.6 20.4 8.7c.4-2 2.2-3.4 4.3-3.4h2.6c2.2 0 3.8 2 3.3 4.1L18.8 56.7a3.7 3.7 0 0 1-3.6 2.9H9.3Z"
+          d="M7.6 76h9.5a8.4 8.4 0 0 0 8.1-6.4l9.2-36.6-8.6-16.7L5.1 64.3C2.8 69.8 6.8 76 12.8 76H7.6Z"
           fill="currentColor"
         />
         <path
-          d="M21.9 4.4h10.3c1.8 0 3.4 1 4.2 2.7l16.3 35c1.1 2.4-.6 5-3.2 5H39.4a4.4 4.4 0 0 1-4-2.5L18.2 9.1a3.4 3.4 0 0 1 3.7-4.7Z"
+          d="M27.8 9.8h12.7a8.4 8.4 0 0 1 7.5 4.6l30 56.3c2.1 4-0.8 8.9-5.4 8.9H61.7a9 9 0 0 1-8-4.9l-30.7-58.8c-2.1-4 .8-8.9 4.8-8.9Z"
           fill="currentColor"
         />
       </svg>

@@ -6,22 +6,8 @@
     </radialGradient>
   </defs>
   <rect width="256" height="256" rx="28" fill="url(#bg)" />
-
-  <g fill="#F3F4F6">
-    <path d="M26.5 198.4 58 64.8a8.8 8.8 0 0 1 8.5-6.8h6.8c5.2 0 8.8 5 7.6 10L47.7 191.7a9.4 9.4 0 0 1-9 6.7H26.5Z" />
-    <path d="M73.5 54h22.7c4.8 0 9.1 2.7 11.1 7L152 153.6c3.7 7.7-1.8 16.4-10.4 16.4h-21.5a11.5 11.5 0 0 1-10.5-6.5L65.2 75.8C62.1 68.6 67.4 61 75 61Z" />
+  <g transform="translate(20 18) scale(2.55)" fill="#F3F4F6">
+    <path d="M7.6 76h9.5a8.4 8.4 0 0 0 8.1-6.4l9.2-36.6-8.6-16.7L5.1 64.3C2.8 69.8 6.8 76 12.8 76H7.6Z" />
+    <path d="M27.8 9.8h12.7a8.4 8.4 0 0 1 7.5 4.6l30 56.3c2.1 4-0.8 8.9-5.4 8.9H61.7a9 9 0 0 1-8-4.9l-30.7-58.8c-2.1-4 .8-8.9 4.8-8.9Z" />
   </g>
-
-  <text
-    x="156"
-    y="154"
-    text-anchor="middle"
-    fill="#F3F4F6"
-    font-family="Inter, Avenir Next, Segoe UI, sans-serif"
-    font-size="48"
-    font-weight="500"
-    letter-spacing="-1.8"
-  >
-    Accrual
-  </text>
 </svg>
