@@ -10,9 +10,9 @@ const CALCOM_30MIN_URL = cleanRawUrl(
 const CALCOM_15MIN_URL = cleanRawUrl(process.env.NEXT_PUBLIC_CALCOM_15MIN_URL ?? "");
 
 export const siteConfig = {
-  productName: "trai\\",
+  productName: "accrua\\",
   founderName: "Prasoon Pathak",
-  founderRole: "Co-Founder, trai\\",
+  founderRole: "Co-Founder, accrua\\",
   founderLinkedInUrl:
     process.env.NEXT_PUBLIC_FOUNDER_LINKEDIN_URL ??
     "https://www.linkedin.com/in/prasoonpathak",

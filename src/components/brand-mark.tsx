@@ -11,7 +11,7 @@ export function BrandMark({ className = "", compact = false }: BrandMarkProps) {
       className={`inline-flex items-baseline lowercase tracking-[-0.04em] text-white ${className}`}
       style={{ fontWeight: 560 }}
     >
-      trai
+      accrua
       <span className={spacingClass} aria-hidden>
         {"\\"}
       </span>
