@@ -4,36 +4,36 @@ import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
 const SITE_URL = "https://www.usetrail.in";
-const SITE_TITLE = "accrua\\ | AI Accounting for SMBs";
+const SITE_TITLE = "Accrual | AI Accounting for SMBs";
 const SITE_DESCRIPTION =
-  "accrua\\ acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.";
+  "Accrual acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  applicationName: "accrua\\",
+  applicationName: "Accrual",
   alternates: {
     canonical: "/",
   },
   icons: {
     icon: [
-      { url: "/accrua-favicon.svg", type: "image/svg+xml" },
+      { url: "/accrual-favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico" },
     ],
-    shortcut: ["/accrua-favicon.svg"],
-    apple: [{ url: "/accrua-favicon.svg", type: "image/svg+xml" }],
+    shortcut: ["/accrual-favicon.svg"],
+    apple: [{ url: "/accrual-favicon.svg", type: "image/svg+xml" }],
   },
   openGraph: {
     type: "website",
     url: SITE_URL,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    siteName: "accrua\\",
+    siteName: "Accrual",
     images: [
       {
-        url: "/accrua-favicon.svg",
-        alt: "accrua\\ logo",
+        url: "/accrual-favicon.svg",
+        alt: "Accrual logo",
       },
     ],
   },
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/accrua-favicon.svg"],
+    images: ["/accrual-favicon.svg"],
   },
 };
 
