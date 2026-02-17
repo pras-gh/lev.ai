@@ -6,8 +6,8 @@
     </radialGradient>
   </defs>
   <rect width="256" height="256" rx="28" fill="url(#bg)" />
-  <g transform="translate(20 18) scale(2.55)" fill="#F3F4F6">
-    <path d="M7.6 76h9.5a8.4 8.4 0 0 0 8.1-6.4l9.2-36.6-8.6-16.7L5.1 64.3C2.8 69.8 6.8 76 12.8 76H7.6Z" />
-    <path d="M27.8 9.8h12.7a8.4 8.4 0 0 1 7.5 4.6l30 56.3c2.1 4-0.8 8.9-5.4 8.9H61.7a9 9 0 0 1-8-4.9l-30.7-58.8c-2.1-4 .8-8.9 4.8-8.9Z" />
+  <g transform="translate(16 16)" stroke="#F3F4F6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M70 194 108 60" stroke-width="22" />
+    <path d="M122 48 200 198" stroke-width="24" />
   </g>
 </svg>

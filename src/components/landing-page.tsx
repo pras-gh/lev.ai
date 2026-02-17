@@ -691,7 +691,7 @@ export function LandingPage() {
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-              Everything flows through <BrandMark compact />
+              Everything flows through Accrual
             </h2>
           </div>
 
