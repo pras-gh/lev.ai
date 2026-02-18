@@ -4,36 +4,36 @@ import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
 const SITE_URL = "https://www.usetrail.in";
-const SITE_TITLE = "Accrual | AI Accounting for SMBs";
+const SITE_TITLE = "trai\\ | AI Accounting for SMBs";
 const SITE_DESCRIPTION =
-  "Accrual acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.";
+  "trai\\ acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  applicationName: "Accrual",
+  applicationName: "trai\\",
   alternates: {
     canonical: "/",
   },
   icons: {
     icon: [
-      { url: "/accrual-favicon.svg", type: "image/svg+xml" },
+      { url: "/trai-favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico" },
     ],
-    shortcut: ["/accrual-favicon.svg"],
-    apple: [{ url: "/accrual-favicon.svg", type: "image/svg+xml" }],
+    shortcut: ["/trai-favicon.svg"],
+    apple: [{ url: "/trai-favicon.svg", type: "image/svg+xml" }],
   },
   openGraph: {
     type: "website",
     url: SITE_URL,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    siteName: "Accrual",
+    siteName: "trai\\",
     images: [
       {
-        url: "/accrual-favicon.svg",
-        alt: "Accrual logo",
+        url: "/trai-favicon.svg",
+        alt: "trai\\ logo",
       },
     ],
   },
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/accrual-favicon.svg"],
+    images: ["/trai-favicon.svg"],
   },
 };
 

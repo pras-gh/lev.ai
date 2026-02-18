@@ -51,7 +51,7 @@ const chatSimulation = [
     message: "Can we afford to hire next month?",
   },
   {
-    role: "Accrual",
+    role: "trai\\",
     message: "Yes, but GST outflow of Rs 1.1L will reduce free cash. Safe hiring budget: Rs X.",
   },
   {
@@ -59,26 +59,26 @@ const chatSimulation = [
     message: "Do we need to worry about compliance this month?",
   },
   {
-    role: "Accrual",
+    role: "trai\\",
     message: "No urgent risks. ITC mismatch flagged for one vendor.",
   },
 ] as const;
 
 const featureSlides: FeatureSlide[] = [
   {
-    title: "Accrual keeps books clean in real time",
+    title: "trai\\ keeps books clean in real time",
     description:
       "Instead of month-end scramble, entries are categorized and reconciled continuously.",
     points: ["Live reconciliation", "Auto-clean ledger", "Month-close readiness"],
   },
   {
-    title: "Accrual flags GST and cash risk before deadlines",
+    title: "trai\\ flags GST and cash risk before deadlines",
     description:
       "You get early warning on GST dues, ITC mismatches, and cash runway pressure.",
     points: ["GST due alerts", "ITC mismatch checks", "Cash runway warnings"],
   },
   {
-    title: "Accrual answer instantly",
+    title: "trai\\ answer instantly",
     description:
       "Ask financing, hiring, and compliance questions and get direct answer context.",
     points: ["Hiring affordability", "Compliance confidence", "Cash-safe budgets"],
@@ -121,22 +121,22 @@ const levNotifications: LevNotification[] = [
 const callouts: Callout[] = [
   {
     title: "Always-on reconciliation",
-    description: "Accrual cleans entries and keeps books audit-ready all month.",
+    description: "trai\\ cleans entries and keeps books audit-ready all month.",
     glyph: "ledger",
   },
   {
     title: "Proactive GST intelligence",
-    description: "Accrual catches filing risk and ITC mismatches before deadline pain.",
+    description: "trai\\ catches filing risk and ITC mismatches before deadline pain.",
     glyph: "shield",
   },
   {
     title: "Cash-aware decision support",
-    description: "Accrual turns inflows, outflows, and runway into practical decisions.",
+    description: "trai\\ turns inflows, outflows, and runway into practical decisions.",
     glyph: "cash",
   },
   {
     title: "Close-ready statements",
-    description: "Accrual delivers founder-ready statements without month-end scramble.",
+    description: "trai\\ delivers founder-ready statements without month-end scramble.",
     glyph: "statement",
   },
 ];
@@ -419,7 +419,7 @@ export function LandingPage() {
         }`}
       >
         <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">
-          <Link href="/" aria-label="Accrual home">
+          <Link href="/" aria-label="trai\\ home">
             <BrandMark className="text-[1.1rem] font-semibold" />
           </Link>
 
@@ -498,7 +498,7 @@ export function LandingPage() {
                     transition={{ duration: shouldReduceMotion ? 0 : 0.56, ease: easing }}
                     className="lev-torch-text text-[clamp(2.4rem,7.6vw,5.4rem)] leading-[0.9] font-semibold tracking-[-0.04em]"
                   >
-                    Accrual
+                    trai\
                   </motion.p>
                 ) : (
                   <motion.p
@@ -555,7 +555,7 @@ export function LandingPage() {
               className="mt-10 flex justify-center"
             >
               <a href={calBookingUrl} className="lev-button lev-button--hero-dark lev-cta-pulse">
-                get Accrual
+                get trai\
                 <ArrowIcon />
               </a>
             </motion.div>
@@ -600,10 +600,10 @@ export function LandingPage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
-                About Accrual
+                About trai\
               </p>
               <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-                Accrual gives you modern accounting with real time audit ready book and more
+                trai\ gives you modern accounting with real time audit ready book and more
               </h2>
               <p className="mt-3 text-sm font-medium text-emerald-200">Simple, flat pricing.</p>
             </div>
@@ -653,7 +653,7 @@ export function LandingPage() {
               className="glass-panel rounded-[26px] border border-white/12 p-5"
             >
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
-                Accrual answer instantly.
+                trai\ answer instantly.
               </p>
               <div className="mt-4 space-y-3">
                 {chatSimulation.map((entry, index) => (
@@ -670,7 +670,7 @@ export function LandingPage() {
                     }`}
                   >
                     <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] opacity-70">
-                      {entry.role === "you" ? "You" : "Accrual"}
+                      {entry.role === "you" ? "You" : "trai\\"}
                     </p>
                     {entry.message}
                   </motion.div>
@@ -691,7 +691,7 @@ export function LandingPage() {
           <div className="mb-6 max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Integrations</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-              Everything flows through Accrual
+              Everything flows through trai\
             </h2>
           </div>
 
@@ -702,7 +702,7 @@ export function LandingPage() {
                 <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/70 to-transparent" />
                 <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/70 to-transparent" />
                 <div className="absolute right-4 top-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                  Accrual processing
+                  trai\ processing
                 </div>
 
                 {integrationFlowItems.map((item, index) => {
@@ -774,7 +774,7 @@ export function LandingPage() {
                     <div className="mb-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-100">
                       <span className="inline-flex items-center gap-1.5">
                         <GmailIcon />
-                        Notification Bar • Gmail • Accrual
+                        Notification Bar • Gmail • trai\
                       </span>
                     </div>
 
@@ -813,7 +813,7 @@ export function LandingPage() {
                               </span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
-                                  <p className="text-[11px] font-medium text-slate-200">Gmail • Accrual</p>
+                                  <p className="text-[11px] font-medium text-slate-200">Gmail • trai\</p>
                                   <p className="text-[10px] font-medium text-slate-400">now</p>
                                 </div>
                                 <p className="truncate text-[12px] font-semibold text-white">{notice.title}</p>
@@ -901,7 +901,7 @@ export function LandingPage() {
           </div>
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-5 text-sm text-slate-400">
-            <p>© 2026 Accrual</p>
+            <p>© 2026 trai\</p>
           </div>
         </footer>
       </main>
