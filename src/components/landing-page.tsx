@@ -545,7 +545,7 @@ export function LandingPage() {
               className="mx-auto mt-6 max-w-3xl text-[1.08rem] leading-relaxed text-slate-300 sm:text-[1.16rem]"
             >
               Close your books on time, stay ahead of GST surprises, and get clear answers before
-              you question.
+              you even ask.
             </motion.p>
 
             <motion.div
