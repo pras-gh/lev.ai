@@ -755,7 +755,7 @@ export function LandingPage() {
                   className="relative w-full max-w-[332px] rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
                 >
                   <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
-                  <div className="rounded-[28px] border border-white/10 bg-[#0f141d] px-3 pb-4 pt-4">
+                  <div className="ios-notification-center px-3 pb-4 pt-4">
                     <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-300">
                       <span>9:41</span>
                       <span>5G</span>
@@ -796,7 +796,7 @@ export function LandingPage() {
                               style={{ zIndex: 30 - stackIndex }}
                               className="absolute inset-x-0"
                             >
-                              <div className="rounded-[18px] border border-white/12 bg-[rgba(28,32,40,0.74)] px-3 py-2.5 backdrop-blur-[14px] shadow-[0_20px_42px_-26px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.14)]">
+                              <div className="ios-notification-card px-3 py-2.5">
                                 <div className="flex items-start gap-2.5">
                                   <span className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-[10px] border border-white/14 bg-white/95">
                                     <Image src="/trai-favicon.svg" alt="Trail icon" width={18} height={18} className="h-[18px] w-[18px] rounded-[4px]" />
