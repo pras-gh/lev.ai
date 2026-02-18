@@ -15,8 +15,9 @@ type FeatureSlide = {
 
 type LevNotification = {
   id: string;
-  title: string;
-  message: string;
+  category: string;
+  line1: string;
+  line2: string;
 };
 
 type Callout = {
@@ -87,34 +88,28 @@ const featureSlides: FeatureSlide[] = [
 
 const levNotifications: LevNotification[] = [
   {
+    id: "cashflow-risk",
+    category: "Cashflow risk",
+    line1: "⚠️ Cash runway dropped to 23 days",
+    line2: "Projected shortfall: ₹1,84,000 by Mar 12",
+  },
+  {
+    id: "gst-alert",
+    category: "GST",
+    line1: "GST due in 5 days",
+    line2: "Estimated payable: ₹1,12,450",
+  },
+  {
+    id: "itc-mismatch",
+    category: "ITC mismatch",
+    line1: "ITC mismatch detected",
+    line2: "Vendor: ABC Traders — ₹38,900 missing",
+  },
+  {
     id: "refund-spike",
-    title: "High Refund Spike",
-    message: "Refunds increased 18% this week. Margin impact estimated: ₹32k.",
-  },
-  {
-    id: "gateway-charges",
-    title: "Gateway Charge Spike",
-    message: "Gateway charges crossed ₹21k this month (+22%). Worth renegotiating plan.",
-  },
-  {
-    id: "gstr-ready",
-    title: "GSTR-3B Draft Ready",
-    message: "GSTR-3B draft is ready. Filing after 20th may trigger interest + penalty.",
-  },
-  {
-    id: "budget-update",
-    title: "Budget 2026 Update",
-    message: "Budget 2026: Books updated automatically.",
-  },
-  {
-    id: "healthy-month",
-    title: "Monthly Health Snapshot",
-    message: "This month looks healthy: Profit ₹3.1L, GST payable ₹1.2L, no compliance red flags.",
-  },
-  {
-    id: "crunch-warning",
-    title: "Crunch Warning",
-    message: "At current inflows, cash will fall below 20 day runway by next Friday.",
+    category: "Refund spike",
+    line1: "Refund spike detected",
+    line2: "Refunds up 18% this week (₹32k impact)",
   },
 ];
 
@@ -249,18 +244,6 @@ function CloseIcon() {
   );
 }
 
-function GmailIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5">
-      <rect x="2" y="5" width="20" height="14" rx="2.8" fill="#ffffff" />
-      <path d="M2 7.4v9.2l5.7-4.4V8.3L2 7.4Z" fill="#34A853" />
-      <path d="M22 7.4v9.2l-5.7-4.4V8.3L22 7.4Z" fill="#4285F4" />
-      <path d="M2 6.8 12 14.1 22 6.8V5.8c0-1.2-.9-2.1-2.1-2.1H4.1C2.9 3.7 2 4.6 2 5.8v1Z" fill="#EA4335" />
-      <path d="m7.7 8.2 4.3 3.1 4.3-3.1V5.2L12 8.1 7.7 5.2v3Z" fill="#FBBC05" />
-    </svg>
-  );
-}
-
 function SocialIcon({ kind }: { kind: "x" | "linkedin" }) {
   if (kind === "x") {
     return (
@@ -324,11 +307,17 @@ export function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeNotification, setActiveNotification] = useState(0);
-  const [isNotificationInteracting, setIsNotificationInteracting] = useState(false);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
   const [introCount, setIntroCount] = useState(shouldReduceMotion ? INTRO_WORD.length : 0);
   const displayIntroPhase = shouldReduceMotion ? "get" : introPhase;
   const displayIntroCount = shouldReduceMotion ? INTRO_WORD.length : introCount;
+  const stackedNotifications = Array.from({ length: 3 }, (_, offset) => {
+    const index = (activeNotification + offset) % levNotifications.length;
+    return {
+      notice: levNotifications[index],
+      stackIndex: offset,
+    };
+  });
 
   useEffect(() => {
     const onScroll = () => {
@@ -394,18 +383,18 @@ export function LandingPage() {
   }, [shouldReduceMotion]);
 
   useEffect(() => {
-    if (shouldReduceMotion || isNotificationInteracting) {
+    if (shouldReduceMotion) {
       return;
     }
 
     const interval = window.setInterval(() => {
       setActiveNotification((prev) => (prev + 1) % levNotifications.length);
-    }, 2500);
+    }, 4000);
 
     return () => {
       window.clearInterval(interval);
     };
-  }, [isNotificationInteracting, shouldReduceMotion]);
+  }, [shouldReduceMotion]);
 
   return (
     <div className="relative min-h-screen overflow-x-clip pb-20 text-slate-100">
@@ -766,63 +755,68 @@ export function LandingPage() {
                   className="relative w-full max-w-[332px] rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
                 >
                   <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
-                  <div className="rounded-[28px] border border-white/10 bg-[#0f141d] px-3 pb-3 pt-5">
+                  <div className="rounded-[28px] border border-white/10 bg-[#0f141d] px-3 pb-4 pt-4">
                     <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-300">
                       <span>9:41</span>
                       <span>5G</span>
                     </div>
-                    <div className="mb-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-[11px] font-medium text-slate-100">
-                      <span className="inline-flex items-center gap-1.5">
-                        <GmailIcon />
-                        Notification Bar • Gmail • trai\
-                      </span>
-                    </div>
+                    <p className="mb-3 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                      Notification Center
+                    </p>
 
-                    <div
-                      className="h-[360px] space-y-2 overflow-y-auto pr-1"
-                      onMouseEnter={() => setIsNotificationInteracting(true)}
-                      onMouseLeave={() => setIsNotificationInteracting(false)}
-                    >
-                      {levNotifications.map((notice, index) => {
-                        const isActive = activeNotification === index;
+                    <div className="relative h-[262px]">
+                      <AnimatePresence initial={false}>
+                        {stackedNotifications.map(({ notice, stackIndex }) => {
+                          const stackTop = stackIndex * 78;
+                          const cardOpacity = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.82 : 0.62;
+                          const cardScale = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.975 : 0.95;
 
-                        return (
-                          <motion.button
-                            key={notice.id}
-                            type="button"
-                            animate={{
-                              opacity: isActive ? 1 : 0.58,
-                              scale: isActive ? 1.03 : 0.92,
-                            }}
-                            transition={{
-                              duration: shouldReduceMotion ? 0 : 0.22,
-                              ease: easing,
-                            }}
-                            onMouseEnter={() => setActiveNotification(index)}
-                            onFocus={() => setActiveNotification(index)}
-                            onClick={() => setActiveNotification(index)}
-                            className={`w-full transform-gpu rounded-2xl border px-3 py-3 text-left transition-colors duration-200 [will-change:transform,opacity] ${
-                              isActive
-                                ? "border-white/28 bg-white/24 shadow-[0_20px_36px_-25px_rgba(255,255,255,0.34)]"
-                                : "border-white/10 bg-white/10"
-                            }`}
-                          >
-                            <div className="flex items-start gap-2.5">
-                              <span className="inline-flex h-8 w-8 flex-none items-center justify-center rounded-full border border-white/20 bg-white/90 text-[#5f6368]">
-                                <GmailIcon />
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-[11px] font-medium text-slate-200">Gmail • trai\</p>
-                                  <p className="text-[10px] font-medium text-slate-400">now</p>
+                          return (
+                            <motion.div
+                              key={`${notice.id}-${activeNotification}-${stackIndex}`}
+                              initial={{
+                                opacity: 0,
+                                y: shouldReduceMotion ? stackTop : stackTop - 12,
+                                scale: shouldReduceMotion ? cardScale : cardScale - 0.02,
+                              }}
+                              animate={{
+                                opacity: cardOpacity,
+                                y: stackTop,
+                                scale: cardScale,
+                              }}
+                              exit={{
+                                opacity: 0,
+                                y: shouldReduceMotion ? stackTop : stackTop + 14,
+                                scale: cardScale - 0.02,
+                              }}
+                              transition={{
+                                duration: shouldReduceMotion ? 0 : 0.5,
+                                ease: easing,
+                              }}
+                              style={{ zIndex: 30 - stackIndex }}
+                              className="absolute inset-x-0"
+                            >
+                              <div className="rounded-[18px] border border-white/12 bg-[rgba(28,32,40,0.74)] px-3 py-2.5 backdrop-blur-[14px] shadow-[0_20px_42px_-26px_rgba(0,0,0,0.95),inset_0_1px_0_rgba(255,255,255,0.14)]">
+                                <div className="flex items-start gap-2.5">
+                                  <span className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-[10px] border border-white/14 bg-white/95">
+                                    <Image src="/trai-favicon.svg" alt="Trail icon" width={18} height={18} className="h-[18px] w-[18px] rounded-[4px]" />
+                                  </span>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-300">
+                                        Trail • {notice.category}
+                                      </p>
+                                      <p className="text-[10px] font-medium text-slate-400">now</p>
+                                    </div>
+                                    <p className="mt-0.5 truncate text-[12px] font-semibold text-white">{notice.line1}</p>
+                                    <p className="mt-0.5 truncate text-[11px] leading-[1.3] text-slate-200">{notice.line2}</p>
+                                  </div>
                                 </div>
-                                <p className="truncate text-[12px] font-semibold text-white">{notice.title}</p>
-                                <p className="mt-0.5 text-[12px] leading-[1.35] text-slate-200">{notice.message}</p>
                               </div>
-                            </div>
-                          </motion.button>
-                        );
-                      })}
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   </div>
                 </motion.div>
