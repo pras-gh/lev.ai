@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { OrangeCursor } from "@/components/orange-cursor";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const SITE_URL = "https://www.usetrailai.com";
@@ -53,9 +54,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <OrangeCursor />
-        {children}
-        <SpeedInsights />
+        <Providers>
+          <OrangeCursor />
+          {children}
+          <SpeedInsights />
+        </Providers>
       </body>
     </html>
   );
