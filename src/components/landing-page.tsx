@@ -5,7 +5,6 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
-import { LoginModal } from "@/components/auth/login-modal";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 
 type FeatureSlide = {
@@ -426,7 +425,6 @@ export function LandingPage() {
               Book Demo
               <ArrowIcon />
             </a>
-            <LoginModal triggerClassName="hidden md:inline-flex" />
             <button
               type="button"
               onClick={() => setMobileOpen((value) => !value)}
@@ -462,12 +460,6 @@ export function LandingPage() {
                   Book Demo
                   <ArrowIcon />
                 </a>
-                <LoginModal
-                  onTriggerClick={() => {
-                    setMobileOpen(false);
-                  }}
-                  triggerClassName="lev-button lev-button--outline w-fit"
-                />
               </div>
             </motion.div>
           ) : null}
