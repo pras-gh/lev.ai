@@ -3,7 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { OrangeCursor } from "@/components/orange-cursor";
 import "./globals.css";
 
-const SITE_URL = "https://www.usetrail.in";
+const SITE_URL = "https://www.usetrailai.com";
 const SITE_TITLE = "trai\\ | AI Accounting for SMBs";
 const SITE_DESCRIPTION =
   "trai\\ acts like an in-house finance hire by keeping books accurate, closing months on time, and flagging GST and cash risks before they grow.";
