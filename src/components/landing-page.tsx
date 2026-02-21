@@ -765,11 +765,11 @@ export function LandingPage() {
                 </motion.div>
               </div>
 
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center overflow-visible">
                 <motion.div
                   animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
                   transition={{ duration: 5.4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                  className="relative w-full max-w-[332px] rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
+                  className="relative w-full max-w-[332px] overflow-visible rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
                 >
                   <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
                   <div className="ios-notification-center px-3 pb-4 pt-4">
@@ -778,13 +778,13 @@ export function LandingPage() {
                       <span>5G</span>
                     </div>
 
-                    <div className="relative h-[286px]">
+                    <div className="relative h-[348px]">
                       <AnimatePresence initial={false}>
                         {stackedNotifications.map(({ notice, stackIndex }) => {
                           const sequenceIndex = activeNotification + stackIndex;
                           const showLeadingIcon = sequenceIndex % 2 === 0;
                           const showSenderGlyph = sequenceIndex % 3 !== 1;
-                          const stackTop = stackIndex * 90;
+                          const stackTop = stackIndex * 108;
                           const cardOpacity = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.82 : 0.62;
                           const cardScale = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.975 : 0.95;
 

@@ -132,7 +132,7 @@ img {
   font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text";
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
 }
 
@@ -140,6 +140,7 @@ img {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   background-image: repeating-linear-gradient(
     0deg,
     rgba(255, 255, 255, 0.024) 0px,
@@ -149,6 +150,7 @@ img {
   );
   opacity: 0.38;
   pointer-events: none;
+  z-index: 0;
 }
 
 .ios-notification-card {
