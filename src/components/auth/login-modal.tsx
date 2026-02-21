@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -61,12 +60,22 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
       redirect: false,
     });
 
-    if (!response || !response.ok) {
+    if (!response) {
+      setErrorMessage("Unable to sign in right now. Try again.");
+      return;
+    }
+
+    if (response.error) {
       setErrorMessage("Invalid email or password.");
       return;
     }
 
     const nextSession = await getSession();
+    if (!nextSession?.user) {
+      setErrorMessage("Unable to create login session. Try again.");
+      return;
+    }
+
     if (!nextSession?.user?.isPaid) {
       await signOut({ redirect: false });
       setErrorMessage("Your account is not on a paid plan yet.");
@@ -168,12 +177,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
             get trai\ now
           </a>
         ) : null}
-
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
