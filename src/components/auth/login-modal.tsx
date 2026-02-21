@@ -66,6 +66,10 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     }
 
     if (response.error) {
+      if (response.error === "Configuration") {
+        setErrorMessage("Login is not configured yet. Please try again shortly.");
+        return;
+      }
       setErrorMessage("Invalid email or password.");
       return;
     }

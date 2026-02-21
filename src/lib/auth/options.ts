@@ -17,6 +17,22 @@ type DashboardUserRow = {
   password: string | null;
 };
 
+const nextAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
+
+export function getMissingAuthEnvKeys() {
+  const missing: string[] = [];
+
+  if (!process.env.NEXTAUTH_URL && !process.env.AUTH_URL) {
+    missing.push("NEXTAUTH_URL");
+  }
+
+  if (!process.env.NEXTAUTH_SECRET && !process.env.AUTH_SECRET) {
+    missing.push("NEXTAUTH_SECRET");
+  }
+
+  return missing;
+}
+
 function secureEquals(left: string, right: string) {
   const leftBuffer = Buffer.from(left);
   const rightBuffer = Buffer.from(right);
@@ -88,6 +104,7 @@ async function authorizeWithSupabase(email: string, password: string) {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: nextAuthSecret,
   session: {
     strategy: "jwt",
   },
