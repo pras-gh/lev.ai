@@ -261,9 +261,9 @@ function SocialIcon({ kind }: { kind: "x" | "linkedin" }) {
 
 }
 
-function GmailIcon() {
+function GmailIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-[18px] w-[18px]">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
       <path d="M2 7.3 12 14l10-6.7V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7.3Z" fill="#FFFFFF" />
       <path d="M2 7.3V18a2 2 0 0 0 2 2h1.2V9.8L2 7.3Z" fill="#34A853" />
       <path d="M22 7.3V18a2 2 0 0 1-2 2h-1.2V9.8L22 7.3Z" fill="#4285F4" />
@@ -777,14 +777,14 @@ export function LandingPage() {
                       <span>9:41</span>
                       <span>5G</span>
                     </div>
-                    <p className="mb-3 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                      Gmail Notification Center
-                    </p>
 
-                    <div className="relative h-[274px]">
+                    <div className="relative h-[286px]">
                       <AnimatePresence initial={false}>
                         {stackedNotifications.map(({ notice, stackIndex }) => {
-                          const stackTop = stackIndex * 84;
+                          const sequenceIndex = activeNotification + stackIndex;
+                          const showLeadingIcon = sequenceIndex % 2 === 0;
+                          const showSenderGlyph = sequenceIndex % 3 !== 1;
+                          const stackTop = stackIndex * 90;
                           const cardOpacity = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.82 : 0.62;
                           const cardScale = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.975 : 0.95;
 
@@ -813,22 +813,28 @@ export function LandingPage() {
                               style={{ zIndex: 30 - stackIndex }}
                               className="absolute inset-x-0"
                             >
-                              <div className="ios-notification-card gmail-notification-card px-3.5 py-3">
+                              <div className="ios-notification-card trail-notification-card px-4 py-3.5">
                                 <div className="flex items-start gap-3">
-                                  <span className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-[10px] border border-white/14 bg-white/95 shadow-[0_10px_24px_-16px_rgba(0,0,0,0.9)]">
-                                    <GmailIcon />
-                                  </span>
+                                  {showLeadingIcon ? (
+                                    <span className="mt-0.5 inline-flex h-11 w-11 flex-none items-center justify-center rounded-[12px] border border-slate-200/90 bg-white/95 shadow-[0_10px_24px_-16px_rgba(0,0,0,0.35)]">
+                                      <GmailIcon className="h-6 w-6" />
+                                    </span>
+                                  ) : null}
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center justify-between gap-2">
                                       <div className="min-w-0">
-                                        <p className="truncate text-[12px] font-semibold text-slate-700">Trail</p>
-                                        <p className="truncate text-[10px] font-medium uppercase tracking-[0.08em] text-slate-500">
-                                          via Gmail • {notice.category}
-                                        </p>
+                                        <div className="inline-flex items-center gap-1.5">
+                                          {showSenderGlyph ? (
+                                            <span className="inline-flex h-[14px] w-[14px] items-center justify-center overflow-hidden rounded-[4px]">
+                                              <GmailIcon className="h-[14px] w-[14px]" />
+                                            </span>
+                                          ) : null}
+                                          <p className="truncate text-[11px] font-medium text-slate-500">Trail</p>
+                                        </div>
                                       </div>
                                       <p className="text-[11px] font-medium text-slate-500">16:12</p>
                                     </div>
-                                    <p className="mt-1 truncate text-[13px] font-medium text-slate-800">{notice.line1}</p>
+                                    <p className="mt-1 truncate text-[13px] font-medium text-slate-700">{notice.line1}</p>
                                     <p
                                       className="mt-0.5 overflow-hidden text-[12px] leading-[1.35] text-slate-600"
                                       style={{
