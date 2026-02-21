@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { LoginModal } from "@/components/auth/login-modal";
 import { BrandMark } from "@/components/brand-mark";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 
@@ -425,6 +426,7 @@ export function LandingPage() {
               Book Demo
               <ArrowIcon />
             </a>
+            <LoginModal triggerClassName="hidden md:inline-flex" />
             <button
               type="button"
               onClick={() => setMobileOpen((value) => !value)}
@@ -460,6 +462,12 @@ export function LandingPage() {
                   Book Demo
                   <ArrowIcon />
                 </a>
+                <LoginModal
+                  onTriggerClick={() => {
+                    setMobileOpen(false);
+                  }}
+                  triggerClassName="lev-button lev-button--outline w-fit"
+                />
               </div>
             </motion.div>
           ) : null}
