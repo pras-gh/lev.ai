@@ -42,10 +42,7 @@ type FlowItem =
 
 const easing = [0.22, 1, 0.36, 1] as const;
 
-const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#integrations", label: "Integrations" },
-];
+const navLinks: Array<{ href: string; label: string }> = [];
 
 const chatSimulation = [
   {
