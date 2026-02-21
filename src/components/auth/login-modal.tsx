@@ -120,13 +120,13 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         </button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[440px]">
+      <DialogContent className="lev-login-box-glow sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle>{isSignedIn ? "Account" : "Login to trai\\"}</DialogTitle>
           <DialogDescription>
             {isSignedIn
               ? "You already have dashboard access."
-              : "Login with your email and password to access product dashboard."}
+              : "Login with your email and password to access trai\\"}
           </DialogDescription>
         </DialogHeader>
 
