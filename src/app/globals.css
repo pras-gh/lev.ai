@@ -164,12 +164,39 @@ img {
 }
 
 .trail-notification-card {
-  border-color: rgba(255, 255, 255, 0.74);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(247, 248, 250, 0.97) 0%, rgba(237, 239, 243, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: linear-gradient(180deg, rgba(237, 232, 227, 0.96) 0%, rgba(229, 224, 220, 0.93) 100%);
   box-shadow:
-    0 18px 32px -20px rgba(0, 0, 0, 0.8),
-    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    0 22px 40px -26px rgba(0, 0, 0, 0.74),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.trail-notification-scene {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(120% 60% at 58% 18%, rgba(214, 118, 62, 0.36), transparent 56%),
+    radial-gradient(92% 56% at 22% 34%, rgba(180, 112, 72, 0.2), transparent 58%),
+    linear-gradient(180deg, #6c6669 0%, #5f595a 32%, #4e4643 58%, #2c2520 78%, #181516 100%);
+  box-shadow: 0 34px 74px -40px rgba(0, 0, 0, 0.85);
+}
+
+.trail-notification-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 24%, rgba(244, 151, 94, 0.22), transparent 26%),
+    radial-gradient(circle at 72% 20%, rgba(241, 143, 84, 0.2), transparent 24%),
+    radial-gradient(circle at 56% 82%, rgba(21, 17, 15, 0.55), transparent 40%);
+  pointer-events: none;
+}
+
+.trail-notification-scene > * {
+  position: relative;
+  z-index: 1;
 }
 
 .lev-button {

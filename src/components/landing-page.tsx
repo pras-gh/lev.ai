@@ -14,13 +14,6 @@ type FeatureSlide = {
   points: string[];
 };
 
-type LevNotification = {
-  id: string;
-  category: string;
-  line1: string;
-  line2: string;
-};
-
 type Callout = {
   title: string;
   description: string;
@@ -84,32 +77,26 @@ const featureSlides: FeatureSlide[] = [
   },
 ];
 
-const levNotifications: LevNotification[] = [
+const notificationMockupCards = [
   {
-    id: "cashflow-risk",
-    category: "Cashflow risk",
-    line1: "⚠️ Cash runway dropped to 23 days",
-    line2: "Projected shortfall: ₹1,84,000 by Mar 12",
+    id: "budget",
+    title: "Budget 2026 just dropped",
+    detail: "Your books are already synced with the latest updates.",
+    time: "Now",
   },
   {
-    id: "gst-alert",
-    category: "GST",
-    line1: "GST due in 5 days",
-    line2: "Estimated payable: ₹1,12,450",
+    id: "refunds",
+    title: "Refunds up 18% this week",
+    detail: "(₹32,000 impact)",
+    time: "12m ago",
   },
   {
-    id: "itc-mismatch",
-    category: "ITC mismatch",
-    line1: "ITC mismatch detected",
-    line2: "Vendor: ABC Traders — ₹38,900 missing",
+    id: "gst",
+    title: "GST due in 5 days",
+    detail: "₹1,12,450",
+    time: "1h ago",
   },
-  {
-    id: "refund-spike",
-    category: "Refund spike",
-    line1: "Refund spike detected",
-    line2: "Refunds up 18% this week (₹32k impact)",
-  },
-];
+] as const;
 
 const callouts: Callout[] = [
   {
@@ -261,18 +248,6 @@ function SocialIcon({ kind }: { kind: "x" | "linkedin" }) {
 
 }
 
-function GmailIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
-      <path d="M2 7.3 12 14l10-6.7V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7.3Z" fill="#FFFFFF" />
-      <path d="M2 7.3V18a2 2 0 0 0 2 2h1.2V9.8L2 7.3Z" fill="#34A853" />
-      <path d="M22 7.3V18a2 2 0 0 1-2 2h-1.2V9.8L22 7.3Z" fill="#4285F4" />
-      <path d="M22 7.3 12 14 2 7.3l2-1.7a2 2 0 0 1 1.3-.5h13.4a2 2 0 0 1 1.3.5l2 1.7Z" fill="#EA4335" />
-      <path d="M5.2 20h13.6V9.8L12 14 5.2 9.8V20Z" fill="#FBBC04" opacity="0.2" />
-    </svg>
-  );
-}
-
 function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
   if (glyph === "ledger") {
     return (
@@ -316,18 +291,10 @@ export function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [activeNotification, setActiveNotification] = useState(0);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
   const [introCount, setIntroCount] = useState(shouldReduceMotion ? INTRO_WORD.length : 0);
   const displayIntroPhase = shouldReduceMotion ? "get" : introPhase;
   const displayIntroCount = shouldReduceMotion ? INTRO_WORD.length : introCount;
-  const stackedNotifications = Array.from({ length: 3 }, (_, offset) => {
-    const index = (activeNotification + offset) % levNotifications.length;
-    return {
-      notice: levNotifications[index],
-      stackIndex: offset,
-    };
-  });
 
   useEffect(() => {
     const onScroll = () => {
@@ -386,20 +353,6 @@ export function LandingPage() {
     const interval = window.setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % featureSlides.length);
     }, 5200);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [shouldReduceMotion]);
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const interval = window.setInterval(() => {
-      setActiveNotification((prev) => (prev + 1) % levNotifications.length);
-    }, 4000);
 
     return () => {
       window.clearInterval(interval);
@@ -765,94 +718,45 @@ export function LandingPage() {
                 </motion.div>
               </div>
 
-              <div className="flex items-center justify-center overflow-visible">
+              <div className="flex items-center justify-center">
                 <motion.div
-                  animate={shouldReduceMotion ? undefined : { y: [0, -6, 0] }}
-                  transition={{ duration: 5.4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                  className="relative w-full max-w-[332px] overflow-visible rounded-[36px] border border-white/15 bg-[#121723] p-3 shadow-[0_34px_70px_-35px_rgba(0,0,0,0.95)]"
+                  animate={shouldReduceMotion ? undefined : { y: [0, -5, 0] }}
+                  transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                  className="trail-notification-scene w-full max-w-[520px] p-5 sm:p-6"
                 >
-                  <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-white/20" />
-                  <div className="ios-notification-center px-3 pb-4 pt-4">
-                    <div className="mb-2 flex items-center justify-between px-1 text-[11px] font-semibold text-slate-300">
-                      <span>9:41</span>
-                      <span>5G</span>
-                    </div>
-
-                    <div className="relative h-[348px]">
-                      <AnimatePresence initial={false}>
-                        {stackedNotifications.map(({ notice, stackIndex }) => {
-                          const sequenceIndex = activeNotification + stackIndex;
-                          const showLeadingIcon = sequenceIndex % 2 === 0;
-                          const showSenderGlyph = sequenceIndex % 3 !== 1;
-                          const stackTop = stackIndex * 108;
-                          const cardOpacity = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.82 : 0.62;
-                          const cardScale = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.975 : 0.95;
-
-                          return (
-                            <motion.div
-                              key={`${notice.id}-${activeNotification}-${stackIndex}`}
-                              initial={{
-                                opacity: 0,
-                                y: shouldReduceMotion ? stackTop : stackTop - 12,
-                                scale: shouldReduceMotion ? cardScale : cardScale - 0.02,
-                              }}
-                              animate={{
-                                opacity: cardOpacity,
-                                y: stackTop,
-                                scale: cardScale,
-                              }}
-                              exit={{
-                                opacity: 0,
-                                y: shouldReduceMotion ? stackTop : stackTop + 14,
-                                scale: cardScale - 0.02,
-                              }}
-                              transition={{
-                                duration: shouldReduceMotion ? 0 : 0.5,
-                                ease: easing,
-                              }}
-                              style={{ zIndex: 30 - stackIndex }}
-                              className="absolute inset-x-0"
-                            >
-                              <div className="ios-notification-card trail-notification-card px-4 py-3.5">
-                                <div className="flex items-start gap-3">
-                                  {showLeadingIcon ? (
-                                    <span className="mt-0.5 inline-flex h-11 w-11 flex-none items-center justify-center rounded-[12px] border border-slate-200/90 bg-white/95 shadow-[0_10px_24px_-16px_rgba(0,0,0,0.35)]">
-                                      <GmailIcon className="h-6 w-6" />
-                                    </span>
-                                  ) : null}
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center justify-between gap-2">
-                                      <div className="min-w-0">
-                                        <div className="inline-flex items-center gap-1.5">
-                                          {showSenderGlyph ? (
-                                            <span className="inline-flex h-[14px] w-[14px] items-center justify-center overflow-hidden rounded-[4px]">
-                                              <GmailIcon className="h-[14px] w-[14px]" />
-                                            </span>
-                                          ) : null}
-                                          <p className="truncate text-[11px] font-medium text-slate-500">Trail</p>
-                                        </div>
-                                      </div>
-                                      <p className="text-[11px] font-medium text-slate-500">16:12</p>
-                                    </div>
-                                    <p className="mt-1 truncate text-[13px] font-medium text-slate-700">{notice.line1}</p>
-                                    <p
-                                      className="mt-0.5 overflow-hidden text-[12px] leading-[1.35] text-slate-600"
-                                      style={{
-                                        display: "-webkit-box",
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: "vertical",
-                                      }}
-                                    >
-                                      {notice.line2}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </AnimatePresence>
-                    </div>
+                  <div className="relative space-y-5 sm:space-y-6">
+                    {notificationMockupCards.map((item, index) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.6 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: shouldReduceMotion ? 0 : index * 0.08, ease: easing }}
+                        className="trail-notification-card rounded-[30px] px-5 py-4 sm:px-6 sm:py-5"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[#0b0b0d] text-[13px] font-semibold tracking-[-0.01em] text-white">
+                            trai\
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="truncate text-[1.25rem] leading-none tracking-[-0.02em] text-[#505050] sm:text-[1.35rem]">
+                                trai\
+                              </p>
+                              <p className="text-[1.2rem] leading-none tracking-[-0.02em] text-[#696969] sm:text-[1.3rem]">
+                                {item.time}
+                              </p>
+                            </div>
+                            <p className="mt-2 text-[1.75rem] leading-[1.05] font-semibold tracking-[-0.02em] text-[#121212] sm:text-[1.95rem]">
+                              {item.title}
+                            </p>
+                            <p className="mt-2 text-[1.35rem] leading-[1.14] tracking-[-0.01em] text-[#2f2f2f] sm:text-[1.55rem]">
+                              {item.detail}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </motion.div>
               </div>
