@@ -77,27 +77,6 @@ const featureSlides: FeatureSlide[] = [
   },
 ];
 
-const notificationMockupCards = [
-  {
-    id: "budget",
-    title: "Budget 2026 just dropped",
-    detail: "Your books are already synced with the latest updates.",
-    time: "Now",
-  },
-  {
-    id: "refunds",
-    title: "Refunds up 18% this week",
-    detail: "(₹32,000 impact)",
-    time: "12m ago",
-  },
-  {
-    id: "gst",
-    title: "GST due in 5 days",
-    detail: "₹1,12,450",
-    time: "1h ago",
-  },
-] as const;
-
 const callouts: Callout[] = [
   {
     title: "Always-on reconciliation",
@@ -655,7 +634,7 @@ export function LandingPage() {
           </div>
 
           <div className="glass-panel rounded-[26px] border border-white/12 p-5 sm:p-6">
-            <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
+            <div className="grid gap-5">
               <div className="relative h-[390px] overflow-hidden rounded-2xl border border-white/12 bg-black/35">
                 <div className="lev-grid-field absolute inset-0 opacity-[0.14]" />
                 <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/70 to-transparent" />
@@ -718,48 +697,6 @@ export function LandingPage() {
                 </motion.div>
               </div>
 
-              <div className="flex items-center justify-center">
-                <motion.div
-                  animate={shouldReduceMotion ? undefined : { y: [0, -5, 0] }}
-                  transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                  className="trail-notification-scene w-full max-w-[520px] p-5 sm:p-6"
-                >
-                  <div className="relative space-y-5 sm:space-y-6">
-                    {notificationMockupCards.map((item, index) => (
-                      <motion.div
-                        key={item.id}
-                        initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.6 }}
-                        transition={{ duration: shouldReduceMotion ? 0 : 0.45, delay: shouldReduceMotion ? 0 : index * 0.08, ease: easing }}
-                        className="trail-notification-card rounded-[30px] px-5 py-4 sm:px-6 sm:py-5"
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-full bg-[#0b0b0d] text-[13px] font-semibold tracking-[-0.01em] text-white">
-                            trai\
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="truncate text-[1.25rem] leading-none tracking-[-0.02em] text-[#505050] sm:text-[1.35rem]">
-                                trai\
-                              </p>
-                              <p className="text-[1.2rem] leading-none tracking-[-0.02em] text-[#696969] sm:text-[1.3rem]">
-                                {item.time}
-                              </p>
-                            </div>
-                            <p className="mt-2 text-[1.75rem] leading-[1.05] font-semibold tracking-[-0.02em] text-[#121212] sm:text-[1.95rem]">
-                              {item.title}
-                            </p>
-                            <p className="mt-2 text-[1.35rem] leading-[1.14] tracking-[-0.01em] text-[#2f2f2f] sm:text-[1.55rem]">
-                              {item.detail}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </div>
             </div>
           </div>
         </motion.section>
