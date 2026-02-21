@@ -857,7 +857,7 @@ export function LandingPage() {
             <div>
               <BrandMark className="text-[1.3rem]" />
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-300">
-                modern accounting designed in bangalore for india
+                Modern Accounting, Made for India
               </p>
             </div>
             <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-2">
