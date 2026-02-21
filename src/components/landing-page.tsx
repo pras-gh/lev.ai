@@ -261,6 +261,18 @@ function SocialIcon({ kind }: { kind: "x" | "linkedin" }) {
 
 }
 
+function GmailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-[18px] w-[18px]">
+      <path d="M2 7.3 12 14l10-6.7V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7.3Z" fill="#FFFFFF" />
+      <path d="M2 7.3V18a2 2 0 0 0 2 2h1.2V9.8L2 7.3Z" fill="#34A853" />
+      <path d="M22 7.3V18a2 2 0 0 1-2 2h-1.2V9.8L22 7.3Z" fill="#4285F4" />
+      <path d="M22 7.3 12 14 2 7.3l2-1.7a2 2 0 0 1 1.3-.5h13.4a2 2 0 0 1 1.3.5l2 1.7Z" fill="#EA4335" />
+      <path d="M5.2 20h13.6V9.8L12 14 5.2 9.8V20Z" fill="#FBBC04" opacity="0.2" />
+    </svg>
+  );
+}
+
 function CalloutGlyph({ glyph }: { glyph: Callout["glyph"] }) {
   if (glyph === "ledger") {
     return (
@@ -766,13 +778,13 @@ export function LandingPage() {
                       <span>5G</span>
                     </div>
                     <p className="mb-3 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                      Notification Center
+                      Gmail Notification Center
                     </p>
 
-                    <div className="relative h-[262px]">
+                    <div className="relative h-[274px]">
                       <AnimatePresence initial={false}>
                         {stackedNotifications.map(({ notice, stackIndex }) => {
-                          const stackTop = stackIndex * 78;
+                          const stackTop = stackIndex * 84;
                           const cardOpacity = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.82 : 0.62;
                           const cardScale = stackIndex === 0 ? 1 : stackIndex === 1 ? 0.975 : 0.95;
 
@@ -801,20 +813,32 @@ export function LandingPage() {
                               style={{ zIndex: 30 - stackIndex }}
                               className="absolute inset-x-0"
                             >
-                              <div className="ios-notification-card px-3 py-2.5">
-                                <div className="flex items-start gap-2.5">
-                                  <span className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-[10px] border border-white/14 bg-white/95">
-                                    <Image src="/trai-favicon.svg" alt="Trail icon" width={18} height={18} className="h-[18px] w-[18px] rounded-[4px]" />
+                              <div className="ios-notification-card gmail-notification-card px-3.5 py-3">
+                                <div className="flex items-start gap-3">
+                                  <span className="mt-0.5 inline-flex h-8 w-8 flex-none items-center justify-center rounded-[10px] border border-white/14 bg-white/95 shadow-[0_10px_24px_-16px_rgba(0,0,0,0.9)]">
+                                    <GmailIcon />
                                   </span>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center justify-between gap-2">
-                                      <p className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-300">
-                                        Trail • {notice.category}
-                                      </p>
-                                      <p className="text-[10px] font-medium text-slate-400">now</p>
+                                      <div className="min-w-0">
+                                        <p className="truncate text-[12px] font-semibold text-slate-700">Trail</p>
+                                        <p className="truncate text-[10px] font-medium uppercase tracking-[0.08em] text-slate-500">
+                                          via Gmail • {notice.category}
+                                        </p>
+                                      </div>
+                                      <p className="text-[11px] font-medium text-slate-500">16:12</p>
                                     </div>
-                                    <p className="mt-0.5 truncate text-[12px] font-semibold text-white">{notice.line1}</p>
-                                    <p className="mt-0.5 truncate text-[11px] leading-[1.3] text-slate-200">{notice.line2}</p>
+                                    <p className="mt-1 truncate text-[13px] font-medium text-slate-800">{notice.line1}</p>
+                                    <p
+                                      className="mt-0.5 overflow-hidden text-[12px] leading-[1.35] text-slate-600"
+                                      style={{
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: "vertical",
+                                      }}
+                                    >
+                                      {notice.line2}
+                                    </p>
                                   </div>
                                 </div>
                               </div>
