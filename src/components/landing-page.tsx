@@ -79,22 +79,22 @@ const featureSlides: FeatureSlide[] = [
 
 const callouts: Callout[] = [
   {
-    title: "Always-on reconciliation",
+    title: "Books updated automatically",
     description: "trai\\ cleans entries and keeps books audit-ready all month.",
     glyph: "ledger",
   },
   {
-    title: "Proactive GST intelligence",
+    title: "Early tax risk alerts",
     description: "trai\\ catches filing risk and ITC mismatches before deadline pain.",
     glyph: "shield",
   },
   {
-    title: "Cash-aware decision support",
+    title: "Clear cash visibility",
     description: "trai\\ turns inflows, outflows, and runway into practical decisions.",
     glyph: "cash",
   },
   {
-    title: "Close-ready statements",
+    title: "Close-ready financials",
     description: "trai\\ delivers founder-ready statements without month-end scramble.",
     glyph: "statement",
   },
