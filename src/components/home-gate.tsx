@@ -9,13 +9,6 @@ const MAINTENANCE_START_MS = 1771874099000;
 const MAINTENANCE_DURATION_MS = 24 * 60 * 60 * 1000;
 const MAINTENANCE_END_MS = MAINTENANCE_START_MS + MAINTENANCE_DURATION_MS;
 
-const floatingFeatures = [
-  { label: "Books updated automatically", className: "left-[8%] top-[16%] hidden lg:flex" },
-  { label: "Early tax risk alerts", className: "right-[10%] top-[18%] hidden lg:flex" },
-  { label: "Clear cash visibility", className: "left-[10%] bottom-[18%] hidden lg:flex" },
-  { label: "Close-ready financials", className: "right-[12%] bottom-[16%] hidden lg:flex" },
-] as const;
-
 type Countdown = {
   hours: string;
   minutes: string;
@@ -95,28 +88,6 @@ export function HomeGate() {
         <div className="absolute inset-0 opacity-35 [background-image:repeating-linear-gradient(135deg,rgba(255,255,255,0.04)_0px,rgba(255,255,255,0.04)_1px,transparent_1px,transparent_76px)]" />
       </div>
 
-      {floatingFeatures.map((item, index) => (
-        <motion.div
-          key={item.label}
-          className={`absolute rounded-full border border-white/16 bg-[#0f131a]/92 px-4 py-2 text-xs font-medium text-slate-200 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.9)] ${item.className}`}
-          animate={
-            shouldReduceMotion
-              ? undefined
-              : {
-                  y: [0, -8, 0],
-                  opacity: [0.75, 1, 0.75],
-                }
-          }
-          transition={{
-            duration: shouldReduceMotion ? 0 : 4 + index * 0.4,
-            ease: "easeInOut",
-            repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
-          }}
-        >
-          {item.label}
-        </motion.div>
-      ))}
-
       <section className="relative mx-auto flex min-h-screen w-full max-w-[920px] items-center justify-center px-6 py-20">
         <div className="w-full rounded-[32px] border border-white/14 bg-[linear-gradient(160deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.02)_100%)] p-7 shadow-[0_36px_90px_-58px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:p-10">
           <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/16 bg-white/6 px-4 py-2">
@@ -132,14 +103,8 @@ export function HomeGate() {
           <p className="mt-4 max-w-2xl text-[clamp(1rem,2.2vw,1.22rem)] leading-relaxed text-slate-300">
             to deliver a stronger experience tomorrow.
           </p>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-            We&apos;re working on integrating product to landing page.
-          </p>
 
           <div className="mt-10">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">
-              Automatically going live in
-            </p>
             <div className="flex flex-wrap gap-3">
               <TimerUnit label="Hours" value={countdown.hours} shouldReduceMotion={shouldReduceMotion} />
               <TimerUnit label="Minutes" value={countdown.minutes} shouldReduceMotion={shouldReduceMotion} />
