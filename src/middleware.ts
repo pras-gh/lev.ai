@@ -9,14 +9,14 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: authSecret });
 
   if (token) {
-    const isPaidUser = token.isPaid === true;
-    if (isPaidUser) {
+    const planStatus = typeof token.planStatus === "string" ? token.planStatus : token.isPaid ? "active" : "trial";
+    if (planStatus === "active") {
       return NextResponse.next();
     }
 
-    const restrictedRedirect = new URL("/", request.url);
-    restrictedRedirect.searchParams.set("access", "restricted");
-    return NextResponse.redirect(restrictedRedirect);
+    const billingRedirect = new URL("/billing", request.url);
+    billingRedirect.searchParams.set("plan_status", planStatus);
+    return NextResponse.redirect(billingRedirect);
   }
 
   const redirectUrl = new URL("/", request.url);

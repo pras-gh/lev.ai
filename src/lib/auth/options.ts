@@ -11,12 +11,28 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+type PlanStatus = "trial" | "active" | "overdue" | "cancelled";
+type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+  planStatus: PlanStatus;
+  isPaid: boolean;
+};
+
+const PLAN_STATUSES = new Set<PlanStatus>(["trial", "active", "overdue", "cancelled"]);
+
 type DashboardUserRow = {
   id: string | null;
   email: string | null;
   full_name: string | null;
   is_paid: boolean | null;
   password: string | null;
+};
+
+type AllowedUserRow = {
+  full_name: string | null;
+  plan_status: string | null;
 };
 
 type DashboardAccessRow = {
@@ -47,11 +63,24 @@ function secureEquals(left: string, right: string) {
   return timingSafeEqual(leftBuffer, rightBuffer);
 }
 
-function authorizeWithEnv(email: string, password: string) {
+function normalizePlanStatus(value: unknown, fallback: PlanStatus = "trial"): PlanStatus {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase() as PlanStatus;
+  return PLAN_STATUSES.has(normalized) ? normalized : fallback;
+}
+
+function authorizeWithEnv(email: string, password: string): AuthUser | null {
   const envEmail = process.env.DASHBOARD_LOGIN_EMAIL?.trim().toLowerCase();
   const envPassword = process.env.DASHBOARD_LOGIN_PASSWORD ?? "";
   const envName = process.env.DASHBOARD_LOGIN_NAME?.trim() || "Trail User";
   const envIsPaid = (process.env.DASHBOARD_LOGIN_IS_PAID ?? "false").toLowerCase() === "true";
+  const envPlanStatus = normalizePlanStatus(
+    process.env.DASHBOARD_LOGIN_PLAN_STATUS,
+    envIsPaid ? "active" : "trial"
+  );
 
   if (!envEmail || !envPassword) {
     return null;
@@ -69,7 +98,8 @@ function authorizeWithEnv(email: string, password: string) {
     id: `env-${email}`,
     email: envEmail,
     name: envName,
-    isPaid: envIsPaid,
+    planStatus: envPlanStatus,
+    isPaid: envPlanStatus === "active",
   };
 }
 
@@ -102,7 +132,59 @@ function resolveSupabaseAuthConfig() {
   };
 }
 
-async function authorizeWithSupabaseAuth(email: string, password: string) {
+async function resolveAllowedAccess(
+  email: string,
+  fallbackName: string,
+  fallbackPlanStatus: PlanStatus = "trial"
+): Promise<{ name: string; planStatus: PlanStatus }> {
+  if (!hasSupabaseAdminEnv()) {
+    return {
+      name: fallbackName,
+      planStatus: fallbackPlanStatus,
+    };
+  }
+
+  try {
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    const { data: allowedRow, error: allowedError } = await supabaseAdmin
+      .from("allowed_users")
+      .select("full_name,plan_status")
+      .eq("email", email)
+      .limit(1)
+      .maybeSingle<AllowedUserRow>();
+
+    if (!allowedError && allowedRow) {
+      return {
+        name: allowedRow.full_name?.trim() || fallbackName,
+        planStatus: normalizePlanStatus(allowedRow.plan_status, fallbackPlanStatus),
+      };
+    }
+
+    const { data: dashboardAccessRow, error: dashboardAccessError } = await supabaseAdmin
+      .from("dashboard_users")
+      .select("full_name,is_paid")
+      .eq("email", email)
+      .limit(1)
+      .maybeSingle<DashboardAccessRow>();
+
+    if (!dashboardAccessError && dashboardAccessRow) {
+      return {
+        name: dashboardAccessRow.full_name?.trim() || fallbackName,
+        planStatus: dashboardAccessRow.is_paid ? "active" : "trial",
+      };
+    }
+  } catch {
+    // fall through
+  }
+
+  return {
+    name: fallbackName,
+    planStatus: fallbackPlanStatus,
+  };
+}
+
+async function authorizeWithSupabaseAuth(email: string, password: string): Promise<AuthUser | null> {
   const config = resolveSupabaseAuthConfig();
   if (!config) {
     return null;
@@ -131,34 +213,21 @@ async function authorizeWithSupabaseAuth(email: string, password: string) {
         ? data.user.user_metadata.full_name.trim()
         : "Trail User";
 
-    let paidAccess: DashboardAccessRow | null = null;
-    if (hasSupabaseAdminEnv()) {
-      try {
-        const supabaseAdmin = createSupabaseAdminClient();
-        const { data: accessRow } = await supabaseAdmin
-          .from("dashboard_users")
-          .select("full_name,is_paid")
-          .eq("email", email)
-          .limit(1)
-          .maybeSingle<DashboardAccessRow>();
-        paidAccess = accessRow ?? null;
-      } catch {
-        paidAccess = null;
-      }
-    }
+    const allowedAccess = await resolveAllowedAccess(email, fallbackName, "trial");
 
     return {
       id: data.user.id,
       email: data.user.email ?? email,
-      name: paidAccess?.full_name?.trim() || fallbackName,
-      isPaid: Boolean(paidAccess?.is_paid),
+      name: allowedAccess.name,
+      planStatus: allowedAccess.planStatus,
+      isPaid: allowedAccess.planStatus === "active",
     };
   } catch {
     return null;
   }
 }
 
-async function authorizeWithSupabase(email: string, password: string) {
+async function authorizeWithSupabase(email: string, password: string): Promise<AuthUser | null> {
   if (!hasSupabaseAdminEnv()) {
     return null;
   }
@@ -180,11 +249,19 @@ async function authorizeWithSupabase(email: string, password: string) {
       return null;
     }
 
+    const defaultPlanStatus: PlanStatus = data.is_paid ? "active" : "trial";
+    const allowedAccess = await resolveAllowedAccess(
+      email,
+      data.full_name ?? "Trail User",
+      defaultPlanStatus
+    );
+
     return {
       id: data.id ?? data.email,
       email: data.email,
-      name: data.full_name ?? "Trail User",
-      isPaid: Boolean(data.is_paid),
+      name: allowedAccess.name,
+      planStatus: allowedAccess.planStatus,
+      isPaid: allowedAccess.planStatus === "active",
     };
   } catch {
     return null;
@@ -230,7 +307,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.isPaid = user.isPaid;
+        token.planStatus = user.planStatus;
+        token.isPaid = user.planStatus === "active";
       }
 
       return token;
@@ -238,7 +316,11 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = String(token.id ?? "");
-        session.user.isPaid = Boolean(token.isPaid);
+        session.user.planStatus = normalizePlanStatus(
+          token.planStatus,
+          token.isPaid ? "active" : "trial"
+        );
+        session.user.isPaid = session.user.planStatus === "active";
       }
 
       return session;

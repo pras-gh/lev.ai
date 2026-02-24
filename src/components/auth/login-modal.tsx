@@ -1,10 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import Link from "next/link";
-import { getSession, signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { getSession, signIn, signOut, useSession } from "next-auth/react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -26,33 +26,37 @@ const loginSchema = z.object({
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
-
-const signupSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters."),
-    email: z.string().email("Enter a valid email address."),
-    password: z.string().min(8, "Password must be at least 8 characters."),
-    confirmPassword: z.string().min(1, "Confirm your password."),
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match.",
-  });
-
-type SignupValues = z.infer<typeof signupSchema>;
-type AuthMode = "login" | "signup";
 type AuthResult = "ok" | "restricted" | "error";
+type PlanStatus = "trial" | "active" | "overdue" | "cancelled";
 
 type LoginModalProps = {
   triggerClassName?: string;
   onTriggerClick?: () => void;
 };
 
+function restrictedMessage(planStatus: PlanStatus) {
+  if (planStatus === "overdue") {
+    return "Your account is overdue. Book a demo to restore access.";
+  }
+
+  if (planStatus === "cancelled") {
+    return "Your account is cancelled. Book a demo to reactivate access.";
+  }
+
+  return "This email is not approved yet. Book a demo for early access.";
+}
+
+function normalizePlanStatus(value: unknown): PlanStatus {
+  if (value === "active" || value === "overdue" || value === "cancelled" || value === "trial") {
+    return value;
+  }
+  return "trial";
+}
+
 export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showEarlyAccessCta, setShowEarlyAccessCta] = useState(false);
   const bookDemoUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
@@ -65,21 +69,12 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     },
   });
 
-  const signupForm = useForm<SignupValues>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
   const isSignedIn = Boolean(session?.user);
-  const triggerLabel = status === "loading" ? "User Sign In" : isSignedIn ? "Account" : "User Sign In";
+  const triggerLabel = status === "loading" ? "Client Access" : isSignedIn ? "Account" : "Client Access";
 
   async function signInAndRedirect(email: string, password: string): Promise<AuthResult> {
     setShowEarlyAccessCta(false);
+    setErrorMessage(null);
 
     const response = await signIn("credentials", {
       email,
@@ -107,10 +102,11 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
       return "error";
     }
 
-    if (!nextSession.user.isPaid) {
+    const planStatus = normalizePlanStatus(nextSession.user.planStatus);
+    if (planStatus !== "active") {
       await signOut({ redirect: false });
       setShowEarlyAccessCta(true);
-      setErrorMessage("This email is not approved yet. Book a demo for early access.");
+      setErrorMessage(restrictedMessage(planStatus));
       return "restricted";
     }
 
@@ -119,57 +115,9 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     const targetPath = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/dashboard";
 
     loginForm.reset();
-    signupForm.reset();
     setOpen(false);
     router.push(targetPath);
     return "ok";
-  }
-
-  async function handleLogin(values: LoginValues) {
-    setErrorMessage(null);
-    await signInAndRedirect(values.email, values.password);
-  }
-
-  async function handleSignup(values: SignupValues) {
-    setErrorMessage(null);
-
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-      }),
-    });
-
-    const payload = (await response.json().catch(() => null)) as
-      | { error?: string; requiresEmailConfirmation?: boolean; missing?: string[] }
-      | null;
-    if (!response.ok) {
-      if (payload?.missing && payload.missing.length > 0) {
-        setErrorMessage(`${payload.error ?? "Unable to create account."} Missing: ${payload.missing.join(", ")}`);
-      } else {
-        setErrorMessage(payload?.error ?? "Unable to create account. Try again.");
-      }
-      return;
-    }
-
-    if (payload?.requiresEmailConfirmation) {
-      setAuthMode("login");
-      loginForm.setValue("email", values.email);
-      setErrorMessage("Account created. Verify your email, then log in.");
-      return;
-    }
-
-    const signInResult = await signInAndRedirect(values.email, values.password);
-    if (signInResult === "error") {
-      setAuthMode("login");
-      loginForm.setValue("email", values.email);
-      setErrorMessage("Account created. Please log in.");
-    }
   }
 
   async function handleSignOut() {
@@ -184,7 +132,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         setOpen(nextOpen);
         if (nextOpen) {
           setErrorMessage(null);
-          setAuthMode("login");
           setShowEarlyAccessCta(false);
         }
       }}
@@ -203,15 +150,11 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
       <DialogContent className="lev-login-box-glow sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle>
-            {isSignedIn ? "Account" : authMode === "login" ? "Login to trai\\" : "Sign up for trai\\"}
-          </DialogTitle>
+          <DialogTitle>{isSignedIn ? "Account" : "Login to trai\\"}</DialogTitle>
           <DialogDescription>
             {isSignedIn
               ? "You already have product access."
-              : authMode === "login"
-                ? "Login with your email and password to access trai\\."
-                : "Create your account to access trai\\ product dashboard."}
+              : "Use your approved email and password to access the product dashboard."}
           </DialogDescription>
         </DialogHeader>
 
@@ -229,145 +172,37 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setAuthMode("login");
-                }}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition",
-                  authMode === "login"
-                    ? "bg-white text-[#0b0d12]"
-                    : "text-slate-200 hover:bg-white/10"
-                )}
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setAuthMode("signup");
-                }}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-sm font-medium transition",
-                  authMode === "signup"
-                    ? "bg-white text-[#0b0d12]"
-                    : "text-slate-200 hover:bg-white/10"
-                )}
-              >
-                Sign up
-              </button>
+          <form
+            className="space-y-3"
+            onSubmit={loginForm.handleSubmit(async (values) => {
+              await signInAndRedirect(values.email, values.password);
+            })}
+          >
+            <div className="space-y-1.5">
+              <label htmlFor="login-email" className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">
+                Email
+              </label>
+              <Input id="login-email" type="email" autoComplete="email" {...loginForm.register("email")} />
+              <p className="text-xs text-rose-300">{loginForm.formState.errors.email?.message}</p>
             </div>
 
-            {authMode === "login" ? (
-              <form
-                className="space-y-3"
-                onSubmit={loginForm.handleSubmit(async (values) => {
-                  await handleLogin(values);
-                })}
-              >
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="login-email"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Email
-                  </label>
-                  <Input id="login-email" type="email" autoComplete="email" {...loginForm.register("email")} />
-                  <p className="text-xs text-rose-300">{loginForm.formState.errors.email?.message}</p>
-                </div>
+            <div className="space-y-1.5">
+              <label htmlFor="login-password" className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">
+                Password
+              </label>
+              <Input
+                id="login-password"
+                type="password"
+                autoComplete="current-password"
+                {...loginForm.register("password")}
+              />
+              <p className="text-xs text-rose-300">{loginForm.formState.errors.password?.message}</p>
+            </div>
 
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="login-password"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Password
-                  </label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    autoComplete="current-password"
-                    {...loginForm.register("password")}
-                  />
-                  <p className="text-xs text-rose-300">{loginForm.formState.errors.password?.message}</p>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
-                  {loginForm.formState.isSubmitting ? "Logging in..." : "Login"}
-                </Button>
-              </form>
-            ) : (
-              <form
-                className="space-y-3"
-                onSubmit={signupForm.handleSubmit(async (values) => {
-                  await handleSignup(values);
-                })}
-              >
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="signup-name"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Name
-                  </label>
-                  <Input id="signup-name" autoComplete="name" {...signupForm.register("name")} />
-                  <p className="text-xs text-rose-300">{signupForm.formState.errors.name?.message}</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="signup-email"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Email
-                  </label>
-                  <Input id="signup-email" type="email" autoComplete="email" {...signupForm.register("email")} />
-                  <p className="text-xs text-rose-300">{signupForm.formState.errors.email?.message}</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="signup-password"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Password
-                  </label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    autoComplete="new-password"
-                    {...signupForm.register("password")}
-                  />
-                  <p className="text-xs text-rose-300">{signupForm.formState.errors.password?.message}</p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label
-                    htmlFor="signup-confirm-password"
-                    className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
-                  >
-                    Confirm password
-                  </label>
-                  <Input
-                    id="signup-confirm-password"
-                    type="password"
-                    autoComplete="new-password"
-                    {...signupForm.register("confirmPassword")}
-                  />
-                  <p className="text-xs text-rose-300">{signupForm.formState.errors.confirmPassword?.message}</p>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={signupForm.formState.isSubmitting}>
-                  {signupForm.formState.isSubmitting ? "Creating account..." : "Create account"}
-                </Button>
-              </form>
-            )}
-          </div>
+            <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
+              {loginForm.formState.isSubmitting ? "Signing in..." : "User Sign In"}
+            </Button>
+          </form>
         )}
 
         {errorMessage ? (

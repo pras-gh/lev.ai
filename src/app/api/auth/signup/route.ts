@@ -208,10 +208,21 @@ export async function POST(request: Request) {
           : name;
     }
 
-    // Optional compatibility write for legacy credential table.
+    // Optional compatibility write for access-control and legacy credential tables.
     if (hasSupabaseAdminEnv()) {
       try {
         const supabaseAdmin = createSupabaseAdminClient();
+        await supabaseAdmin.from("allowed_users").upsert(
+          {
+            email,
+            full_name: name,
+            plan_status: "trial",
+          },
+          {
+            onConflict: "email",
+          }
+        );
+
         await supabaseAdmin.from("dashboard_users").upsert(
           {
             email,

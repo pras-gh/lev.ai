@@ -9,8 +9,8 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  if (!session.user.isPaid) {
-    redirect("/?access=restricted");
+  if (session.user.planStatus !== "active") {
+    redirect("/billing");
   }
 
   return (
