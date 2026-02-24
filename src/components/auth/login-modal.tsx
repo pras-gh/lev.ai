@@ -132,9 +132,18 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
       }),
     });
 
-    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    const payload = (await response.json().catch(() => null)) as
+      | { error?: string; requiresEmailConfirmation?: boolean }
+      | null;
     if (!response.ok) {
       setErrorMessage(payload?.error ?? "Unable to create account. Try again.");
+      return;
+    }
+
+    if (payload?.requiresEmailConfirmation) {
+      setAuthMode("login");
+      loginForm.setValue("email", values.email);
+      setErrorMessage("Account created. Verify your email, then log in.");
       return;
     }
 

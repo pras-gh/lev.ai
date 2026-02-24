@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSupabaseAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
@@ -67,6 +68,67 @@ function authorizeWithEnv(email: string, password: string) {
   };
 }
 
+function resolveSupabaseAuthConfig() {
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "").trim();
+  const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? "").trim();
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(supabaseUrl);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
+  return {
+    supabaseUrl,
+    supabaseAnonKey,
+  };
+}
+
+async function authorizeWithSupabaseAuth(email: string, password: string) {
+  const config = resolveSupabaseAuthConfig();
+  if (!config) {
+    return null;
+  }
+
+  try {
+    const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error || !data.user?.id) {
+      return null;
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email ?? email,
+      name:
+        typeof data.user.user_metadata?.full_name === "string" &&
+        data.user.user_metadata.full_name.trim()
+          ? data.user.user_metadata.full_name.trim()
+          : "Trail User",
+      isPaid: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function authorizeWithSupabase(email: string, password: string) {
   if (!hasSupabaseAdminEnv()) {
     return null;
@@ -120,6 +182,11 @@ export const authOptions: NextAuthOptions = {
 
         const email = parsed.data.email.trim().toLowerCase();
         const password = parsed.data.password;
+
+        const authUser = await authorizeWithSupabaseAuth(email, password);
+        if (authUser) {
+          return authUser;
+        }
 
         const dbUser = await authorizeWithSupabase(email, password);
         if (dbUser) {

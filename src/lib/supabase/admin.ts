@@ -18,16 +18,40 @@ function isValidUrl(value: string | undefined) {
   }
 }
 
+function resolveSupabaseUrl() {
+  return (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+}
+
+function resolveServiceRoleKey() {
+  return (process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY ?? "").trim();
+}
+
+export function getMissingSupabaseAdminEnvKeys() {
+  const missing: string[] = [];
+
+  if (!isValidUrl(resolveSupabaseUrl())) {
+    missing.push("SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)");
+  }
+
+  if (!resolveServiceRoleKey()) {
+    missing.push("SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY)");
+  }
+
+  return missing;
+}
+
 export function hasSupabaseAdminEnv() {
-  return Boolean(isValidUrl(process.env.SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return getMissingSupabaseAdminEnvKeys().length === 0;
 }
 
 function getSupabaseAdminEnv(): SupabaseAdminEnv {
-  const supabaseUrl = process.env.SUPABASE_URL ?? "";
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+  const supabaseUrl = resolveSupabaseUrl();
+  const serviceRoleKey = resolveServiceRoleKey();
 
   if (!isValidUrl(supabaseUrl) || !serviceRoleKey) {
-    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
+    throw new Error(
+      `Missing Supabase admin env vars: ${getMissingSupabaseAdminEnvKeys().join(", ")}.`
+    );
   }
 
   return {
