@@ -133,10 +133,14 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     });
 
     const payload = (await response.json().catch(() => null)) as
-      | { error?: string; requiresEmailConfirmation?: boolean }
+      | { error?: string; requiresEmailConfirmation?: boolean; missing?: string[] }
       | null;
     if (!response.ok) {
-      setErrorMessage(payload?.error ?? "Unable to create account. Try again.");
+      if (payload?.missing && payload.missing.length > 0) {
+        setErrorMessage(`${payload.error ?? "Unable to create account."} Missing: ${payload.missing.join(", ")}`);
+      } else {
+        setErrorMessage(payload?.error ?? "Unable to create account. Try again.");
+      }
       return;
     }
 

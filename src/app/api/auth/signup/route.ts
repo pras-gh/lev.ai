@@ -26,22 +26,28 @@ function parseErrorMessage(error: unknown, fallback: string) {
     : fallback;
 }
 
-function resolveSupabasePublicAuthEnv() {
+function isPlaceholder(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return (
+    normalized.length === 0 ||
+    normalized.startsWith("replace_me") ||
+    normalized === "your_key_here" ||
+    normalized === "changeme"
+  );
+}
+
+function resolveSupabaseSignupConfig() {
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "").trim();
-  const supabaseAnonKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? "").trim();
+  const publicAuthKey = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY ?? "").trim();
+  const adminAuthKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SECRET_KEY
+  )?.trim() ?? "";
 
   const missing: string[] = [];
 
-  if (!supabaseUrl) {
+  if (isPlaceholder(supabaseUrl)) {
     missing.push("NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL)");
-  }
-
-  if (!supabaseAnonKey) {
-    missing.push("NEXT_PUBLIC_SUPABASE_ANON_KEY (or SUPABASE_ANON_KEY)");
-  }
-
-  if (missing.length > 0) {
-    return { missing, config: null };
   }
 
   try {
@@ -59,14 +65,28 @@ function resolveSupabasePublicAuthEnv() {
     };
   }
 
+  const hasPublicAuthKey = !isPlaceholder(publicAuthKey);
+  const hasAdminAuthKey = !isPlaceholder(adminAuthKey);
+
+  if (!hasPublicAuthKey && !hasAdminAuthKey) {
+    missing.push(
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY (or SUPABASE_ANON_KEY) or SUPABASE_SERVICE_ROLE_KEY"
+    );
+    return { missing, config: null };
+  }
+
   return {
     missing,
-    config: { supabaseUrl, supabaseAnonKey },
+    config: {
+      supabaseUrl,
+      publicAuthKey: hasPublicAuthKey ? publicAuthKey : null,
+      adminAuthKey: hasAdminAuthKey ? adminAuthKey : null,
+    },
   };
 }
 
 export async function POST(request: Request) {
-  const { missing, config } = resolveSupabasePublicAuthEnv();
+  const { missing, config } = resolveSupabaseSignupConfig();
   if (!config) {
     return NextResponse.json(
       {
@@ -95,35 +115,97 @@ export async function POST(request: Request) {
   const password = parsed.data.password;
 
   try {
-    const supabaseAuthClient = createClient(config.supabaseUrl, config.supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    let requiresEmailConfirmation = false;
+    let authUserId: string | null = null;
+    let authUserEmail: string | null = null;
+    let authUserName: string | null = null;
 
-    const { data, error } = await supabaseAuthClient.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
+    if (config.publicAuthKey) {
+      const supabaseAuthClient = createClient(config.supabaseUrl, config.publicAuthKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
         },
-      },
-    });
+      });
 
-    if (error) {
-      const errorText = parseErrorMessage(error, "Unable to create account right now.");
-      const normalized = errorText.toLowerCase();
-      if (
-        normalized.includes("already registered") ||
-        normalized.includes("already exists") ||
-        normalized.includes("user exists")
-      ) {
-        return NextResponse.json({ error: "This email is already registered. Please log in." }, { status: 409 });
+      const { data, error } = await supabaseAuthClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) {
+        const errorText = parseErrorMessage(error, "Unable to create account right now.");
+        const normalized = errorText.toLowerCase();
+        if (
+          normalized.includes("already registered") ||
+          normalized.includes("already exists") ||
+          normalized.includes("user exists")
+        ) {
+          return NextResponse.json(
+            { error: "This email is already registered. Please log in." },
+            { status: 409 }
+          );
+        }
+
+        return NextResponse.json({ error: errorText }, { status: 500 });
       }
 
-      return NextResponse.json({ error: errorText }, { status: 500 });
+      requiresEmailConfirmation = !data.session;
+      authUserId = data.user?.id ?? null;
+      authUserEmail = data.user?.email ?? email;
+      authUserName =
+        typeof data.user?.user_metadata?.full_name === "string" &&
+        data.user.user_metadata.full_name.trim()
+          ? data.user.user_metadata.full_name.trim()
+          : name;
+    } else if (config.adminAuthKey) {
+      const supabaseAdminAuthClient = createClient(config.supabaseUrl, config.adminAuthKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      });
+
+      const { data, error } = await supabaseAdminAuthClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: name,
+        },
+      });
+
+      if (error) {
+        const errorText = parseErrorMessage(error, "Unable to create account right now.");
+        const normalized = errorText.toLowerCase();
+        if (
+          normalized.includes("already registered") ||
+          normalized.includes("already exists") ||
+          normalized.includes("user exists") ||
+          normalized.includes("duplicate")
+        ) {
+          return NextResponse.json(
+            { error: "This email is already registered. Please log in." },
+            { status: 409 }
+          );
+        }
+
+        return NextResponse.json({ error: errorText }, { status: 500 });
+      }
+
+      requiresEmailConfirmation = false;
+      authUserId = data.user?.id ?? null;
+      authUserEmail = data.user?.email ?? email;
+      authUserName =
+        typeof data.user?.user_metadata?.full_name === "string" &&
+        data.user.user_metadata.full_name.trim()
+          ? data.user.user_metadata.full_name.trim()
+          : name;
     }
 
     // Optional compatibility write for legacy credential table.
@@ -146,19 +228,18 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({
-      ok: true,
-      requiresEmailConfirmation: !data.session,
-      user: {
-        id: data.user?.id ?? null,
-        email: data.user?.email ?? email,
-        name:
-          typeof data.user?.user_metadata?.full_name === "string" &&
-          data.user.user_metadata.full_name.trim()
-            ? data.user.user_metadata.full_name.trim()
-            : name,
+    return NextResponse.json(
+      {
+        ok: true,
+        requiresEmailConfirmation,
+        user: {
+          id: authUserId,
+          email: authUserEmail ?? email,
+          name: authUserName ?? name,
+        },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     return NextResponse.json(
       { error: parseErrorMessage(error, "Sign up failed. Please try again.") },
