@@ -1,0 +1,3 @@
+{
+  "/api/transactions/bulk-categorize/route": "app/api/transactions/bulk-categorize/route.js"
+}

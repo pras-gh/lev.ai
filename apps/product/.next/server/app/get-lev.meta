@@ -1,0 +1,17 @@
+{
+  "status": 307,
+  "headers": {
+    "location": "https://cal.com/get-trai.ai",
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/get-lev/layout,_N_T_/get-lev/page,_N_T_/get-lev"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/get-lev/__PAGE__",
+    "/get-lev",
+    "/_index",
+    "/_head"
+  ]
+}

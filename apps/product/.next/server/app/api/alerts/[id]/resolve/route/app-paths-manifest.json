@@ -1,0 +1,3 @@
+{
+  "/api/alerts/[id]/resolve/route": "app/api/alerts/[id]/resolve/route.js"
+}

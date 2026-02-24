@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../../apps/marketing/src/app/dashboard/page.tsx"],"sourcesContent":["import { redirect } from \"next/navigation\";\n\nexport default function DashboardRouteAliasPage() {\n  redirect(\"/app/dashboard\");\n}\n"],"names":[],"mappings":"oUAAA,EAAA,CAAA,CAAA,OAAA,IAAA,EAAA,EAAA,CAAA,CAAA,OAEe,SAAS,IACtB,CAAA,EAAA,EAAA,QAAA,AAAQ,EAAC,iBACX"}

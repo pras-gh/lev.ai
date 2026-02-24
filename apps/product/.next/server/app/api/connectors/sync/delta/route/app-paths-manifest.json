@@ -1,0 +1,3 @@
+{
+  "/api/connectors/sync/delta/route": "app/api/connectors/sync/delta/route.js"
+}

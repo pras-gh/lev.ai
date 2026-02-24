@@ -1,0 +1,11 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/connectors/sync/delta/route.js")
+R.c("server/chunks/_323cbf29._.js")
+R.c("server/chunks/apps_marketing_src_lib_a131d017._.js")
+R.c("server/chunks/[root-of-the-server]__87f07efd._.js")
+R.c("server/chunks/node_modules_next_f2da0d3e._.js")
+R.c("server/chunks/[root-of-the-server]__9d217c47._.js")
+R.c("server/chunks/node_modules_next_dist_3cae5f3a._.js")
+R.c("server/chunks/[root-of-the-server]__e7a16c5b._.js")
+R.c("server/chunks/bbfa2__next-internal_server_app_api_connectors_sync_delta_route_actions_b73da471.js")
+R.m(70732)
+module.exports=R.m(70732).exports

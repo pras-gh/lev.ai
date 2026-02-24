@@ -1,0 +1,3 @@
+module.exports=[93695,(a,b,c)=>{b.exports=a.x("next/dist/shared/lib/no-fallback-error.external.js",()=>require("next/dist/shared/lib/no-fallback-error.external.js"))},3521,a=>{a.n(a.i(40534))},43619,a=>{a.n(a.i(79962))},13718,a=>{a.n(a.i(85523))},18198,a=>{a.n(a.i(45518))},62212,a=>{a.n(a.i(66114))},10552,a=>{a.n(a.i(81735))},53193,a=>{a.n(a.i(28404))},31045,a=>{"use strict";a.i(70396);var b=a.i(73727);function c(){(0,b.redirect)("/app/ledger")}a.s(["default",()=>c])}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__2ddf00c7._.js.map

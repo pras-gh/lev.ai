@@ -1,0 +1,3 @@
+{
+  "/api/metrics/health/route": "app/api/metrics/health/route.js"
+}

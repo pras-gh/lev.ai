@@ -1,0 +1,145 @@
+@keyframes product-reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.product-shell {
+  --font-ui: "Avenir Next", "Avenir", "SF Pro Display", "Segoe UI", sans-serif;
+  --bg: #060606;
+  --surface: #111214;
+  --card: #f5f4f1;
+  --border: #d7d5cf;
+  --text: #161616;
+  --muted: #3f3f3b;
+  --subtle: #5b5b57;
+  --accent: #161616;
+  --accent-soft: rgba(255, 255, 255, 0.12);
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --shadow-soft: 0 14px 36px rgba(8, 8, 8, 0.12);
+  --lev-text: #f5f5f4;
+  min-height: 100vh;
+  background:
+    radial-gradient(1400px 620px at 70% 105%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 52%),
+    radial-gradient(900px 420px at 14% -8%, rgba(150, 150, 150, 0.14) 0%, rgba(150, 150, 150, 0) 58%),
+    linear-gradient(180deg, #070708 0%, #050505 68%, #0a0703 100%);
+  color: var(--lev-text);
+  font-family: var(--font-ui);
+}
+
+.product-shell .ds-title {
+  font-size: clamp(32px, 3vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.product-shell .ds-kpi {
+  font-size: clamp(44px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.product-shell .ds-label {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-shell .ui-panel-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xl);
+  background: rgba(6, 6, 6, 0.78);
+  backdrop-filter: blur(14px);
+}
+
+.product-shell .ui-surface-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+
+.product-shell .ui-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.product-shell .ui-muted {
+  color: var(--subtle);
+}
+
+.product-shell .ui-button {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.product-shell .ui-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.product-shell .ui-button-solid {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.product-shell .ui-button-solid:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.product-shell :where(a, button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.22);
+}
+
+.product-shell [data-reveal="true"] {
+  opacity: 0;
+  animation: product-reveal-up 520ms cubic-bezier(0.24, 0.76, 0.24, 1) forwards;
+}
+
+.product-shell [data-reveal-delay="1"] {
+  animation-delay: 80ms;
+}
+
+.product-shell [data-reveal-delay="2"] {
+  animation-delay: 160ms;
+}
+
+.product-shell [data-reveal-delay="3"] {
+  animation-delay: 240ms;
+}
+
+.product-shell [data-reveal-delay="4"] {
+  animation-delay: 320ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-shell [data-reveal="true"] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

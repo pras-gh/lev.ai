@@ -1,0 +1,12 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/connectors/webhooks/[provider]/route.js")
+R.c("server/chunks/apps_marketing_src_lib_connectors_registry_ts_d9ecff40._.js")
+R.c("server/chunks/_ec5b54eb._.js")
+R.c("server/chunks/[root-of-the-server]__51427a7a._.js")
+R.c("server/chunks/apps_marketing_src_lib_a131d017._.js")
+R.c("server/chunks/[root-of-the-server]__9d217c47._.js")
+R.c("server/chunks/node_modules_next_dist_3cae5f3a._.js")
+R.c("server/chunks/apps_marketing_src_lib_f380112e._.js")
+R.c("server/chunks/node_modules_next_f2da0d3e._.js")
+R.c("server/chunks/37130_server_app_api_connectors_webhooks_[provider]_route_actions_e04f11bc.js")
+R.m(48920)
+module.exports=R.m(48920).exports

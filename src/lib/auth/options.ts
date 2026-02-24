@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
+import { verifyPassword } from "@/lib/auth/password";
 import { createSupabaseAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 
 const loginSchema = z.object({
@@ -21,10 +22,6 @@ const nextAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET ||
 
 export function getMissingAuthEnvKeys() {
   const missing: string[] = [];
-
-  if (!process.env.NEXTAUTH_URL && !process.env.AUTH_URL) {
-    missing.push("NEXTAUTH_URL");
-  }
 
   if (!process.env.NEXTAUTH_SECRET && !process.env.AUTH_SECRET) {
     missing.push("NEXTAUTH_SECRET");
@@ -88,7 +85,7 @@ async function authorizeWithSupabase(email: string, password: string) {
       return null;
     }
 
-    if (!secureEquals(password, data.password)) {
+    if (!verifyPassword(password, data.password)) {
       return null;
     }
 
