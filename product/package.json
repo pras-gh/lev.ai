@@ -1,0 +1,53 @@
+{
+  "name": "core-sell-pro",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "next build --no-lint",
+    "start": "next start",
+    "db:migrate": "node scripts/db/migrate.cjs",
+    "db:smoke": "node scripts/db/smoke.cjs",
+    "qa:click-flow": "node scripts/qa/click-flow-smoke.mjs",
+    "db:csv-proof": "node scripts/db/quickCsvProof.mjs",
+    "db:seed-categories": "node scripts/db/seedCategories.mjs",
+    "db:autotag-v0": "node scripts/db/backfillAutoTagV0.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^6.4.1",
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-table": "^8.21.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.574.0",
+    "next": "^15.0.0",
+    "papaparse": "^5.5.3",
+    "pg": "^8.13.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.71.1",
+    "recharts": "^3.7.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/node": "^22.10.2",
+    "@types/papaparse": "^5.5.2",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "prisma": "^6.4.1",
+    "tailwindcss": "^4.2.0",
+    "typescript": "^5.7.2"
+  }
+}
