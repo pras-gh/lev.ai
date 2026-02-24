@@ -1,0 +1,246 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TxnType {
+  credit
+  debit
+
+  @@map("txn_type")
+}
+
+enum TxnStatus {
+  pending
+  posted
+  reversed
+
+  @@map("txn_status")
+}
+
+model Business {
+  id             BigInt         @id @default(autoincrement())
+  publicId       String         @unique @default(cuid()) @map("public_id")
+  name           String
+  legalName      String?        @map("legal_name")
+  countryCode    String         @default("IN") @db.Char(2) @map("country_code")
+  timezone       String         @default("Asia/Kolkata")
+  baseCurrency   String         @default("INR") @db.Char(3) @map("base_currency")
+  isActive       Boolean        @default(true) @map("is_active")
+  categories     Category[]
+  transactions   Transaction[]
+  alerts         Alert[]
+  workspace      Workspace?
+  monthlyReports MonthlyReport[]
+  auditLogs      AuditLog[]
+  createdAt      DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime       @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@map("businesses")
+}
+
+model Category {
+  id           BigInt         @id @default(autoincrement())
+  publicId     String         @unique @default(cuid()) @map("public_id")
+  businessId   BigInt         @map("business_id")
+  workspaceId  String?        @db.Uuid @map("workspace_id")
+  name         String
+  kind         String
+  type         String?
+  description  String?
+  business     Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workspace    Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt    DateTime       @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt    DateTime       @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([businessId, name])
+  @@index([businessId])
+  @@index([workspaceId])
+  @@map("categories")
+}
+
+model Transaction {
+  id            BigInt        @id @default(autoincrement())
+  publicId      String        @unique @default(cuid()) @map("public_id")
+  businessId    BigInt        @map("business_id")
+  workspaceId   String?       @db.Uuid @map("workspace_id")
+
+  amount        Decimal       @db.Decimal(14, 2) @map("amount_minor")
+  currency      String        @default("INR") @db.Char(3) @map("currency_code")
+  type          TxnType       @map("direction")
+  status        TxnStatus     @default(posted)
+
+  txnDate       DateTime      @db.Timestamptz(6) @map("occurred_at")
+  bookedAt      DateTime?     @db.Timestamptz(6) @map("booked_at")
+
+  description   String?
+  merchant      String?       @map("counterparty")
+  reference     String?       @map("external_ref")
+
+  categoryId    BigInt?       @map("category_id")
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workspace     Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  externalId    String?       @map("external_id")
+  rowHash       String?       @map("row_hash")
+
+  isDeleted     Boolean       @default(false) @map("is_hidden")
+  deletedAt     DateTime?     @db.Timestamptz(6) @map("hidden_at")
+  deleteReason  String?       @map("hidden_reason")
+
+  reversedById  BigInt?       @unique @map("reversed_by_transaction_id")
+  reversalOfId  BigInt?       @unique @map("reversal_of_transaction_id")
+  reversedBy    Transaction?  @relation("TxnReversedByLink", fields: [reversedById], references: [id], onDelete: SetNull)
+  reversedTxn   Transaction?  @relation("TxnReversedByLink")
+  reversalOf    Transaction?  @relation("TxnReversalOfLink", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversalTxn   Transaction?  @relation("TxnReversalOfLink")
+
+  source        String        @default("manual")
+  gstApplicable Boolean       @default(false) @map("gst_applicable")
+  gstRate       Decimal?      @db.Decimal(6, 3) @map("gst_rate")
+  gstAmount     Decimal?      @db.Decimal(14, 2) @map("gst_amount")
+  matched       Boolean       @default(false)
+  matchGroupId  String?       @db.Uuid @map("match_group_id")
+  confidence    Decimal?      @db.Decimal(5, 4)
+  metadata      Json          @default("{}")
+  alerts        Alert[]
+
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@index([businessId, txnDate])
+  @@index([businessId, isDeleted])
+  @@index([businessId, status])
+  @@index([workspaceId])
+  @@map("transactions")
+}
+
+model Alert {
+  id            BigInt        @id @default(autoincrement())
+  publicId      String        @unique @default(cuid()) @map("public_id")
+  businessId    BigInt        @map("business_id")
+  workspaceId   String?       @db.Uuid @map("workspace_id")
+  transactionId BigInt?       @map("transaction_id")
+  alertType     String        @map("alert_type")
+  type          String?
+  severity      String
+  status        String        @default("open")
+  message       String
+  title         String?
+  body          String?
+  relatedTransactionIds Json? @map("related_transaction_ids")
+  payload       Json          @default("{}")
+  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workspace     Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  transaction   Transaction?  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  resolvedAt    DateTime?     @db.Timestamptz(6) @map("resolved_at")
+
+  @@index([businessId, status, severity])
+  @@index([workspaceId, status, severity])
+  @@index([transactionId])
+  @@map("alerts")
+}
+
+model Workspace {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessId    BigInt          @unique @map("business_id")
+  name          String
+  business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  categories    Category[]
+  transactions  Transaction[]
+  alerts        Alert[]
+  integrations  Integration[]
+  monthlyReports MonthlyReport[]
+  auditLogs      AuditLog[]
+  members       WorkspaceMember[]
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  workspaceId  String    @db.Uuid @map("workspace_id")
+  userId       String    @db.Uuid @map("user_id")
+  role         String    @default("member")
+  status       String    @default("active")
+  onboardingCompletedAt DateTime? @db.Timestamptz(6) @map("onboarding_completed_at")
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+}
+
+model Integration {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId  String    @db.Uuid @map("workspace_id")
+  provider     String
+  status       String    @default("disconnected")
+  lastSyncedAt DateTime? @db.Timestamptz(6) @map("last_synced_at")
+  meta         Json      @default("{}")
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([workspaceId, provider])
+  @@index([workspaceId, status])
+  @@map("integrations")
+}
+
+model MonthlyReport {
+  id                BigInt      @id @default(autoincrement())
+  publicId          String      @unique @default(cuid()) @map("public_id")
+  businessId        BigInt      @map("business_id")
+  workspaceId       String      @db.Uuid @map("workspace_id")
+  reportMonth       DateTime    @db.Date @map("report_month")
+  status            String      @default("draft")
+  totalIncomeMinor  BigInt      @default(0) @map("total_income_minor")
+  totalExpenseMinor BigInt      @default(0) @map("total_expense_minor")
+  netCashflowMinor  BigInt      @default(0) @map("net_cashflow_minor")
+  reportJson        Json        @default("{}") @map("report_json")
+  generatedAt       DateTime?   @db.Timestamptz(6) @map("generated_at")
+  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  workspace         Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt         DateTime    @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([businessId, reportMonth])
+  @@unique([workspaceId, reportMonth])
+  @@index([businessId, reportMonth])
+  @@index([workspaceId, reportMonth])
+  @@map("monthly_reports")
+}
+
+model AuditLog {
+  id          BigInt    @id @default(autoincrement())
+  publicId    String    @unique @default(cuid()) @map("public_id")
+  businessId  BigInt?   @map("business_id")
+  workspaceId String?   @db.Uuid @map("workspace_id")
+  actorType   String    @map("actor_type")
+  actorId     String?   @map("actor_id")
+  entityType  String    @map("entity_type")
+  entityId    String    @map("entity_id")
+  action      String
+  beforeState Json?     @map("before_state")
+  afterState  Json?     @map("after_state")
+  requestId   String?   @map("request_id")
+  ipAddress   String?   @db.Inet @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+
+  @@index([businessId, entityType, createdAt])
+  @@index([workspaceId, entityType, createdAt])
+  @@map("audit_logs")
+}

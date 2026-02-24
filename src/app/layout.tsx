@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { OrangeCursor } from "@/components/orange-cursor";
 import { Providers } from "@/components/providers";
+import "@/styles/product-dashboard.css";
 import "./globals.css";
 
 const SITE_URL = "https://www.usetrailai.com";
