@@ -9,6 +9,10 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
+  if (!session.user.isPaid) {
+    redirect("/?access=restricted");
+  }
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1220px] px-6 py-24 sm:px-8">
       <section className="glass-panel rounded-[26px] border border-white/12 p-8">

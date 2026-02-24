@@ -217,7 +217,7 @@ export async function POST(request: Request) {
             email,
             full_name: name,
             password: hashPassword(password),
-            is_paid: true,
+            is_paid: false,
           },
           {
             onConflict: "email",

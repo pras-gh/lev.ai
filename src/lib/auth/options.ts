@@ -19,6 +19,11 @@ type DashboardUserRow = {
   password: string | null;
 };
 
+type DashboardAccessRow = {
+  full_name: string | null;
+  is_paid: boolean | null;
+};
+
 const nextAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
 
 export function getMissingAuthEnvKeys() {
@@ -120,15 +125,33 @@ async function authorizeWithSupabaseAuth(email: string, password: string) {
       return null;
     }
 
+    const fallbackName =
+      typeof data.user.user_metadata?.full_name === "string" &&
+      data.user.user_metadata.full_name.trim()
+        ? data.user.user_metadata.full_name.trim()
+        : "Trail User";
+
+    let paidAccess: DashboardAccessRow | null = null;
+    if (hasSupabaseAdminEnv()) {
+      try {
+        const supabaseAdmin = createSupabaseAdminClient();
+        const { data: accessRow } = await supabaseAdmin
+          .from("dashboard_users")
+          .select("full_name,is_paid")
+          .eq("email", email)
+          .limit(1)
+          .maybeSingle<DashboardAccessRow>();
+        paidAccess = accessRow ?? null;
+      } catch {
+        paidAccess = null;
+      }
+    }
+
     return {
       id: data.user.id,
       email: data.user.email ?? email,
-      name:
-        typeof data.user.user_metadata?.full_name === "string" &&
-        data.user.user_metadata.full_name.trim()
-          ? data.user.user_metadata.full_name.trim()
-          : "Trail User",
-      isPaid: true,
+      name: paidAccess?.full_name?.trim() || fallbackName,
+      isPaid: Boolean(paidAccess?.is_paid),
     };
   } catch {
     return null;

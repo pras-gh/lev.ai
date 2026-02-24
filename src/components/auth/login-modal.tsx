@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -40,6 +41,7 @@ const signupSchema = z
 
 type SignupValues = z.infer<typeof signupSchema>;
 type AuthMode = "login" | "signup";
+type AuthResult = "ok" | "restricted" | "error";
 
 type LoginModalProps = {
   triggerClassName?: string;
@@ -52,6 +54,8 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showEarlyAccessCta, setShowEarlyAccessCta] = useState(false);
+  const bookDemoUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -72,9 +76,11 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
   });
 
   const isSignedIn = Boolean(session?.user);
-  const triggerLabel = status === "loading" ? "Login" : isSignedIn ? "Account" : "Login / Sign up";
+  const triggerLabel = status === "loading" ? "User Sign In" : isSignedIn ? "Account" : "User Sign In";
 
-  async function signInAndRedirect(email: string, password: string) {
+  async function signInAndRedirect(email: string, password: string): Promise<AuthResult> {
+    setShowEarlyAccessCta(false);
+
     const response = await signIn("credentials", {
       email,
       password,
@@ -83,22 +89,29 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
     if (!response) {
       setErrorMessage("Unable to sign in right now. Try again.");
-      return false;
+      return "error";
     }
 
     if (response.error) {
       if (response.error === "Configuration") {
         setErrorMessage("Login is not configured yet. Please try again shortly.");
-        return false;
+        return "error";
       }
       setErrorMessage("Invalid email or password.");
-      return false;
+      return "error";
     }
 
     const nextSession = await getSession();
     if (!nextSession?.user) {
       setErrorMessage("Unable to create login session. Try again.");
-      return false;
+      return "error";
+    }
+
+    if (!nextSession.user.isPaid) {
+      await signOut({ redirect: false });
+      setShowEarlyAccessCta(true);
+      setErrorMessage("This email is not approved yet. Book a demo for early access.");
+      return "restricted";
     }
 
     const nextPath =
@@ -109,7 +122,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     signupForm.reset();
     setOpen(false);
     router.push(targetPath);
-    return true;
+    return "ok";
   }
 
   async function handleLogin(values: LoginValues) {
@@ -151,8 +164,8 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
       return;
     }
 
-    const signedIn = await signInAndRedirect(values.email, values.password);
-    if (!signedIn) {
+    const signInResult = await signInAndRedirect(values.email, values.password);
+    if (signInResult === "error") {
       setAuthMode("login");
       loginForm.setValue("email", values.email);
       setErrorMessage("Account created. Please log in.");
@@ -172,6 +185,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         if (nextOpen) {
           setErrorMessage(null);
           setAuthMode("login");
+          setShowEarlyAccessCta(false);
         }
       }}
     >
@@ -358,6 +372,12 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
         {errorMessage ? (
           <p className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-xs text-rose-200">{errorMessage}</p>
+        ) : null}
+
+        {!isSignedIn && showEarlyAccessCta ? (
+          <a href={bookDemoUrl} className="lev-button lev-button--hero-dark w-full justify-center">
+            Book demo for early access
+          </a>
         ) : null}
       </DialogContent>
     </Dialog>
