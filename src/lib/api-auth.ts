@@ -1,4 +1,6 @@
 import { NextRequest } from "next/server";
+import { createHash } from "node:crypto";
+import { getToken } from "next-auth/jwt";
 import type { PoolClient } from "pg";
 import type { ApiScopeInput, ResolvedScope } from "@/lib/api-utils";
 import { resolveScope } from "@/lib/api-utils";
@@ -22,6 +24,9 @@ type SessionUser = {
   userId: string;
   email: string | null;
 };
+
+const nextAuthSecret =
+  process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
 
 export type AuthorizedScope = ResolvedScope & {
   userId: string;
@@ -74,6 +79,52 @@ function resolveSupabaseAuthConfig(): { supabaseUrl: string; supabaseAnonKey: st
 
 function looksLikeJwt(value: string): boolean {
   return JWT_REGEX.test(value.trim());
+}
+
+function deterministicUuidFromSeed(seed: string): string {
+  const digest = createHash("sha256").update(seed).digest("hex");
+  const part1 = digest.slice(0, 8);
+  const part2 = digest.slice(8, 12);
+  const part3Raw = parseInt(digest.slice(12, 16), 16);
+  const part4Raw = parseInt(digest.slice(16, 20), 16);
+  const part3 = ((part3Raw & 0x0fff) | 0x4000).toString(16).padStart(4, "0");
+  const part4 = ((part4Raw & 0x3fff) | 0x8000).toString(16).padStart(4, "0");
+  const part5 = digest.slice(20, 32);
+  return `${part1}-${part2}-${part3}-${part4}-${part5}`;
+}
+
+function normalizeSessionUserId(candidateId: string | null, email: string | null): string {
+  if (candidateId && UUID_REGEX.test(candidateId)) {
+    return candidateId;
+  }
+
+  const seed = candidateId || email || "trail-anon-session";
+  return deterministicUuidFromSeed(seed);
+}
+
+async function validateNextAuthSession(request: NextRequest): Promise<SessionUser | null> {
+  const token = await getToken({
+    req: request,
+    secret: nextAuthSecret,
+  });
+
+  if (!token) {
+    return null;
+  }
+
+  const email =
+    typeof token.email === "string" && token.email.trim() ? token.email.trim().toLowerCase() : null;
+  const candidateId =
+    typeof token.id === "string" && token.id.trim()
+      ? token.id.trim()
+      : typeof token.sub === "string" && token.sub.trim()
+        ? token.sub.trim()
+        : null;
+
+  return {
+    userId: normalizeSessionUserId(candidateId, email),
+    email,
+  };
 }
 
 function parseTokenFromUnknown(value: unknown): string | null {
@@ -274,7 +325,21 @@ export async function resolveSessionUser(request: NextRequest): Promise<{
   userId: string;
   email: string | null;
 }> {
-  return validateSupabaseSession(request);
+  try {
+    return await validateSupabaseSession(request);
+  } catch (error) {
+    const authStatus = getAuthErrorStatus(error);
+    if (authStatus && authStatus !== 401 && authStatus !== 403) {
+      throw error;
+    }
+  }
+
+  const nextAuthSession = await validateNextAuthSession(request);
+  if (nextAuthSession) {
+    return nextAuthSession;
+  }
+
+  authError("Missing access token. Send Authorization: Bearer <token>.", 401);
 }
 
 export async function resolveAuthorizedScope(params: {
@@ -282,7 +347,7 @@ export async function resolveAuthorizedScope(params: {
   scope: ApiScopeInput;
   client?: PoolClient;
 }): Promise<AuthorizedScope> {
-  const session = await validateSupabaseSession(params.request);
+  const session = await resolveSessionUser(params.request);
   const resolvedScope = await resolveScope(params.scope, params.client, {
     allowWorkspaceAutocreate: false
   });

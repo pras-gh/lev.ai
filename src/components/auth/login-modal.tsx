@@ -96,7 +96,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
     const nextPath =
       typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
-    const targetPath = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/dashboard";
+    const targetPath = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/onboarding";
 
     loginForm.reset();
     setOpen(false);
