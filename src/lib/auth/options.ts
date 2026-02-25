@@ -345,12 +345,12 @@ export const authOptions: NextAuthOptions = {
 
       const email = typeof user.email === "string" ? user.email.trim().toLowerCase() : "";
       if (!email) {
-        return "/access-denied";
+        return "/private-access";
       }
 
       const allowed = await resolveAllowedAccess(email, user.name ?? "Trail User", "trial");
       if (allowed.planStatus !== "active") {
-        return "/access-denied";
+        return "/private-access";
       }
 
       return true;

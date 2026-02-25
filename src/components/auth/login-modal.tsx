@@ -17,7 +17,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -34,18 +33,6 @@ type LoginModalProps = {
   onTriggerClick?: () => void;
 };
 
-function restrictedMessage(planStatus: PlanStatus) {
-  if (planStatus === "overdue") {
-    return "Your account is overdue. Book a demo to restore access.";
-  }
-
-  if (planStatus === "cancelled") {
-    return "Your account is cancelled. Book a demo to reactivate access.";
-  }
-
-  return "This email is not approved yet. Book a demo for early access.";
-}
-
 function normalizePlanStatus(value: unknown): PlanStatus {
   if (value === "active" || value === "overdue" || value === "cancelled" || value === "trial") {
     return value;
@@ -58,8 +45,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showEarlyAccessCta, setShowEarlyAccessCta] = useState(false);
-  const bookDemoUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -80,7 +65,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
   }
 
   async function signInAndRedirect(email: string, password: string): Promise<AuthResult> {
-    setShowEarlyAccessCta(false);
     setErrorMessage(null);
 
     const response = await signIn("credentials", {
@@ -112,8 +96,8 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     const planStatus = normalizePlanStatus(nextSession.user.planStatus);
     if (planStatus !== "active") {
       await signOut({ redirect: false });
-      setShowEarlyAccessCta(true);
-      setErrorMessage(restrictedMessage(planStatus));
+      setOpen(false);
+      router.replace("/private-access");
       return "restricted";
     }
 
@@ -139,7 +123,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         setOpen(nextOpen);
         if (nextOpen) {
           setErrorMessage(null);
-          setShowEarlyAccessCta(false);
         }
       }}
     >
@@ -217,12 +200,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
         {errorMessage ? (
           <p className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-xs text-rose-200">{errorMessage}</p>
-        ) : null}
-
-        {!isSignedIn && showEarlyAccessCta ? (
-          <a href={bookDemoUrl} className="lev-button lev-button--hero-dark w-full justify-center">
-            Book demo for early access
-          </a>
         ) : null}
       </DialogContent>
     </Dialog>

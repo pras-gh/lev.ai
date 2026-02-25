@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   }
 
   if (session.user.planStatus !== "active") {
-    redirect("/billing");
+    redirect("/private-access");
   }
 
   return (
