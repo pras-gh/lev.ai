@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { verifyPassword } from "@/lib/auth/password";
@@ -35,12 +36,18 @@ type AllowedUserRow = {
   plan_status: string | null;
 };
 
+type AllowedUserLegacyRow = {
+  full_name: string | null;
+  status: string | null;
+};
+
 type DashboardAccessRow = {
   full_name: string | null;
   is_paid: boolean | null;
 };
 
 const nextAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
+const hasGoogleProviderEnv = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
 export function getMissingAuthEnvKeys() {
   const missing: string[] = [];
@@ -161,6 +168,22 @@ async function resolveAllowedAccess(
       };
     }
 
+    if (allowedError) {
+      const allowedLegacyResult = await supabaseAdmin
+        .from("allowed_users")
+        .select("full_name,status")
+        .eq("email", email)
+        .limit(1)
+        .maybeSingle<AllowedUserLegacyRow>();
+
+      if (!allowedLegacyResult.error && allowedLegacyResult.data) {
+        return {
+          name: allowedLegacyResult.data.full_name?.trim() || fallbackName,
+          planStatus: normalizePlanStatus(allowedLegacyResult.data.status, fallbackPlanStatus),
+        };
+      }
+    }
+
     const { data: dashboardAccessRow, error: dashboardAccessError } = await supabaseAdmin
       .from("dashboard_users")
       .select("full_name,is_paid")
@@ -268,47 +291,102 @@ async function authorizeWithSupabase(email: string, password: string): Promise<A
   }
 }
 
+const credentialsProvider = CredentialsProvider({
+  name: "Email and Password",
+  credentials: {
+    email: { label: "Email", type: "email" },
+    password: { label: "Password", type: "password" },
+  },
+  async authorize(credentials) {
+    const parsed = loginSchema.safeParse(credentials);
+    if (!parsed.success) {
+      return null;
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+    const password = parsed.data.password;
+
+    const authUser = await authorizeWithSupabaseAuth(email, password);
+    if (authUser) {
+      return authUser;
+    }
+
+    const dbUser = await authorizeWithSupabase(email, password);
+    if (dbUser) {
+      return dbUser;
+    }
+
+    return authorizeWithEnv(email, password);
+  },
+});
+
+const providers: NonNullable<NextAuthOptions["providers"]> = [credentialsProvider];
+
+if (hasGoogleProviderEnv) {
+  providers.push(
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    })
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   secret: nextAuthSecret,
   session: {
     strategy: "jwt",
   },
-  providers: [
-    CredentialsProvider({
-      name: "Email and Password",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) {
-          return null;
-        }
-
-        const email = parsed.data.email.trim().toLowerCase();
-        const password = parsed.data.password;
-
-        const authUser = await authorizeWithSupabaseAuth(email, password);
-        if (authUser) {
-          return authUser;
-        }
-
-        const dbUser = await authorizeWithSupabase(email, password);
-        if (dbUser) {
-          return dbUser;
-        }
-
-        return authorizeWithEnv(email, password);
-      },
-    }),
-  ],
+  providers,
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") {
+        return true;
+      }
+
+      const email = typeof user.email === "string" ? user.email.trim().toLowerCase() : "";
+      if (!email) {
+        return "/access-denied";
+      }
+
+      const allowed = await resolveAllowedAccess(email, user.name ?? "Trail User", "trial");
+      if (allowed.planStatus !== "active") {
+        return "/access-denied";
+      }
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.planStatus = user.planStatus;
-        token.isPaid = user.planStatus === "active";
+        const email =
+          typeof user.email === "string" && user.email.trim()
+            ? user.email.trim().toLowerCase()
+            : typeof token.email === "string"
+              ? token.email.trim().toLowerCase()
+              : "";
+
+        const fallbackPlanStatus = normalizePlanStatus(
+          (user as { planStatus?: unknown }).planStatus,
+          (user as { isPaid?: boolean }).isPaid ? "active" : "trial"
+        );
+
+        let resolvedName =
+          typeof user.name === "string" && user.name.trim() ? user.name.trim() : "Trail User";
+        let resolvedPlanStatus = fallbackPlanStatus;
+
+        if (email && account?.provider === "google") {
+          const allowed = await resolveAllowedAccess(email, resolvedName, "trial");
+          resolvedName = allowed.name;
+          resolvedPlanStatus = allowed.planStatus;
+        }
+
+        token.id = String((user as { id?: string }).id ?? token.id ?? token.sub ?? email);
+        token.email = email || token.email;
+        token.name = resolvedName;
+        token.planStatus = resolvedPlanStatus;
+        token.isPaid = resolvedPlanStatus === "active";
+      } else {
+        token.planStatus = normalizePlanStatus(token.planStatus, token.isPaid ? "active" : "trial");
+        token.isPaid = token.planStatus === "active";
       }
 
       return token;
