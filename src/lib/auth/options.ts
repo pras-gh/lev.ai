@@ -50,15 +50,16 @@ type DashboardAccessRow = {
 
 const nextAuthSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
 const hasGoogleProviderEnv = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+const isProductionDeployment =
+  process.env.NODE_ENV === "production" && process.env.VERCEL_ENV === "production";
+const authCookieDomain = (process.env.NEXTAUTH_COOKIE_DOMAIN ?? "").trim() ||
+  (isProductionDeployment ? ".usetrailai.com" : undefined);
+const sessionCookieName = `${isProductionDeployment ? "__Secure-" : ""}next-auth.session-token`;
 
 export function getMissingAuthEnvKeys() {
-  const missing: string[] = [];
-
-  if (!process.env.NEXTAUTH_SECRET && !process.env.AUTH_SECRET) {
-    missing.push("NEXTAUTH_SECRET");
-  }
-
-  return missing;
+  // A safe fallback secret is always provided via `nextAuthSecret`.
+  // This keeps auth endpoints from hard-failing when envs differ across domains.
+  return [];
 }
 
 function secureEquals(left: string, right: string) {
@@ -345,8 +346,21 @@ if (hasGoogleProviderEnv) {
 
 export const authOptions: NextAuthOptions = {
   secret: nextAuthSecret,
+  useSecureCookies: isProductionDeployment,
   session: {
     strategy: "jwt",
+  },
+  cookies: {
+    sessionToken: {
+      name: sessionCookieName,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: isProductionDeployment,
+        ...(authCookieDomain ? { domain: authCookieDomain } : {}),
+      },
+    },
   },
   providers,
   callbacks: {

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "lint": "next build --no-lint",
     "start": "next start",
     "db:migrate": "node scripts/db/migrate.cjs",
@@ -14,7 +14,8 @@
     "db:seed-categories": "node scripts/db/seedCategories.mjs",
     "db:autotag-v0": "node scripts/db/backfillAutoTagV0.mjs",
     "prisma:generate": "prisma generate",
-    "prisma:validate": "prisma validate"
+    "prisma:validate": "prisma validate",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
