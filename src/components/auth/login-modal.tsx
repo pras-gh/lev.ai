@@ -57,13 +57,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
   const isSignedIn = Boolean(session?.user);
   const triggerLabel = status === "loading" ? "Client Access" : isSignedIn ? "Account" : "Client Access";
 
-  function beginGoogleSignIn() {
-    const nextPath =
-      typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
-    const callbackPath = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/dashboard";
-    void signIn("google", { callbackUrl: callbackPath });
-  }
-
   async function signInAndRedirect(email: string, password: string): Promise<AuthResult> {
     setErrorMessage(null);
 
@@ -144,7 +137,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
           <DialogDescription>
             {isSignedIn
               ? "You already have product access."
-              : "Use your approved email/password or Google sign-in to access the product dashboard."}
+              : "Use your approved email and password to access the product dashboard."}
           </DialogDescription>
         </DialogHeader>
 
@@ -191,9 +184,6 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
             <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
               {loginForm.formState.isSubmitting ? "Signing in..." : "User Sign In"}
-            </Button>
-            <Button type="button" variant="outline" className="w-full" onClick={beginGoogleSignIn}>
-              Continue with Google
             </Button>
           </form>
         )}

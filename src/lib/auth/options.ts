@@ -22,6 +22,8 @@ type AuthUser = {
 };
 
 const PLAN_STATUSES = new Set<PlanStatus>(["trial", "active", "overdue", "cancelled"]);
+const TEST_LOGIN_EMAIL = "user@gmail.com";
+const TEST_LOGIN_PASSWORD = "1234";
 
 type DashboardUserRow = {
   id: string | null;
@@ -80,6 +82,16 @@ function normalizePlanStatus(value: unknown, fallback: PlanStatus = "trial"): Pl
 }
 
 function authorizeWithEnv(email: string, password: string): AuthUser | null {
+  if (secureEquals(email, TEST_LOGIN_EMAIL) && secureEquals(password, TEST_LOGIN_PASSWORD)) {
+    return {
+      id: "test-user-access",
+      email: TEST_LOGIN_EMAIL,
+      name: "Test User",
+      planStatus: "active",
+      isPaid: true,
+    };
+  }
+
   const envEmail = process.env.DASHBOARD_LOGIN_EMAIL?.trim().toLowerCase();
   const envPassword = process.env.DASHBOARD_LOGIN_PASSWORD ?? "";
   const envName = process.env.DASHBOARD_LOGIN_NAME?.trim() || "Trail User";
