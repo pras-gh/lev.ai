@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -37,6 +38,44 @@ function normalizePlanStatus(value: unknown): PlanStatus {
     return value;
   }
   return "trial";
+}
+
+function resolveProductUrl(nextPath: string | null): string {
+  const productAppUrl = normalizeBookingUrl(siteConfig.productAppUrl);
+
+  if (!nextPath) {
+    return productAppUrl;
+  }
+
+  if (/^https?:\/\//i.test(nextPath)) {
+    try {
+      const appOrigin = new URL(productAppUrl).origin;
+      const requestedUrl = new URL(nextPath);
+      if (requestedUrl.origin === appOrigin) {
+        return requestedUrl.toString();
+      }
+    } catch {
+      return productAppUrl;
+    }
+
+    return productAppUrl;
+  }
+
+  if (
+    nextPath.startsWith("/app") ||
+    nextPath.startsWith("/product") ||
+    nextPath.startsWith("/dashboard")
+  ) {
+    try {
+      const appOrigin = new URL(productAppUrl).origin;
+      const mappedPath = nextPath === "/product" ? "/" : nextPath;
+      return new URL(mappedPath, `${appOrigin}/`).toString();
+    } catch {
+      return productAppUrl;
+    }
+  }
+
+  return productAppUrl;
 }
 
 export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps) {
@@ -95,12 +134,15 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
     const nextPath =
       typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
-    const targetPath =
-      nextPath && (nextPath.startsWith("/app") || nextPath.startsWith("/product")) ? nextPath : "/product";
+    const targetUrl = resolveProductUrl(nextPath);
 
     loginForm.reset();
     setOpen(false);
-    router.push(targetPath);
+    if (typeof window !== "undefined") {
+      window.location.assign(targetUrl);
+      return "ok";
+    }
+    router.push("/product");
     return "ok";
   }
 
@@ -151,6 +193,10 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
                 className="lev-button lev-button--hero-dark"
                 onClick={() => {
                   setOpen(false);
+                  if (typeof window !== "undefined") {
+                    window.location.assign(normalizeBookingUrl(siteConfig.productAppUrl));
+                    return;
+                  }
                   router.push("/product");
                 }}
               >
