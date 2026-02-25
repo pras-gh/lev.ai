@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession, signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
@@ -96,7 +95,8 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
     const nextPath =
       typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
-    const targetPath = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/onboarding";
+    const targetPath =
+      nextPath && (nextPath.startsWith("/app") || nextPath.startsWith("/product")) ? nextPath : "/product";
 
     loginForm.reset();
     setOpen(false);
@@ -146,9 +146,16 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
             <p className="text-sm text-slate-300">Signed in as</p>
             <p className="text-sm font-semibold text-white">{session?.user?.email ?? "Unknown user"}</p>
             <div className="flex items-center gap-2">
-              <Link href="/app/dashboard" className="lev-button lev-button--hero-dark">
+              <button
+                type="button"
+                className="lev-button lev-button--hero-dark"
+                onClick={() => {
+                  setOpen(false);
+                  router.push("/product");
+                }}
+              >
                 Open Product
-              </Link>
+              </button>
               <Button variant="outline" onClick={() => void handleSignOut()}>
                 Sign out
               </Button>
