@@ -34,6 +34,13 @@ model Business {
   categories     Category[]
   transactions   Transaction[]
   alerts         Alert[]
+  accounts       Account[]
+  vendors        Vendor[]
+  customers      Customer[]
+  ledgerEntries  LedgerEntry[]
+  metricsCache   MetricCache[]
+  forecasts      Forecast[]
+  reconciliations Reconciliation[]
   workspace      Workspace?
   monthlyReports MonthlyReport[]
   auditLogs      AuditLog[]
@@ -83,7 +90,11 @@ model Transaction {
   reference     String?       @map("external_ref")
 
   categoryId    BigInt?       @map("category_id")
+  vendorId      String?       @db.Uuid @map("vendor_id")
+  customerId    String?       @db.Uuid @map("customer_id")
   category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  vendor        Vendor?       @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  customer      Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   workspace     Workspace?    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -110,6 +121,8 @@ model Transaction {
   confidence    Decimal?      @db.Decimal(5, 4)
   metadata      Json          @default("{}")
   alerts        Alert[]
+  ledgerEntries LedgerEntry[]
+  reconciliation Reconciliation?
 
   createdAt     DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
   updatedAt     DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
@@ -118,6 +131,8 @@ model Transaction {
   @@index([businessId, isDeleted])
   @@index([businessId, status])
   @@index([workspaceId])
+  @@index([vendorId])
+  @@index([customerId])
   @@map("transactions")
 }
 
@@ -156,6 +171,13 @@ model Workspace {
   categories    Category[]
   transactions  Transaction[]
   alerts        Alert[]
+  accounts      Account[]
+  vendors       Vendor[]
+  customers     Customer[]
+  ledgerEntries LedgerEntry[]
+  metricsCache  MetricCache[]
+  forecasts     Forecast[]
+  reconciliations Reconciliation[]
   integrations  Integration[]
   monthlyReports MonthlyReport[]
   auditLogs      AuditLog[]
@@ -189,12 +211,191 @@ model Integration {
   lastSyncedAt DateTime? @db.Timestamptz(6) @map("last_synced_at")
   meta         Json      @default("{}")
   workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  accounts     Account[]
   createdAt    DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
   updatedAt    DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
 
   @@unique([workspaceId, provider])
   @@index([workspaceId, status])
   @@map("integrations")
+}
+
+model Account {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId         String        @db.Uuid @map("workspace_id")
+  businessId          BigInt        @map("business_id")
+  integrationId       String?       @db.Uuid @map("integration_id")
+  accountType         String        @default("bank") @map("account_type")
+  name                String
+  accountNumberMasked String?       @map("account_number_masked")
+  ifsc                String?
+  currencyCode        String        @default("INR") @db.Char(3) @map("currency_code")
+  openingBalance      Decimal       @default(0) @db.Decimal(14, 2) @map("opening_balance")
+  currentBalance      Decimal?      @db.Decimal(14, 2) @map("current_balance")
+  isActive            Boolean       @default(true) @map("is_active")
+  metadata            Json          @default("{}")
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  integration         Integration?  @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+  ledgerEntries       LedgerEntry[]
+  createdAt           DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt           DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@index([workspaceId, accountType, name])
+  @@index([integrationId])
+  @@map("accounts")
+}
+
+model Vendor {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId      String        @db.Uuid @map("workspace_id")
+  businessId       BigInt        @map("business_id")
+  name             String
+  legalName        String?       @map("legal_name")
+  gstin            String?
+  pan              String?
+  email            String?
+  phone            String?
+  paymentTermsDays Int           @default(0) @map("payment_terms_days")
+  isActive         Boolean       @default(true) @map("is_active")
+  metadata         Json          @default("{}")
+  workspace        Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business         Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  ledgerEntries    LedgerEntry[]
+  createdAt        DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt        DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, isActive, name])
+  @@index([workspaceId, gstin])
+  @@map("vendors")
+}
+
+model Customer {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId    String        @db.Uuid @map("workspace_id")
+  businessId     BigInt        @map("business_id")
+  name           String
+  legalName      String?       @map("legal_name")
+  gstin          String?
+  pan            String?
+  email          String?
+  phone          String?
+  creditTermsDays Int          @default(0) @map("credit_terms_days")
+  isActive       Boolean       @default(true) @map("is_active")
+  metadata       Json          @default("{}")
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  ledgerEntries  LedgerEntry[]
+  createdAt      DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, isActive, name])
+  @@index([workspaceId, gstin])
+  @@map("customers")
+}
+
+model LedgerEntry {
+  id          BigInt       @id @default(autoincrement())
+  workspaceId String       @db.Uuid @map("workspace_id")
+  businessId  BigInt       @map("business_id")
+  journalId   String       @db.Uuid @default(dbgenerated("gen_random_uuid()")) @map("journal_id")
+  accountId   String?      @db.Uuid @map("account_id")
+  transactionId BigInt?    @map("transaction_id")
+  vendorId    String?      @db.Uuid @map("vendor_id")
+  customerId  String?      @db.Uuid @map("customer_id")
+  entryType   String       @map("entry_type")
+  amount      Decimal      @db.Decimal(14, 2)
+  currencyCode String      @default("INR") @db.Char(3) @map("currency_code")
+  occurredAt  DateTime     @default(now()) @db.Timestamptz(6) @map("occurred_at")
+  description String?
+  reference   String?
+  metadata    Json         @default("{}")
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business    Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  account     Account?     @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  vendor      Vendor?      @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@index([workspaceId, occurredAt])
+  @@index([workspaceId, accountId, occurredAt])
+  @@index([workspaceId, journalId])
+  @@index([transactionId])
+  @@map("ledger_entries")
+}
+
+model MetricCache {
+  id          BigInt    @id @default(autoincrement())
+  workspaceId String    @db.Uuid @map("workspace_id")
+  businessId  BigInt    @map("business_id")
+  metricKey   String    @map("metric_key")
+  metricScope Json      @default("{}") @map("metric_scope")
+  metricValue Json      @default("{}") @map("metric_value")
+  source      String    @default("system")
+  computedAt  DateTime  @default(now()) @db.Timestamptz(6) @map("computed_at")
+  expiresAt   DateTime? @db.Timestamptz(6) @map("expires_at")
+  metadata    Json      @default("{}")
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@index([workspaceId, computedAt])
+  @@index([workspaceId, expiresAt])
+  @@map("metrics_cache")
+}
+
+model Forecast {
+  id           BigInt    @id @default(autoincrement())
+  workspaceId  String    @db.Uuid @map("workspace_id")
+  businessId   BigInt    @map("business_id")
+  forecastType String    @map("forecast_type")
+  horizonStart DateTime  @db.Date @map("horizon_start")
+  horizonEnd   DateTime  @db.Date @map("horizon_end")
+  modelVersion String    @default("v1") @map("model_version")
+  status       String    @default("draft")
+  assumptions  Json      @default("{}")
+  forecastJson Json      @default("{}") @map("forecast_json")
+  confidencePct Decimal? @db.Decimal(5, 2) @map("confidence_pct")
+  createdBy    String?   @map("created_by")
+  generatedAt  DateTime? @db.Timestamptz(6) @map("generated_at")
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@unique([workspaceId, forecastType, horizonStart, horizonEnd, modelVersion])
+  @@index([workspaceId, status, generatedAt])
+  @@map("forecasts")
+}
+
+model Reconciliation {
+  id                        BigInt       @id @default(autoincrement())
+  workspaceId               String       @db.Uuid @map("workspace_id")
+  businessId                BigInt       @map("business_id")
+  transactionId             BigInt       @unique @map("transaction_id")
+  state                     String       @default("unmatched")
+  matchGroupId              String?      @db.Uuid @map("match_group_id")
+  matchedWithTransactionIds Json         @default("[]") @map("matched_with_transaction_ids")
+  confidence                Decimal?     @db.Decimal(5, 4)
+  metadata                  Json         @default("{}")
+  reconciledAt              DateTime?    @db.Timestamptz(6) @map("reconciled_at")
+  workspace                 Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  business                  Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  transaction               Transaction  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  createdAt                 DateTime     @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt                 DateTime     @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  @@index([workspaceId, state])
+  @@index([workspaceId, matchGroupId])
+  @@index([workspaceId, reconciledAt])
+  @@map("reconciliations")
 }
 
 model MonthlyReport {

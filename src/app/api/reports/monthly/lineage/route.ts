@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  badRequest,
   readScopeFromSearchParams,
   toOptionalPositiveInt
 } from "@/lib/api-utils";
 import { getAuthErrorStatus, resolveAuthorizedScope } from "@/lib/api-auth";
 import { getDbPool } from "@/lib/db";
 import { computeMonthlySummary } from "@/lib/monthly-summary";
+import { writeReasoningAudit } from "@/lib/reasoning-audit";
+import {
+  buildToolChainingFromSteps,
+  normalizeConfidenceScore,
+  offsetTimestamp,
+  type ReasoningRiskFlag,
+  type ReasoningTrace,
+  type ReasoningTraceStep
+} from "@/lib/reasoning-trace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -472,6 +480,98 @@ function mapErrorToStatus(error: unknown): number {
   return 500;
 }
 
+function buildLineageReasoningTrace(params: {
+  userQuery: string;
+  generatedAt: Date;
+  metric: SupportedMetric;
+  month: string;
+  scanLimit: number;
+  metricValue: number;
+  lineageCount: number;
+  totalCandidates: number;
+  contributionTotal: number;
+  auditLogCount: number;
+}): ReasoningTrace {
+  const truncated = params.totalCandidates > params.lineageCount;
+  const riskFlags: ReasoningRiskFlag[] = [];
+
+  if (truncated) {
+    riskFlags.push({
+      code: "lineage_truncated",
+      severity: "medium",
+      title: "Lineage output truncated",
+      detail: `Showing ${params.lineageCount} of ${params.totalCandidates} candidate rows.`
+    });
+  }
+
+  if (params.metric === "gstPayableEstimate" && params.metricValue > 0 && params.contributionTotal < 0) {
+    riskFlags.push({
+      code: "gst_lineage_sign_mismatch",
+      severity: "low",
+      title: "GST lineage has net negative contribution",
+      detail: "Eligible ITC currently exceeds output GST for the sampled window."
+    });
+  }
+
+  let confidenceScore = normalizeConfidenceScore(0.86);
+  if (params.totalCandidates === 0) {
+    confidenceScore = normalizeConfidenceScore(0.62);
+  } else if (truncated) {
+    confidenceScore = normalizeConfidenceScore(confidenceScore - 0.08);
+  }
+
+  const steps: ReasoningTraceStep[] = [
+    {
+      user_query: params.userQuery,
+      tools_called: ["compute_monthly_summary"],
+      inputs: {
+        month: params.month
+      },
+      outputs: {
+        metric: params.metric,
+        metric_value: params.metricValue
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 0),
+      confidence_score: confidenceScore
+    },
+    {
+      user_query: params.userQuery,
+      tools_called: ["fetch_lineage_transactions", "compute_lineage_rows"],
+      inputs: {
+        scan_limit: params.scanLimit,
+        metric: params.metric
+      },
+      outputs: {
+        lineage_count: params.lineageCount,
+        total_candidates: params.totalCandidates,
+        contribution_total: params.contributionTotal
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 220),
+      confidence_score: confidenceScore
+    },
+    {
+      user_query: params.userQuery,
+      tools_called: ["fetch_audit_logs"],
+      inputs: {
+        transaction_count: params.lineageCount
+      },
+      outputs: {
+        audit_log_count: params.auditLogCount,
+        risk_flags: riskFlags
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 380),
+      confidence_score: confidenceScore
+    }
+  ];
+
+  return {
+    multi_step_reasoning_chain: steps,
+    tool_chaining: buildToolChainingFromSteps(steps),
+    confidence_score: confidenceScore,
+    risk_flags: riskFlags
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const params = request.nextUrl.searchParams;
@@ -562,6 +662,41 @@ export async function GET(request: NextRequest) {
           : metric === "profitEstimate"
             ? summary.metrics.profitEstimate
             : summary.metrics.gstPayableEstimate;
+    const generatedAtDate = new Date();
+    const generatedAt = generatedAtDate.toISOString();
+    const userQuery =
+      params.get("query")?.trim().slice(0, 280) ||
+      `Explain ${metric} lineage for ${summary.month}`;
+    const reasoningTrace = buildLineageReasoningTrace({
+      userQuery,
+      generatedAt: generatedAtDate,
+      metric,
+      month: summary.month,
+      scanLimit,
+      metricValue: round2(metricValue),
+      lineageCount: lineage.rows.length,
+      totalCandidates: lineage.totalCandidates,
+      contributionTotal: round2(lineage.totalContribution),
+      auditLogCount: auditLogs.length
+    });
+
+    await writeReasoningAudit({
+      request,
+      workspaceId: scope.workspaceId,
+      businessId: scope.businessId,
+      endpoint: "api.reports.monthly.lineage",
+      method: "GET",
+      userQuery,
+      trace: reasoningTrace,
+      outputs: {
+        month: summary.month,
+        metric,
+        metric_value: round2(metricValue),
+        lineage_count: lineage.rows.length,
+        total_candidates: lineage.totalCandidates
+      },
+      generatedAt
+    });
 
     return NextResponse.json({
       workspaceId: scope.workspaceId,
@@ -599,7 +734,9 @@ export async function GET(request: NextRequest) {
         entityId: log.entity_id,
         action: log.action,
         createdAt: log.created_at
-      }))
+      })),
+      generatedAt,
+      reasoningTrace
     });
   } catch (error) {
     const message =

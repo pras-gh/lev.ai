@@ -1,0 +1,491 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0c10;
+  --foreground: #f4f7f6;
+  --muted: #a0a8b8;
+  --accent: #00ea64;
+  --accent-2: #1cd67a;
+  --font-body: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 16% 8%, rgba(0, 234, 100, 0.07), transparent 20%),
+    radial-gradient(circle at 84% 12%, rgba(0, 234, 100, 0.05), transparent 22%),
+    linear-gradient(180deg, #010203 0%, #020304 52%, #010203 100%);
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--muted);
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+::selection {
+  background: #00ea64;
+  color: #04140a;
+}
+
+.glass-panel {
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.lev-page-backdrop {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(0, 234, 100, 0.08), transparent 24%),
+    radial-gradient(circle at 86% 16%, rgba(0, 234, 100, 0.05), transparent 26%),
+    repeating-linear-gradient(
+      132deg,
+      rgba(0, 234, 100, 0.04) 0px,
+      rgba(0, 234, 100, 0.04) 1px,
+      transparent 1px,
+      transparent 72px
+    );
+  opacity: 0.42;
+}
+
+.lev-hero-deep {
+  background:
+    radial-gradient(circle at 20% 16%, rgba(0, 234, 100, 0.08), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(0, 234, 100, 0.05), transparent 30%),
+    repeating-linear-gradient(
+      122deg,
+      rgba(0, 234, 100, 0.04) 0px,
+      rgba(0, 234, 100, 0.04) 1px,
+      transparent 1px,
+      transparent 88px
+    ),
+    linear-gradient(180deg, #020304 0%, #020304 100%);
+}
+
+.lev-torch-text {
+  color: #ffffff;
+  text-shadow:
+    0 0 22px rgba(255, 255, 255, 0.26),
+    0 0 44px rgba(255, 255, 255, 0.12);
+}
+
+.lev-highlight {
+  background: linear-gradient(124deg, var(--accent) 0%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lev-soft-outline {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow:
+    0 28px 70px -58px rgba(0, 234, 100, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+}
+
+.lev-grid-field {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.ios-notification-center {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(148, 157, 188, 0.32), transparent 44%),
+    radial-gradient(circle at 78% 76%, rgba(126, 136, 164, 0.26), transparent 42%),
+    linear-gradient(140deg, rgba(46, 52, 70, 0.78), rgba(35, 40, 55, 0.82));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  font-family: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: visible;
+  position: relative;
+}
+
+.ios-notification-center::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.024) 0px,
+    rgba(255, 255, 255, 0.024) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.38;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ios-notification-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(28, 32, 40, 0.74);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+  transform: translateZ(0);
+}
+
+.trail-notification-card {
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: linear-gradient(180deg, rgba(237, 232, 227, 0.96) 0%, rgba(229, 224, 220, 0.93) 100%);
+  box-shadow:
+    0 22px 40px -26px rgba(0, 0, 0, 0.74),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.trail-notification-scene {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(120% 60% at 58% 18%, rgba(214, 118, 62, 0.36), transparent 56%),
+    radial-gradient(92% 56% at 22% 34%, rgba(180, 112, 72, 0.2), transparent 58%),
+    linear-gradient(180deg, #6c6669 0%, #5f595a 32%, #4e4643 58%, #2c2520 78%, #181516 100%);
+  box-shadow: 0 34px 74px -40px rgba(0, 0, 0, 0.85);
+}
+
+.trail-notification-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 24%, rgba(244, 151, 94, 0.22), transparent 26%),
+    radial-gradient(circle at 72% 20%, rgba(241, 143, 84, 0.2), transparent 24%),
+    radial-gradient(circle at 56% 82%, rgba(21, 17, 15, 0.55), transparent 40%);
+  pointer-events: none;
+}
+
+.trail-notification-scene > * {
+  position: relative;
+  z-index: 1;
+}
+
+.lev-button {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.875rem;
+  font-weight: 600;
+  gap: 0.45rem;
+  letter-spacing: 0.01em;
+  padding: 0.82rem 1.2rem;
+  text-decoration: none;
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease,
+    background 0.24s ease,
+    border-color 0.24s ease;
+}
+
+.lev-button:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+.lev-button--emerald {
+  background: linear-gradient(130deg, #00ea64 0%, #1cd67a 100%);
+  border: 1px solid rgba(0, 234, 100, 0.35);
+  color: #03150a;
+  box-shadow: 0 15px 32px -18px rgba(0, 234, 100, 0.75);
+}
+
+.lev-button--emerald:hover {
+  box-shadow: 0 20px 42px -20px rgba(0, 234, 100, 0.92);
+}
+
+.lev-button--dark {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f4f7f6;
+}
+
+.lev-button--dark:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.lev-button--outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #f4f7f6;
+}
+
+.lev-button--outline:hover {
+  border-color: rgba(0, 234, 100, 0.72);
+  background: rgba(0, 234, 100, 0.1);
+}
+
+.lev-button--light {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: #02110d;
+}
+
+.lev-button--light:hover {
+  background: #ffffff;
+}
+
+.lev-button--hero-dark {
+  background:
+    linear-gradient(180deg, #050607, #050607) padding-box,
+    linear-gradient(132deg, rgba(0, 234, 100, 0.84), rgba(0, 234, 100, 0.26)) border-box;
+  border: 1px solid transparent;
+  color: #f4f7f6;
+  box-shadow:
+    0 14px 34px -24px rgba(0, 234, 100, 0.45),
+    0 0 0 1px rgba(0, 234, 100, 0.14) inset;
+}
+
+.lev-button--hero-dark:hover {
+  box-shadow:
+    0 20px 44px -24px rgba(0, 234, 100, 0.7),
+    0 0 0 1px rgba(0, 234, 100, 0.26) inset;
+}
+
+.lev-cta-pulse {
+  animation: levPulse 2.8s ease-in-out infinite;
+}
+
+.lev-login-box-glow {
+  border-color: rgba(0, 234, 100, 0.36) !important;
+  box-shadow:
+    0 24px 80px -28px rgba(0, 0, 0, 0.95),
+    0 16px 36px -22px rgba(0, 234, 100, 0.55),
+    0 0 0 0 rgba(0, 234, 100, 0.24);
+  animation: levLoginPulse 2.8s ease-in-out infinite;
+}
+
+.lev-marquee {
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.lev-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: levMarquee 34s linear infinite;
+  will-change: transform;
+}
+
+.lev-float-soft {
+  will-change: transform;
+}
+
+@keyframes levMarquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes levPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 16px 36px -20px rgba(0, 234, 100, 0.75),
+      0 0 0 0 rgba(0, 234, 100, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 20px 44px -18px rgba(0, 234, 100, 0.9),
+      0 0 0 10px rgba(0, 234, 100, 0);
+  }
+}
+
+@keyframes levLoginPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 24px 80px -28px rgba(0, 0, 0, 0.95),
+      0 16px 36px -22px rgba(0, 234, 100, 0.55),
+      0 0 0 0 rgba(0, 234, 100, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 28px 86px -26px rgba(0, 0, 0, 0.95),
+      0 22px 50px -20px rgba(0, 234, 100, 0.78),
+      0 0 0 10px rgba(0, 234, 100, 0);
+  }
+}
+
+@keyframes levTorchSweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.ui-panel-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: rgba(6, 6, 6, 0.78);
+  backdrop-filter: blur(14px);
+}
+
+.ui-surface-card {
+  border: 1px solid #d7d5cf;
+  border-radius: 20px;
+  background: #f5f4f1;
+  color: #161616;
+  box-shadow: 0 14px 36px rgba(8, 8, 8, 0.12);
+}
+
+.ui-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3f3f3b;
+}
+
+.ui-button {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ui-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.ui-button-solid {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ui-button-solid:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+[data-reveal="true"] {
+  opacity: 0;
+  animation: reveal-up 520ms cubic-bezier(0.24, 0.76, 0.24, 1) forwards;
+}
+
+[data-reveal-delay="1"] {
+  animation-delay: 80ms;
+}
+
+[data-reveal-delay="2"] {
+  animation-delay: 160ms;
+}
+
+[data-reveal-delay="3"] {
+  animation-delay: 240ms;
+}
+
+[data-reveal-delay="4"] {
+  animation-delay: 320ms;
+}
+
+.lev-orange-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  height: 10px;
+  width: 10px;
+  border-radius: 999px;
+  background: #f97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0);
+  will-change: transform;
+  transition: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role="button"] {
+    cursor: none !important;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .lev-orange-cursor {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

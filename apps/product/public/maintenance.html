@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trail | Maintenance</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root {
+        --bg: #06080b;
+        --panel: #0f1319;
+        --text: #f2f5f4;
+        --muted: #b8c1ce;
+        --border: rgba(255, 255, 255, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: Inter, "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 18% 14%, rgba(0, 234, 100, 0.12), transparent 30%),
+          radial-gradient(circle at 82% 16%, rgba(0, 234, 100, 0.08), transparent 34%),
+          linear-gradient(180deg, #030508 0%, var(--bg) 55%, #020305 100%);
+        padding: 24px;
+      }
+
+      .card {
+        width: min(680px, 100%);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        box-shadow:
+          0 28px 70px -48px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+        padding: 28px 26px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .brand img {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+      }
+
+      .brand span {
+        font-size: 1.25rem;
+        letter-spacing: -0.02em;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.9rem, 4vw, 2.8rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+
+      p {
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 2.2vw, 1.2rem);
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="brand">
+        <img src="/trai-favicon.svg" alt="Trail logo" />
+        <span>trai\</span>
+      </div>
+      <h1>Trail is getting better.</h1>
+      <p>trai\ is taking a short pause<br />to deliver a stronger experience tomorrow.</p>
+    </main>
+  </body>
+</html>

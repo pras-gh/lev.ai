@@ -108,6 +108,31 @@ flowchart TD
 4. Async side effects through outbox (alerts, WhatsApp, email).
 5. Strong tenant isolation by `workspace_id` in DB + API auth.
 6. Deterministic rules first, AI reasoning second.
+7. LLM never touches raw financial math.
+
+### Critical Finance Boundary
+
+- LLM is limited to: understanding intent, routing to engines, explaining computed facts, suggesting actions.
+- Structured finance engines must: compute numbers, validate outputs, enforce finance/compliance rules.
+- Any LLM-facing payload should contain engine-computed facts only (no raw ledger math instructions).
+- If a user asks a numeric question, orchestration must call deterministic tools first and only then let LLM explain.
+
+### Reasoning Trace Contract
+
+Every insight response should include a reasoning trace with these required fields on each step:
+
+- `user_query`
+- `tools_called`
+- `inputs`
+- `outputs`
+- `timestamp`
+- `confidence_score`
+
+This contract applies across:
+
+- `/api/insights/*`
+- `/api/metrics/*`
+- `/api/reports/*` (JSON responses) and audit logs for HTML/PDF report generation.
 
 ## 3) Service Contracts by Layer
 

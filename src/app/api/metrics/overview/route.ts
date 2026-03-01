@@ -3,6 +3,15 @@ import { badRequest, readScopeFromSearchParams } from "@/lib/api-utils";
 import { getAuthErrorStatus, resolveAuthorizedScope } from "@/lib/api-auth";
 import { getDbPool } from "@/lib/db";
 import { computeFinanceHealth } from "@/lib/finance-health";
+import { writeReasoningAudit } from "@/lib/reasoning-audit";
+import {
+  buildToolChainingFromSteps,
+  normalizeConfidenceScore,
+  offsetTimestamp,
+  type ReasoningRiskFlag,
+  type ReasoningTrace,
+  type ReasoningTraceStep
+} from "@/lib/reasoning-trace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -115,6 +124,124 @@ function resolveGstCycle(now: Date): {
     cycleEnd,
     dueDate,
     dueInDays: (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  };
+}
+
+function buildOverviewReasoningTrace(params: {
+  userQuery: string;
+  range: OverviewRange;
+  generatedAt: Date;
+  cashBalance: number;
+  runwayDays: number;
+  revenueMtd: number;
+  expensesMtd: number;
+  gstDueDays: number;
+  gstEstPayable: number;
+  itcMismatchCount: number;
+  itcMismatchValue: number;
+  anomalyCount: number;
+  reconciliationPct: number;
+  monthCloseReadinessPct: number;
+  complianceConfidenceRaw: number;
+}): ReasoningTrace {
+  const riskFlags: ReasoningRiskFlag[] = [];
+
+  if (params.runwayDays > 0 && params.runwayDays < 60) {
+    riskFlags.push({
+      code: "cash_runway_tight",
+      severity: params.runwayDays < 30 ? "critical" : "high",
+      title: "Cash runway is tight",
+      detail: `Estimated runway is ${round2(params.runwayDays)} day(s).`
+    });
+  }
+
+  if (params.gstEstPayable > 0 && params.gstDueDays <= 7) {
+    riskFlags.push({
+      code: "gst_due_soon",
+      severity: params.gstDueDays <= 3 ? "critical" : "high",
+      title: "GST due date approaching",
+      detail: `Estimated payable ₹${params.gstEstPayable.toLocaleString("en-IN")} due in ${params.gstDueDays} day(s).`
+    });
+  }
+
+  if (params.itcMismatchCount > 0) {
+    riskFlags.push({
+      code: "itc_mismatch_open",
+      severity: "medium",
+      title: "ITC mismatch detected",
+      detail: `${params.itcMismatchCount} open mismatch alert(s), value ₹${params.itcMismatchValue.toLocaleString("en-IN")}.`
+    });
+  }
+
+  if (params.anomalyCount > 0) {
+    riskFlags.push({
+      code: "anomaly_open",
+      severity: "medium",
+      title: "Operational anomalies open",
+      detail: `${params.anomalyCount} anomaly alert(s) currently open.`
+    });
+  }
+
+  let confidenceScore = normalizeConfidenceScore(params.complianceConfidenceRaw);
+  if (params.anomalyCount >= 4) {
+    confidenceScore = normalizeConfidenceScore(confidenceScore - 0.05);
+  }
+  if (params.itcMismatchCount > 0) {
+    confidenceScore = normalizeConfidenceScore(confidenceScore - 0.03);
+  }
+
+  const steps: ReasoningTraceStep[] = [
+    {
+      user_query: params.userQuery,
+      tools_called: ["compute_finance_health"],
+      inputs: {
+        range: params.range
+      },
+      outputs: {
+        reconciliation_pct: params.reconciliationPct,
+        month_close_readiness_pct: params.monthCloseReadinessPct,
+        compliance_confidence: round2(params.complianceConfidenceRaw)
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 0),
+      confidence_score: confidenceScore
+    },
+    {
+      user_query: params.userQuery,
+      tools_called: ["get_revenue_expense_aggregate", "get_cash_balance"],
+      inputs: {
+        range: params.range
+      },
+      outputs: {
+        revenue_mtd: params.revenueMtd,
+        expenses_mtd: params.expensesMtd,
+        cash_balance: params.cashBalance,
+        runway_days: params.runwayDays
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 200),
+      confidence_score: confidenceScore
+    },
+    {
+      user_query: params.userQuery,
+      tools_called: ["estimate_gst_payable", "aggregate_alerts"],
+      inputs: {
+        gst_window: "current_cycle"
+      },
+      outputs: {
+        gst_due_days: params.gstDueDays,
+        gst_est_payable: params.gstEstPayable,
+        itc_mismatch_count: params.itcMismatchCount,
+        anomaly_count: params.anomalyCount
+      },
+      timestamp: offsetTimestamp(params.generatedAt, 400),
+      confidence_score: confidenceScore
+    }
+  ];
+
+  return {
+    multi_step_reasoning_chain: steps,
+    tool_chaining: buildToolChainingFromSteps(steps),
+    confidence_score: confidenceScore,
+    risk_flags: riskFlags
   };
 }
 
@@ -271,6 +398,45 @@ export async function GET(request: NextRequest) {
     );
     const anomalyCount = Math.trunc(toNumber(alertRow?.anomaly_count));
     const runwayDays = round2(health.cash_runway_months * 30);
+    const generatedAt = now.toISOString();
+    const userQuery =
+      request.nextUrl.searchParams.get("query")?.trim().slice(0, 280) ||
+      `Finance overview for ${range}`;
+    const reasoningTrace = buildOverviewReasoningTrace({
+      userQuery,
+      range,
+      generatedAt: now,
+      cashBalance,
+      runwayDays,
+      revenueMtd,
+      expensesMtd,
+      gstDueDays,
+      gstEstPayable,
+      itcMismatchCount,
+      itcMismatchValue,
+      anomalyCount,
+      reconciliationPct: round2(health.recon_match_pct),
+      monthCloseReadinessPct: round2(health.month_close_readiness_pct),
+      complianceConfidenceRaw: round2(health.compliance_confidence)
+    });
+
+    await writeReasoningAudit({
+      request,
+      workspaceId: scope.workspaceId,
+      businessId: scope.businessId,
+      endpoint: "api.metrics.overview",
+      method: "GET",
+      userQuery,
+      trace: reasoningTrace,
+      outputs: {
+        range,
+        cash_balance: cashBalance,
+        runway_days: runwayDays,
+        gst_est_payable: gstEstPayable,
+        anomaly_count: anomalyCount
+      },
+      generatedAt
+    });
 
     return NextResponse.json({
       workspaceId: scope.workspaceId,
@@ -288,7 +454,8 @@ export async function GET(request: NextRequest) {
       anomaly_count: anomalyCount,
       month_close_readiness_pct: round2(health.month_close_readiness_pct),
       compliance_confidence: round2(health.compliance_confidence),
-      generatedAt: now.toISOString()
+      generatedAt,
+      reasoningTrace
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to compute overview metrics";
