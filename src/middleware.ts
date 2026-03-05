@@ -32,36 +32,29 @@ function buildMarketingRedirect(nextTarget: string): URL {
   return marketingUrl;
 }
 
-function clearAuthCookies(response: NextResponse) {
-  const cookieNames = [
-    "next-auth.session-token",
-    "__Secure-next-auth.session-token",
-    "next-auth.callback-url",
-    "__Secure-next-auth.callback-url",
-    "next-auth.csrf-token",
-    "__Host-next-auth.csrf-token",
-    "__Secure-next-auth.csrf-token",
-  ];
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  for (const cookie of request.cookies.getAll()) {
+    const name = cookie.name.toLowerCase();
+    if (name === "sb-access-token" || name === "supabase-access-token") {
+      return true;
+    }
 
-  for (const name of cookieNames) {
-    response.cookies.set(name, "", {
-      maxAge: 0,
-      expires: new Date(0),
-      path: "/",
-    });
+    if (name.startsWith("sb-") && name.endsWith("-auth-token")) {
+      return true;
+    }
   }
 
-  return response;
+  return false;
 }
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const productHostRequest = isProductHostRequest(request);
   const token = await getToken({ req: request, secret: authSecret });
-  const planStatus = typeof token?.planStatus === "string" ? token.planStatus : token?.isPaid ? "active" : "trial";
+  const hasAuthSession = Boolean(token) || hasSupabaseAuthCookie(request);
 
   if (productHostRequest && pathname === "/") {
-    if (planStatus === "active") {
+    if (hasAuthSession) {
       return NextResponse.redirect(new URL("/app", request.url));
     }
 
@@ -73,19 +66,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (token) {
-    if (planStatus === "active") {
-      return NextResponse.next();
-    }
-
-    const privateAccessRedirect = productHostRequest
-      ? new URL(`/private-access?plan_status=${encodeURIComponent(planStatus)}`, MARKETING_SITE_ORIGIN)
-      : new URL("/private-access", request.url);
-
-    if (!productHostRequest) {
-      privateAccessRedirect.searchParams.set("plan_status", planStatus);
-    }
-    return clearAuthCookies(NextResponse.redirect(privateAccessRedirect));
+  if (hasAuthSession) {
+    return NextResponse.next();
   }
 
   const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;

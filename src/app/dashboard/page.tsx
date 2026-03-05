@@ -1,27 +1,36 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth/options";
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+type DashboardPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  if (!session?.user) {
-    redirect("/");
+function firstValue(value: string | string[] | undefined): string | null {
+  if (typeof value === "string") {
+    return value;
   }
 
-  if (session.user.planStatus !== "active") {
-    redirect("/private-access");
+  if (Array.isArray(value)) {
+    const candidate = value.find((entry) => typeof entry === "string" && entry.length > 0);
+    return candidate ?? null;
   }
 
-  return (
-    <main className="mx-auto min-h-screen w-full max-w-[1220px] px-6 py-24 sm:px-8">
-      <section className="glass-panel rounded-[26px] border border-white/12 p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">Product dashboard</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-white">Welcome back to trai\</h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
-          Your access is active. We can now wire the real accounting product modules into this dashboard shell.
-        </p>
-      </section>
-    </main>
-  );
+  return null;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const workspaceId = firstValue(params.workspaceId);
+  const businessId = firstValue(params.businessId);
+  const next = new URLSearchParams();
+
+  if (workspaceId) {
+    next.set("workspaceId", workspaceId);
+  }
+
+  if (businessId) {
+    next.set("businessId", businessId);
+  }
+
+  const query = next.toString();
+  redirect(query ? `/app/dashboard?${query}` : "/app/dashboard");
 }

@@ -37,6 +37,7 @@ const ALLOWED_SOURCES = new Set([
 ]);
 const ALLOWED_PRESETS = new Set(["unmatched", "itc_mismatch", "gst_due"]);
 const ALLOWED_RECON = new Set(["all", "unmatched", "needs_review"]);
+const ALLOWED_SCHEMAS = new Set(["full", "standard"]);
 
 type TransactionListRow = {
   id: number;
@@ -65,6 +66,18 @@ type TransactionListRow = {
   is_hidden: boolean;
   created_at: string;
   updated_at: string;
+};
+
+type StandardTransactionRow = {
+  id: number;
+  workspace_id: string;
+  date: string;
+  description: string | null;
+  amount: string;
+  type: "credit" | "debit";
+  category: string | null;
+  source: string;
+  created_at: string;
 };
 
 type CountRow = {
@@ -288,6 +301,20 @@ function encodeCursor(row: TransactionListRow): string {
   return `${new Date(row.occurred_at).toISOString()}|${row.id}`;
 }
 
+function toStandardTransaction(row: TransactionListRow): StandardTransactionRow {
+  return {
+    id: row.id,
+    workspace_id: row.workspace_id,
+    date: row.occurred_at,
+    description: row.description,
+    amount: row.amount,
+    type: row.direction,
+    category: row.category_name,
+    source: row.source,
+    created_at: row.created_at
+  };
+}
+
 function parseLimitFromRequest(params: {
   searchParams: URLSearchParams;
   filters: ParsedFiltersPayload;
@@ -492,6 +519,7 @@ export async function GET(request: NextRequest) {
     const category = readStringFilter(params, filtersPayload, "category");
     const preset = readStringFilter(params, filtersPayload, "preset").toLowerCase();
     const recon = (readStringFilter(params, filtersPayload, "recon") || "all").toLowerCase();
+    const schema = (params.get("schema") ?? "full").trim().toLowerCase();
     const transactionIds = parseTransactionIds(
       params.get("ids") ?? filtersPayload?.ids ?? filtersPayload?.transactionIds
     );
@@ -522,6 +550,10 @@ export async function GET(request: NextRequest) {
 
     if (!ALLOWED_RECON.has(recon)) {
       return badRequest("recon must be one of: all, unmatched, needs_review");
+    }
+
+    if (!ALLOWED_SCHEMAS.has(schema)) {
+      return badRequest("schema must be one of: full, standard");
     }
 
     const queryState = buildTransactionQueryState({
@@ -609,6 +641,8 @@ export async function GET(request: NextRequest) {
       const transactions = hasMore ? rowsResult.rows.slice(0, limit) : rowsResult.rows;
       const lastRow = transactions[transactions.length - 1];
       const nextCursor = hasMore && lastRow ? encodeCursor(lastRow) : null;
+      const shapedTransactions =
+        schema === "standard" ? transactions.map(toStandardTransaction) : transactions;
 
       return NextResponse.json({
         count: transactions.length,
@@ -617,7 +651,8 @@ export async function GET(request: NextRequest) {
         nextCursor,
         appliedPreset: preset || null,
         appliedRecon: recon,
-        transactions
+        schema,
+        transactions: shapedTransactions
       });
     }
 
@@ -675,6 +710,8 @@ export async function GET(request: NextRequest) {
     );
 
     const total = Number(countResult.rows[0]?.total ?? "0");
+    const shapedTransactions =
+      schema === "standard" ? rowsResult.rows.map(toStandardTransaction) : rowsResult.rows;
 
     return NextResponse.json({
       page,
@@ -684,7 +721,8 @@ export async function GET(request: NextRequest) {
       count: rowsResult.rows.length,
       appliedPreset: preset || null,
       appliedRecon: recon,
-      transactions: rowsResult.rows
+      schema,
+      transactions: shapedTransactions
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to query transactions";

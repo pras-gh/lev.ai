@@ -12,6 +12,7 @@ import {
   resolveCategoryIdByCategoryName
 } from "./categorizeV0";
 import { buildHashDescription } from "./transaction-hash";
+import { normalizeCsvTransaction } from "./transaction-normalizer";
 
 export type InsertParsedTransactionsInput = {
   businessId: bigint | number | string;
@@ -239,6 +240,7 @@ async function createDuplicateImportSuggestions(params: {
 
 function buildCreateData(params: {
   businessId: bigint;
+  workspaceId: string;
   row: NormalizedCsvTransaction;
   source: string;
   categoryId: bigint | null;
@@ -251,22 +253,38 @@ function buildCreateData(params: {
   autoTagged: boolean;
 }) {
   const existingMetadata = isJsonObject(params.row.raw) ? (params.row.raw as Prisma.JsonObject) : {};
+  const standard = normalizeCsvTransaction({
+    workspaceId: params.workspaceId,
+    source: params.source,
+    row: params.row
+  });
 
   return {
     businessId: params.businessId,
+    workspaceId: params.workspaceId,
     categoryId: params.categoryId,
-    amount: params.row.amount,
-    currency: normalizeCurrency(params.row.currency),
-    type: normalizeTxnType(params.row.type),
+    amount: standard.amount,
+    currency: normalizeCurrency(standard.currency_code),
+    type: normalizeTxnType(standard.type),
     status: TxnStatus.posted,
-    txnDate: new Date(params.row.txnDate),
-    description: params.row.description ?? null,
-    merchant: params.row.merchant ?? null,
+    txnDate: new Date(standard.date),
+    description: standard.description ?? null,
+    merchant: standard.counterparty ?? null,
     reference: params.row.reference ?? null,
-    externalId: params.row.externalId ?? null,
+    externalId: standard.external_id ?? null,
     rowHash: params.row.rowHash,
-    source: params.source,
+    source: standard.source,
     metadata: {
+      standard_transaction_schema: {
+        workspace_id: standard.workspace_id,
+        date: standard.date,
+        description: standard.description,
+        amount: standard.amount,
+        type: standard.type,
+        category: standard.category,
+        source: standard.source,
+        created_at: standard.created_at
+      },
       importer: "bankCsvParser",
       dedupe: {
         hash: params.row.rowHash,
@@ -283,8 +301,8 @@ function buildCreateData(params: {
       raw: existingMetadata,
       hashInputs: {
         description: buildHashDescription([
-          params.row.description,
-          params.row.merchant,
+          standard.description,
+          standard.counterparty,
           params.row.reference
         ]),
         account: params.row.account ?? null
@@ -414,6 +432,7 @@ export async function insertParsedTransactions(
             data: batch.map((entry) =>
               buildCreateData({
                 businessId,
+                workspaceId: workspace.id,
                 row: entry.row,
                 source,
                 categoryId: entry.categoryId,

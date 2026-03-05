@@ -1,11 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSession, signIn, signOut, useSession } from "next-auth/react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,32 +9,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-
-const loginSchema = z.object({
-  email: z.string().email("Enter a valid email address."),
-  password: z.string().min(1, "Password is required."),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
-type AuthResult = "ok" | "restricted" | "error";
-type PlanStatus = "trial" | "active" | "overdue" | "cancelled";
 
 type LoginModalProps = {
   triggerClassName?: string;
   onTriggerClick?: () => void;
 };
-
-function normalizePlanStatus(value: unknown): PlanStatus {
-  if (value === "active" || value === "overdue" || value === "cancelled" || value === "trial") {
-    return value;
-  }
-  return "trial";
-}
 
 function resolveProductUrl(nextPath: string | null): string {
   const productAppUrl = normalizeBookingUrl(siteConfig.productAppUrl);
@@ -78,77 +59,92 @@ function resolveProductUrl(nextPath: string | null): string {
   return productAppUrl;
 }
 
+function buildMagicLinkRedirect(productTarget: string): string {
+  const target = new URL(productTarget);
+  const callback = new URL("/auth/callback", target.origin);
+  callback.searchParams.set("next", `${target.pathname}${target.search}${target.hash}`);
+  return callback.toString();
+}
+
 export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [hasSession, setHasSession] = useState(false);
 
-  const loginForm = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  useEffect(() => {
+    let mounted = true;
 
-  const isSignedIn = Boolean(session?.user);
-  const triggerLabel = status === "loading" ? "Client Access" : isSignedIn ? "Account" : "Client Access";
+    async function loadSession() {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) {
+        return;
+      }
 
-  async function signInAndRedirect(email: string, password: string): Promise<AuthResult> {
-    setErrorMessage(null);
+      setHasSession(Boolean(data.session?.user));
+    }
 
-    const response = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
+    void loadSession();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setHasSession(Boolean(session?.user));
     });
 
-    if (!response) {
-      setErrorMessage("Unable to sign in right now. Try again.");
-      return "error";
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const triggerLabel = hasSession ? "Open App" : "User Sign In";
+
+  async function handleSendMagicLink() {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setErrorMessage("Enter your email to continue.");
+      return;
     }
 
-    if (response.error) {
-      if (response.error === "Configuration") {
-        setErrorMessage("Login is not configured yet. Please try again shortly.");
-        return "error";
-      }
-      setErrorMessage("Invalid email or password.");
-      return "error";
-    }
-
-    const nextSession = await getSession();
-    if (!nextSession?.user) {
-      setErrorMessage("Unable to create login session. Try again.");
-      return "error";
-    }
-
-    const planStatus = normalizePlanStatus(nextSession.user.planStatus);
-    if (planStatus !== "active") {
-      await signOut({ redirect: false });
-      setOpen(false);
-      router.replace("/private-access");
-      return "restricted";
-    }
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     const nextPath =
       typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
     const targetUrl = resolveProductUrl(nextPath);
+    const emailRedirectTo = buildMagicLinkRedirect(targetUrl);
 
-    loginForm.reset();
-    setOpen(false);
-    if (typeof window !== "undefined") {
-      window.location.assign(targetUrl);
-      return "ok";
+    const { error } = await supabase.auth.signInWithOtp({
+      email: normalizedEmail,
+      options: {
+        emailRedirectTo
+      }
+    });
+
+    setIsSubmitting(false);
+    if (error) {
+      setErrorMessage(error.message || "Unable to send magic link right now.");
+      return;
     }
-    router.push("/product");
-    return "ok";
+
+    setSuccessMessage("Magic link sent. Check your email and open the link to continue.");
   }
 
-  async function handleSignOut() {
-    await signOut({ redirect: false });
-    setOpen(false);
+  function openProduct() {
+    const nextPath =
+      typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+    const targetUrl = resolveProductUrl(nextPath);
+    if (typeof window !== "undefined") {
+      window.location.assign(targetUrl);
+      return;
+    }
+    router.push("/product");
   }
 
   return (
@@ -158,6 +154,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         setOpen(nextOpen);
         if (nextOpen) {
           setErrorMessage(null);
+          setSuccessMessage(null);
         }
       }}
     >
@@ -175,74 +172,59 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
       <DialogContent className="lev-login-box-glow sm:max-w-[440px]">
         <DialogHeader>
-          <DialogTitle>{isSignedIn ? "Account" : "Login to trai\\"}</DialogTitle>
+          <DialogTitle>User Sign In</DialogTitle>
           <DialogDescription>
-            {isSignedIn
-              ? "You already have product access."
-              : "Use your approved email and password to access the product dashboard."}
+            Enter your work email. We will send a secure magic link for instant access.
           </DialogDescription>
         </DialogHeader>
 
-        {isSignedIn ? (
+        {hasSession ? (
           <div className="space-y-4 rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-slate-300">Signed in as</p>
-            <p className="text-sm font-semibold text-white">{session?.user?.email ?? "Unknown user"}</p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="lev-button lev-button--hero-dark"
-                onClick={() => {
-                  setOpen(false);
-                  if (typeof window !== "undefined") {
-                    window.location.assign(normalizeBookingUrl(siteConfig.productAppUrl));
-                    return;
-                  }
-                  router.push("/product");
-                }}
-              >
-                Open Product
-              </button>
-              <Button variant="outline" onClick={() => void handleSignOut()}>
-                Sign out
-              </Button>
-            </div>
+            <p className="text-sm text-slate-300">You already have an active session.</p>
+            <button type="button" className="lev-button lev-button--hero-dark" onClick={openProduct}>
+              Open Product
+            </button>
           </div>
         ) : (
           <form
             className="space-y-3"
-            onSubmit={loginForm.handleSubmit(async (values) => {
-              await signInAndRedirect(values.email, values.password);
-            })}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSendMagicLink();
+            }}
           >
             <div className="space-y-1.5">
-              <label htmlFor="login-email" className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">
+              <label
+                htmlFor="magic-email"
+                className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300"
+              >
                 Email
               </label>
-              <Input id="login-email" type="email" autoComplete="email" {...loginForm.register("email")} />
-              <p className="text-xs text-rose-300">{loginForm.formState.errors.email?.message}</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="login-password" className="text-xs font-medium uppercase tracking-[0.08em] text-slate-300">
-                Password
-              </label>
               <Input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                {...loginForm.register("password")}
+                id="magic-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@company.com"
               />
-              <p className="text-xs text-rose-300">{loginForm.formState.errors.password?.message}</p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loginForm.formState.isSubmitting}>
-              {loginForm.formState.isSubmitting ? "Signing in..." : "User Sign In"}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Sending magic link..." : "Send Magic Link"}
             </Button>
           </form>
         )}
 
+        {successMessage ? (
+          <p className="rounded-xl border border-emerald-300/30 bg-emerald-300/10 px-3 py-2 text-xs text-emerald-100">
+            {successMessage}
+          </p>
+        ) : null}
         {errorMessage ? (
-          <p className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-xs text-rose-200">{errorMessage}</p>
+          <p className="rounded-xl border border-rose-300/30 bg-rose-300/10 px-3 py-2 text-xs text-rose-200">
+            {errorMessage}
+          </p>
         ) : null}
       </DialogContent>
     </Dialog>

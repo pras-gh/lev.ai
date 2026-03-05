@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { badRequest } from "@/lib/api-utils";
 import { getAuthErrorStatus, resolveSessionUser } from "@/lib/api-auth";
+import { ensureUserRecord, ensureWorkspaceForUser } from "@/lib/access-layer";
 import { getDbPool } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await resolveSessionUser(request);
     const db = getDbPool();
-    const result = await db.query<WorkspaceRow>(
+    let result = await db.query<WorkspaceRow>(
       `
       SELECT
         w.id::text,
@@ -98,6 +99,33 @@ export async function GET(request: NextRequest) {
       `,
       [session.userId]
     );
+
+    if (result.rows.length === 0) {
+      await ensureWorkspaceForUser({
+        userId: session.userId,
+        email: session.email ?? `${session.userId}@autogen.local`
+      });
+
+      result = await db.query<WorkspaceRow>(
+        `
+        SELECT
+          w.id::text,
+          w.name,
+          w.business_id::text,
+          b.name AS business_name,
+          wm.role,
+          wm.status,
+          w.created_at::text
+        FROM workspace_members wm
+        JOIN workspaces w ON w.id = wm.workspace_id
+        JOIN businesses b ON b.id = w.business_id
+        WHERE wm.user_id = $1::uuid
+          AND wm.status = 'active'
+        ORDER BY w.created_at DESC, w.id DESC
+        `,
+        [session.userId]
+      );
+    }
 
     return NextResponse.json({
       workspaces: result.rows.map((row) => ({
@@ -137,6 +165,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const session = await resolveSessionUser(request);
+    const sessionEmail = session.email ?? `${session.userId}@autogen.local`;
+    await ensureUserRecord({
+      userId: session.userId,
+      email: sessionEmail
+    });
     const workspaceId = toUuid(payload.workspaceId);
 
     if (workspaceId) {
@@ -227,10 +260,13 @@ export async function POST(request: NextRequest) {
 
       const workspaceResult = await client.query<WorkspaceRow>(
         `
-        INSERT INTO workspaces (business_id, name)
-        VALUES ($1, $2)
+        INSERT INTO workspaces (business_id, name, owner_id)
+        VALUES ($1, $2, $3::uuid)
         ON CONFLICT (business_id)
-        DO UPDATE SET name = EXCLUDED.name
+        DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          owner_id = COALESCE(workspaces.owner_id, EXCLUDED.owner_id)
         RETURNING
           id::text,
           name,
@@ -240,7 +276,7 @@ export async function POST(request: NextRequest) {
           'active'::text AS status,
           created_at::text
         `,
-        [businessId, workspaceLabel]
+        [businessId, workspaceLabel, session.userId]
       );
 
       const workspace = workspaceResult.rows[0];
@@ -254,14 +290,16 @@ export async function POST(request: NextRequest) {
           workspace_id,
           user_id,
           role,
-          status
+          status,
+          onboarding_completed_at
         )
-        VALUES ($1::uuid, $2::uuid, 'owner', 'active')
+        VALUES ($1::uuid, $2::uuid, 'owner', 'active', NOW())
         ON CONFLICT (workspace_id, user_id)
         DO UPDATE
         SET
           role = 'owner',
           status = 'active',
+          onboarding_completed_at = COALESCE(workspace_members.onboarding_completed_at, NOW()),
           updated_at = NOW()
         `,
         [workspace.id, session.userId]

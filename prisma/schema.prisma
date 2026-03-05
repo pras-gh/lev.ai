@@ -163,11 +163,24 @@ model Alert {
   @@map("alerts")
 }
 
+model User {
+  id                String            @id @db.Uuid
+  email             String            @unique
+  createdAt         DateTime          @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(6) @map("updated_at")
+  workspaceMembers  WorkspaceMember[]
+  ownedWorkspaces   Workspace[]       @relation("WorkspaceOwner")
+
+  @@map("users")
+}
+
 model Workspace {
   id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   businessId    BigInt          @unique @map("business_id")
+  ownerId       String?         @db.Uuid @map("owner_id")
   name          String
   business      Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  owner         User?           @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   categories    Category[]
   transactions  Transaction[]
   alerts        Alert[]
@@ -195,6 +208,7 @@ model WorkspaceMember {
   status       String    @default("active")
   onboardingCompletedAt DateTime? @db.Timestamptz(6) @map("onboarding_completed_at")
   workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
   updatedAt    DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
 

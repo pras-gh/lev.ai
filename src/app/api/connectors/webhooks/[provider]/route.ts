@@ -31,6 +31,7 @@ import {
   type IntegrationProviderId
 } from "@/lib/integration-catalog";
 import { getProviderAdapter } from "@/lib/connectors/registry";
+import { normalizeCanonicalTransaction } from "@/lib/transaction-normalizer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -341,6 +342,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const primaryRow = webhookRows[0];
+    const standard = normalizeCanonicalTransaction({
+      workspaceId: scope.workspaceId,
+      source: provider,
+      row: primaryRow
+    });
     const eventId =
       adapterWebhook.eventId?.trim() ||
       toOptionalText(payload.eventId) ||
@@ -352,13 +358,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       toOptionalText(payload.eventType) ||
       toOptionalText(payload.type) ||
       "transaction.created";
-    const direction = primaryRow.direction;
-    const amount = primaryRow.amount;
-    const currencyCode = primaryRow.currencyCode?.trim().toUpperCase() || "INR";
-    const description = primaryRow.description;
-    const counterparty = primaryRow.counterparty;
-    const occurredAt = primaryRow.occurredAt;
-    const externalRef = primaryRow.externalTxnId;
+    const direction = standard.type;
+    const amount = standard.amount;
+    const currencyCode = standard.currency_code;
+    const description = standard.description;
+    const counterparty = standard.counterparty;
+    const occurredAt = standard.date;
+    const externalRef = standard.external_id ?? primaryRow.externalTxnId;
     const connectionScopes =
       provider === "whatsapp"
         ? ["messages:write", "contacts:read"]
@@ -614,11 +620,21 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           occurredAt,
           description,
           counterparty,
-          provider,
+          standard.source,
           provider,
           externalRef,
           accountId,
           JSON.stringify({
+            standard_transaction_schema: {
+              workspace_id: standard.workspace_id,
+              date: standard.date,
+              description: standard.description,
+              amount: standard.amount,
+              type: standard.type,
+              category: standard.category,
+              source: standard.source,
+              created_at: standard.created_at
+            },
             integration: {
               provider,
               providerLabel: integrationProviderLabel(provider),
@@ -670,6 +686,16 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             }
           },
           normalizedPayload: {
+            standard_transaction_schema: {
+              workspace_id: standard.workspace_id,
+              date: standard.date,
+              description: standard.description,
+              amount: standard.amount,
+              type: standard.type,
+              category: standard.category,
+              source: standard.source,
+              created_at: standard.created_at
+            },
             eventId,
             eventType,
             direction,

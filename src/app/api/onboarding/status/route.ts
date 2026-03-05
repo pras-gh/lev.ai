@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { badRequest, toOptionalBoolean, toOptionalUuid } from "@/lib/api-utils";
 import { getAuthErrorStatus, resolveSessionUser } from "@/lib/api-auth";
+import { ensureWorkspaceForUser } from "@/lib/access-layer";
 import { getDbPool } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -116,10 +117,21 @@ export async function GET(request: NextRequest) {
       "workspaceId"
     );
 
-    const membership = await loadMembership({
+    let membership = await loadMembership({
       userId: session.userId,
       workspaceId
     });
+
+    if (!workspaceId && !membership) {
+      await ensureWorkspaceForUser({
+        userId: session.userId,
+        email: session.email ?? `${session.userId}@autogen.local`
+      });
+
+      membership = await loadMembership({
+        userId: session.userId
+      });
+    }
 
     if (workspaceId && !membership) {
       return NextResponse.json(

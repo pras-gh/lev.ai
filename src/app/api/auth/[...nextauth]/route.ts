@@ -18,7 +18,7 @@ function isValidHttpUrl(value: string | undefined): boolean {
 
 function ensureRuntimeAuthUrl(request: Request) {
   const requestOrigin = new URL(request.url).origin;
-  const configuredAuthUrl = process.env.NEXTAUTH_URL?.trim();
+  const configuredAuthUrl = process.env.NEXTAUTH_URL?.trim() ?? "";
 
   if (!isValidHttpUrl(configuredAuthUrl)) {
     process.env.NEXTAUTH_URL = requestOrigin;

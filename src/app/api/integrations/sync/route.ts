@@ -30,6 +30,7 @@ import {
   integrationProviderLabel,
   isIntegrationProviderId
 } from "@/lib/integration-catalog";
+import { normalizeCanonicalTransaction } from "@/lib/transaction-normalizer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -662,16 +663,21 @@ export async function POST(request: NextRequest) {
       let inserted = 0;
       for (let index = 0; index < rows.length; index += 1) {
         const row = rows[index];
-        const externalRef = row.externalTxnId;
+        const standard = normalizeCanonicalTransaction({
+          workspaceId: scope.workspaceId,
+          source: provider,
+          row
+        });
+        const externalRef = standard.external_id ?? row.externalTxnId;
         const stableRowHash = hashIntegrationRow(
           [
             scope.workspaceId,
             provider,
-            row.occurredAt,
-            row.direction,
-            row.amount,
-            normalizeStableText(row.description),
-            normalizeStableText(row.counterparty)
+            standard.date,
+            standard.type,
+            standard.amount,
+            normalizeStableText(standard.description),
+            normalizeStableText(standard.counterparty)
           ].join("|")
         );
 
@@ -764,17 +770,27 @@ export async function POST(request: NextRequest) {
             accountId,
             externalRef,
             externalRef,
-            row.direction,
-            row.amount,
-            row.currencyCode,
-            row.occurredAt,
-            row.description,
-            row.counterparty,
-            provider,
+            standard.type,
+            standard.amount,
+            standard.currency_code,
+            standard.date,
+            standard.description,
+            standard.counterparty,
+            standard.source,
             provider,
             externalRef,
             accountId,
             JSON.stringify({
+              standard_transaction_schema: {
+                workspace_id: standard.workspace_id,
+                date: standard.date,
+                description: standard.description,
+                amount: standard.amount,
+                type: standard.type,
+                category: standard.category,
+                source: standard.source,
+                created_at: standard.created_at
+              },
               integration: {
                 provider,
                 providerLabel: integrationProviderLabel(provider),
@@ -785,10 +801,10 @@ export async function POST(request: NextRequest) {
               }
             }),
             stableRowHash,
-            row.gstApplicable,
-            row.gstApplicable,
-            row.gstRate,
-            row.gstAmount
+            standard.gst_applicable,
+            standard.gst_applicable,
+            standard.gst_rate,
+            standard.gst_amount
           ]
         );
 
@@ -803,12 +819,12 @@ export async function POST(request: NextRequest) {
             provider,
             entityKind: "transaction",
             externalId: externalRef,
-            occurredAt: row.occurredAt,
-            direction: row.direction,
-            amount: row.amount,
-            currencyCode: row.currencyCode,
-            description: row.description,
-            counterparty: row.counterparty,
+            occurredAt: standard.date,
+            direction: standard.type,
+            amount: standard.amount,
+            currencyCode: standard.currency_code,
+            description: standard.description,
+            counterparty: standard.counterparty,
             rawPayload: {
               provider,
               jobId,
@@ -817,11 +833,21 @@ export async function POST(request: NextRequest) {
               pullMetadata: pullResult.metadata ?? null
             },
             normalizedPayload: {
+              standard_transaction_schema: {
+                workspace_id: standard.workspace_id,
+                date: standard.date,
+                description: standard.description,
+                amount: standard.amount,
+                type: standard.type,
+                category: standard.category,
+                source: standard.source,
+                created_at: standard.created_at
+              },
               reference: externalRef,
-              direction: row.direction,
-              amount: row.amount,
-              counterparty: row.counterparty,
-              description: row.description
+              direction: standard.type,
+              amount: standard.amount,
+              counterparty: standard.counterparty,
+              description: standard.description
             },
             transactionId: insertedTransactionId,
             ingestionRunId: runIds.ingestionRunId
