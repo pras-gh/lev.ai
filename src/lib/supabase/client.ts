@@ -11,8 +11,16 @@ export function createSupabaseBrowserClient() {
     return browserClient;
   }
 
-  const { supabaseUrl, supabaseAnonKey } = getSupabasePublicEnv();
-  browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const { supabaseUrl, supabaseAnonKey } = getSupabasePublicEnv();
+    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
+  } catch {
+    return null;
+  }
 
   return browserClient;
 }

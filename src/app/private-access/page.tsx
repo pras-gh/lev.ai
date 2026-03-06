@@ -12,7 +12,9 @@ export default function PrivateAccessPage() {
   useEffect(() => {
     try {
       const supabase = createSupabaseBrowserClient();
-      void supabase.auth.signOut({ scope: "global" });
+      if (supabase) {
+        void supabase.auth.signOut({ scope: "global" });
+      }
     } catch {
       // no-op when supabase env is not configured
     }

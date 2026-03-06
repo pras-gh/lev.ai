@@ -161,7 +161,6 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const redirectInFlight = useRef<string | null>(null);
   const isOnboardingRoute = pathname === "/app/onboarding" || pathname.startsWith("/app/onboarding/");
   const workspaceIdFromQuery = searchParams.get("workspaceId");
@@ -186,9 +185,18 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      setUserName("Trail User");
+      setUserEmail("");
+      return () => {
+        mounted = false;
+      };
+    }
+    const supabaseClient = supabase;
 
     async function loadAuthUser() {
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await supabaseClient.auth.getUser();
       if (!mounted) {
         return;
       }
@@ -207,7 +215,7 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user ?? null;
       setUserName(resolveDisplayName(currentUser));
       setUserEmail(currentUser?.email ?? "");
@@ -217,7 +225,7 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, []);
 
   async function handleSignOut() {
     if (isSigningOut) {
@@ -225,8 +233,11 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
     }
 
     setIsSigningOut(true);
+    const supabase = createSupabaseBrowserClient();
     try {
-      await supabase.auth.signOut({ scope: "global" });
+      if (supabase) {
+        await supabase.auth.signOut({ scope: "global" });
+      }
     } catch {
       // continue
     }

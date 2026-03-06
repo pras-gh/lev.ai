@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,7 +68,6 @@ function buildMagicLinkRedirect(productTarget: string): string {
 
 export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps) {
   const router = useRouter();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,9 +77,17 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
   useEffect(() => {
     let mounted = true;
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      setHasSession(false);
+      return () => {
+        mounted = false;
+      };
+    }
+    const supabaseClient = supabase;
 
     async function loadSession() {
-      const { data, error } = await supabase.auth.getUser();
+      const { data, error } = await supabaseClient.auth.getUser();
       if (!mounted) {
         return;
       }
@@ -101,7 +108,7 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
 
     const {
       data: { subscription }
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       setHasSession(Boolean(session?.user));
     });
 
@@ -113,11 +120,17 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
         document.removeEventListener("visibilitychange", onFocus);
       }
     };
-  }, [supabase]);
+  }, []);
 
   const triggerLabel = hasSession ? "Open App" : "User Sign In";
 
   async function handleSendMagicLink() {
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      setErrorMessage("Login is temporarily unavailable. Please try again shortly.");
+      return;
+    }
+
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
       setErrorMessage("Enter your email to continue.");
