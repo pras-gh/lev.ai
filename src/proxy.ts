@@ -5,7 +5,6 @@ import type { NextRequest } from "next/server";
 const authSecret =
   process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "trai-dev-auth-secret-change-me";
 const PRODUCT_APP_HOST = (process.env.NEXT_PUBLIC_PRODUCT_APP_HOST ?? "app.usetrailai.com").trim().toLowerCase();
-const MARKETING_SITE_ORIGIN = (process.env.NEXT_PUBLIC_MARKETING_SITE_ORIGIN ?? "https://usetrailai.com").trim();
 
 function normalizeHost(rawHost: string | null): string {
   if (!rawHost) {
@@ -24,12 +23,6 @@ function isProductHostRequest(request: NextRequest): boolean {
 
 function isProtectedProductPath(pathname: string): boolean {
   return pathname.startsWith("/app") || pathname === "/dashboard";
-}
-
-function buildMarketingRedirect(nextTarget: string): URL {
-  const marketingUrl = new URL(MARKETING_SITE_ORIGIN);
-  marketingUrl.searchParams.set("next", nextTarget);
-  return marketingUrl;
 }
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
@@ -58,8 +51,7 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/app", request.url));
     }
 
-    const nextTarget = `https://${PRODUCT_APP_HOST}/app`;
-    return NextResponse.redirect(buildMarketingRedirect(nextTarget));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   if (productHostRequest && pathname === "/login" && hasAuthSession) {
@@ -75,13 +67,8 @@ export async function proxy(request: NextRequest) {
   }
 
   const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-  const redirectUrl = productHostRequest
-    ? buildMarketingRedirect(`https://${PRODUCT_APP_HOST}${nextPath}`)
-    : new URL("/", request.url);
-
-  if (!productHostRequest) {
-    redirectUrl.searchParams.set("next", nextPath);
-  }
+  const redirectUrl = new URL("/login", request.url);
+  redirectUrl.searchParams.set("next", nextPath);
 
   return NextResponse.redirect(redirectUrl);
 }

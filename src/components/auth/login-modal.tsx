@@ -1,6 +1,6 @@
 "use client";
 
-import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type LoginModalProps = {
@@ -9,17 +9,15 @@ type LoginModalProps = {
 };
 
 export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps) {
-  const productLoginUrl = normalizeBookingUrl(siteConfig.productLoginUrl);
-
   return (
-    <a
-      href={productLoginUrl}
+    <Link
+      href="/login"
       onClick={() => {
         onTriggerClick?.();
       }}
       className={cn("lev-button lev-button--outline", triggerClassName)}
     >
       Login
-    </a>
+    </Link>
   );
 }
