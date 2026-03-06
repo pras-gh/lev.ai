@@ -47,7 +47,7 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return false;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const productHostRequest = isProductHostRequest(request);
   const token = await getToken({ req: request, secret: authSecret });

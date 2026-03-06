@@ -1,5 +1,6 @@
 const DEFAULT_CALCOM_30MIN_URL = "https://cal.com/get-trai.ai";
 const DEFAULT_PRODUCT_APP_URL = "https://app.usetrailai.com";
+const DEFAULT_PRODUCT_LOGIN_URL = `${DEFAULT_PRODUCT_APP_URL}/login`;
 
 function cleanRawUrl(url: string): string {
   return url.trim().replace(/[.,;:!?]+$/, "");
@@ -10,6 +11,9 @@ const CALCOM_30MIN_URL = cleanRawUrl(
 );
 const CALCOM_15MIN_URL = cleanRawUrl(process.env.NEXT_PUBLIC_CALCOM_15MIN_URL ?? "");
 const PRODUCT_APP_URL = cleanRawUrl(process.env.NEXT_PUBLIC_PRODUCT_APP_URL ?? DEFAULT_PRODUCT_APP_URL);
+const PRODUCT_LOGIN_URL = cleanRawUrl(
+  process.env.NEXT_PUBLIC_PRODUCT_LOGIN_URL ?? DEFAULT_PRODUCT_LOGIN_URL
+);
 
 export const siteConfig = {
   productName: "trai\\",
@@ -21,6 +25,7 @@ export const siteConfig = {
   calcom30MinUrl: CALCOM_30MIN_URL,
   calcom15MinUrl: CALCOM_15MIN_URL,
   productAppUrl: PRODUCT_APP_URL,
+  productLoginUrl: PRODUCT_LOGIN_URL,
 };
 
 export function isCalComUrl(url: string): boolean {
