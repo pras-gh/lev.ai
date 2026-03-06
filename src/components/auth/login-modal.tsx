@@ -80,15 +80,24 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     let mounted = true;
 
     async function loadSession() {
-      const { data } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getUser();
       if (!mounted) {
         return;
       }
 
-      setHasSession(Boolean(data.session?.user));
+      setHasSession(Boolean(data.user) && !error);
     }
 
     void loadSession();
+
+    function onFocus() {
+      void loadSession();
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("focus", onFocus);
+      document.addEventListener("visibilitychange", onFocus);
+    }
 
     const {
       data: { subscription }
@@ -99,6 +108,10 @@ export function LoginModal({ triggerClassName, onTriggerClick }: LoginModalProps
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("focus", onFocus);
+        document.removeEventListener("visibilitychange", onFocus);
+      }
     };
   }, [supabase]);
 

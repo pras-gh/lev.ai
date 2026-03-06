@@ -365,13 +365,17 @@ export const authOptions: NextAuthOptions = {
   providers,
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider !== "google") {
-        return true;
-      }
-
       const email = typeof user.email === "string" ? user.email.trim().toLowerCase() : "";
       if (!email) {
         return "/private-access";
+      }
+
+      if (account?.provider !== "google") {
+        const planStatus = normalizePlanStatus(
+          (user as { planStatus?: unknown }).planStatus,
+          (user as { isPaid?: boolean }).isPaid ? "active" : "trial"
+        );
+        return planStatus === "active" ? true : "/private-access";
       }
 
       const allowed = await resolveAllowedAccess(email, user.name ?? "Trail User", "trial");

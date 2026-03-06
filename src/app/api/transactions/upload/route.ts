@@ -8,6 +8,7 @@ import {
 import type { ApiScopeInput } from "@/lib/api-utils";
 import { getAuthErrorStatus, resolveAuthorizedScope } from "@/lib/api-auth";
 import { parseAndInsertBankCsv } from "@/lib/bankCsvIngest";
+import { runLedgerPipelinePostIngest } from "@/lib/connector-sync-engine";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -120,6 +121,17 @@ export async function POST(request: NextRequest) {
       dryRun: payload.dryRun
     });
 
+    const shouldRunPipeline = !payload.dryRun && result.insert.insertedCount > 0;
+    const pipeline = shouldRunPipeline
+      ? await runLedgerPipelinePostIngest({
+          workspaceId: scope.workspaceId,
+          businessId: scope.businessId,
+          runRules: true,
+          runAlerts: true,
+          sendWhatsAppDigest: false
+        })
+      : null;
+
     return NextResponse.json({
       parsed: {
         headers: result.parsed.headers,
@@ -128,7 +140,17 @@ export async function POST(request: NextRequest) {
         rejectedRows: result.parsed.rejectedRows.length
       },
       rejectedPreview: result.parsed.rejectedRows.slice(0, 20),
-      insert: result.insert
+      insert: {
+        inserted: result.insert.insertedCount,
+        skippedAsDuplicate: result.insert.skippedCount,
+        alreadyExisting: result.insert.alreadyExistingCount,
+        uniqueInPayload: result.insert.uniqueInPayloadCount,
+        duplicateInPayload: result.insert.duplicateRowHashes.length,
+        autoTagged: result.insert.autoTaggedCount,
+        autoTaggedRate: result.insert.autoTaggedRate
+      },
+      insertDetails: result.insert,
+      pipeline
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to upload transactions CSV";

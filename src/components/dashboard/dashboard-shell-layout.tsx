@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bell, Bot, Loader2, Search } from "lucide-react";
+import { signOut as nextAuthSignOut } from "next-auth/react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/app/dashboard" },
@@ -65,7 +67,35 @@ function buildScopedHref(path: string, scope: ScopeRouteState): string {
   return query ? `${path}?${query}` : path;
 }
 
-function TrailLogo() {
+function resolveDisplayName(user: {
+  email?: string | null;
+  user_metadata?: Record<string, unknown> | null;
+} | null): string {
+  if (!user) {
+    return "Trail User";
+  }
+
+  const metadata = user.user_metadata ?? {};
+  const candidates = [
+    metadata.full_name,
+    metadata.name,
+    metadata.display_name
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      return candidate.trim();
+    }
+  }
+
+  if (typeof user.email === "string" && user.email.trim()) {
+    return user.email.split("@")[0] ?? "Trail User";
+  }
+
+  return "Trail User";
+}
+
+function TrailLogo({ userName }: { userName: string }) {
   return (
     <div>
       <p className="text-[2.6rem] font-semibold leading-none tracking-tight text-zinc-100">
@@ -73,7 +103,7 @@ function TrailLogo() {
       </p>
       <p className="mt-3 text-sm font-medium text-zinc-100">Books that never fall behind</p>
       <p className="mt-1 max-w-[190px] text-xs leading-relaxed text-zinc-400">
-        Live ledger health, GST readiness, and cash runway - updated continuously.
+        {userName}
       </p>
     </div>
   );
@@ -81,19 +111,23 @@ function TrailLogo() {
 
 function LeftRail({
   pathname,
-  scope
+  scope,
+  userName,
+  userEmail
 }: {
   pathname: string;
   scope: ScopeRouteState;
+  userName: string;
+  userEmail: string;
 }) {
   return (
     <aside className="ui-panel-dark hidden w-[250px] shrink-0 flex-col p-5 shadow-[0_28px_80px_rgba(0,0,0,0.52)] lg:flex">
-      <TrailLogo />
+      <TrailLogo userName={userName} />
 
       <article className="mt-6 rounded-2xl border border-white/12 bg-white/[0.04] p-4">
         <p className="ui-label">User</p>
-        <p className="mt-2 text-base font-medium text-zinc-100">Prasoon Pathak</p>
-        <p className="mt-1 text-xs text-zinc-400">ID: TRL-IND-0001</p>
+        <p className="mt-2 text-base font-medium text-zinc-100">{userName}</p>
+        <p className="mt-1 truncate text-xs text-zinc-400">{userEmail || "Signed in user"}</p>
       </article>
 
       <nav className="mt-6 space-y-2">
@@ -127,10 +161,14 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const redirectInFlight = useRef<string | null>(null);
   const isOnboardingRoute = pathname === "/app/onboarding" || pathname.startsWith("/app/onboarding/");
   const workspaceIdFromQuery = searchParams.get("workspaceId");
   const businessIdFromQuery = searchParams.get("businessId");
+  const [userName, setUserName] = useState("Trail User");
+  const [userEmail, setUserEmail] = useState("");
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const queryBusinessId = useMemo(() => {
     const parsed = Number.parseInt(businessIdFromQuery ?? "", 10);
@@ -145,6 +183,67 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
     businessId: queryBusinessId,
     error: null
   });
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAuthUser() {
+      const { data, error } = await supabase.auth.getUser();
+      if (!mounted) {
+        return;
+      }
+
+      if (error || !data.user) {
+        setUserName("Trail User");
+        setUserEmail("");
+        return;
+      }
+
+      setUserName(resolveDisplayName(data.user));
+      setUserEmail(data.user.email ?? "");
+    }
+
+    void loadAuthUser();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUserName(resolveDisplayName(currentUser));
+      setUserEmail(currentUser?.email ?? "");
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function handleSignOut() {
+    if (isSigningOut) {
+      return;
+    }
+
+    setIsSigningOut(true);
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch {
+      // continue
+    }
+
+    try {
+      await nextAuthSignOut({ redirect: false });
+    } catch {
+      // continue
+    }
+
+    if (typeof window !== "undefined") {
+      window.location.assign("/");
+      return;
+    }
+
+    router.replace("/");
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -329,12 +428,17 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-[1600px] gap-3 md:gap-4">
-        <LeftRail pathname={pathname} scope={scopedRoute} />
+        <LeftRail
+          pathname={pathname}
+          scope={scopedRoute}
+          userName={userName}
+          userEmail={userEmail}
+        />
 
         <section className="ui-panel-dark relative min-w-0 flex-1 p-4 shadow-[0_34px_96px_rgba(0,0,0,0.6)] md:p-5">
           <header className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/12 bg-black/55 px-4 py-4 md:px-5">
             <div className="lg:hidden">
-              <TrailLogo />
+              <TrailLogo userName={userName} />
             </div>
 
             <div className="hidden min-w-0 flex-1 text-sm text-zinc-400 md:block">
@@ -363,6 +467,17 @@ export function DashboardShellLayout({ children }: { children: ReactNode }) {
                 aria-label="Notifications"
               >
                 <Bell className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className="ui-button rounded-lg px-3 py-2 text-xs font-semibold tracking-wide text-zinc-200"
+                onClick={() => {
+                  void handleSignOut();
+                }}
+                disabled={isSigningOut}
+                aria-label="Sign out"
+              >
+                {isSigningOut ? "Signing out..." : "Sign out"}
               </button>
             </div>
           </header>

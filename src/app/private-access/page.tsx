@@ -4,11 +4,18 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { normalizeBookingUrl, siteConfig } from "@/lib/site-config";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function PrivateAccessPage() {
   const bookDemoUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
 
   useEffect(() => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      void supabase.auth.signOut({ scope: "global" });
+    } catch {
+      // no-op when supabase env is not configured
+    }
     void signOut({ redirect: false });
   }, []);
 

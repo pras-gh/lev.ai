@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { ensureWorkspaceForUser } from "@/lib/access-layer";
+import { resolveAccessByEmail } from "@/lib/access-control";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -68,13 +69,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(fallbackRedirect);
     }
 
+    const access = await resolveAccessByEmail(data.user.email);
+    if (!access.allowed) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL("/private-access", request.url));
+    }
+
     const bootstrap = await ensureWorkspaceForUser({
       userId: data.user.id,
       email: data.user.email
     });
 
-    const redirectUrl = new URL(nextPath, request.url);
+    const targetPath =
+      bootstrap.created || !bootstrap.onboardingCompleted ? "/app/onboarding" : nextPath;
+    const redirectUrl = new URL(targetPath, request.url);
     redirectUrl.searchParams.set("workspaceId", bootstrap.workspaceId);
+    redirectUrl.searchParams.set("businessId", String(bootstrap.businessId));
 
     return NextResponse.redirect(redirectUrl);
   } catch {

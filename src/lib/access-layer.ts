@@ -5,6 +5,7 @@ type MembershipRow = {
   workspace_id: string;
   business_id: string;
   workspace_name: string;
+  onboarding_completed_at: string | null;
 };
 
 type BusinessRow = {
@@ -17,6 +18,7 @@ export type WorkspaceBootstrapResult = {
   businessId: number;
   workspaceName: string;
   created: boolean;
+  onboardingCompleted: boolean;
 };
 
 function toTitleCase(value: string): string {
@@ -47,7 +49,8 @@ async function findActiveMembership(params: {
     SELECT
       wm.workspace_id::text,
       w.business_id::text,
-      w.name AS workspace_name
+      w.name AS workspace_name,
+      wm.onboarding_completed_at::text
     FROM workspace_members wm
     JOIN workspaces w ON w.id = wm.workspace_id
     WHERE wm.user_id = $1::uuid
@@ -134,7 +137,8 @@ export async function ensureWorkspaceForUser(params: {
         workspaceId: existing.workspace_id,
         businessId: Number.parseInt(existing.business_id, 10),
         workspaceName: existing.workspace_name,
-        created: false
+        created: false,
+        onboardingCompleted: Boolean(existing.onboarding_completed_at)
       };
     }
 
@@ -177,13 +181,12 @@ export async function ensureWorkspaceForUser(params: {
         status,
         onboarding_completed_at
       )
-      VALUES ($1::uuid, $2::uuid, 'owner', 'active', NOW())
+      VALUES ($1::uuid, $2::uuid, 'owner', 'active', NULL)
       ON CONFLICT (workspace_id, user_id)
       DO UPDATE
       SET
         role = 'owner',
         status = 'active',
-        onboarding_completed_at = COALESCE(workspace_members.onboarding_completed_at, NOW()),
         updated_at = NOW()
       `,
       [workspace.id, params.userId]
@@ -197,7 +200,8 @@ export async function ensureWorkspaceForUser(params: {
       workspaceId: workspace.id,
       businessId: Number.parseInt(business.id, 10),
       workspaceName: workspace.name,
-      created: true
+      created: true,
+      onboardingCompleted: false
     };
   } catch (error) {
     if (!params.client) {
