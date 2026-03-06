@@ -62,6 +62,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(buildMarketingRedirect(nextTarget));
   }
 
+  if (productHostRequest && pathname === "/login" && hasAuthSession) {
+    return NextResponse.redirect(new URL("/app", request.url));
+  }
+
   if (!isProtectedProductPath(pathname)) {
     return NextResponse.next();
   }
@@ -83,5 +87,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/app/:path*", "/dashboard"],
+  matcher: ["/", "/app/:path*", "/dashboard", "/login"],
 };
