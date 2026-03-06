@@ -1,19 +1,40 @@
 const DEFAULT_CALCOM_30MIN_URL = "https://cal.com/get-trai.ai";
 const DEFAULT_PRODUCT_APP_URL = "https://app.usetrailai.com";
-const DEFAULT_PRODUCT_LOGIN_URL = `${DEFAULT_PRODUCT_APP_URL}/login`;
 
 function cleanRawUrl(url: string): string {
   return url.trim().replace(/[.,;:!?]+$/, "");
 }
 
-const CALCOM_30MIN_URL = cleanRawUrl(
-  process.env.NEXT_PUBLIC_CALCOM_30MIN_URL ?? DEFAULT_CALCOM_30MIN_URL
+function normalizeAbsoluteUrl(rawUrl: string, fallbackUrl: string): string {
+  const cleanedUrl = cleanRawUrl(rawUrl);
+
+  try {
+    const parsed = new URL(cleanedUrl);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return fallbackUrl;
+    }
+    return parsed.toString();
+  } catch {
+    return fallbackUrl;
+  }
+}
+
+function buildProductLoginUrl(productAppUrl: string): string {
+  const fallbackLoginUrl = `${productAppUrl.replace(/\/+$/, "")}/login`;
+  const configuredLoginUrl = process.env.NEXT_PUBLIC_PRODUCT_LOGIN_URL ?? fallbackLoginUrl;
+  return normalizeAbsoluteUrl(configuredLoginUrl, fallbackLoginUrl);
+}
+
+const CALCOM_30MIN_URL = normalizeAbsoluteUrl(
+  process.env.NEXT_PUBLIC_CALCOM_30MIN_URL ?? DEFAULT_CALCOM_30MIN_URL,
+  DEFAULT_CALCOM_30MIN_URL
 );
 const CALCOM_15MIN_URL = cleanRawUrl(process.env.NEXT_PUBLIC_CALCOM_15MIN_URL ?? "");
-const PRODUCT_APP_URL = cleanRawUrl(process.env.NEXT_PUBLIC_PRODUCT_APP_URL ?? DEFAULT_PRODUCT_APP_URL);
-const PRODUCT_LOGIN_URL = cleanRawUrl(
-  process.env.NEXT_PUBLIC_PRODUCT_LOGIN_URL ?? DEFAULT_PRODUCT_LOGIN_URL
+const PRODUCT_APP_URL = normalizeAbsoluteUrl(
+  process.env.NEXT_PUBLIC_PRODUCT_APP_URL ?? DEFAULT_PRODUCT_APP_URL,
+  DEFAULT_PRODUCT_APP_URL
 );
+const PRODUCT_LOGIN_URL = buildProductLoginUrl(PRODUCT_APP_URL);
 
 export const siteConfig = {
   productName: "trai\\",
