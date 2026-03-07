@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { resolveAccessByEmail } from "@/lib/access-control";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSupabaseAdminClient, hasSupabaseAdminEnv } from "@/lib/supabase/admin";
 
@@ -157,61 +158,66 @@ async function resolveAllowedAccess(
   fallbackName: string,
   fallbackPlanStatus: PlanStatus = "trial"
 ): Promise<{ name: string; planStatus: PlanStatus }> {
-  if (!hasSupabaseAdminEnv()) {
-    return {
-      name: fallbackName,
-      planStatus: fallbackPlanStatus,
-    };
+  if (hasSupabaseAdminEnv()) {
+    try {
+      const supabaseAdmin = createSupabaseAdminClient();
+
+      const { data: allowedRow, error: allowedError } = await supabaseAdmin
+        .from("allowed_users")
+        .select("full_name,plan_status")
+        .eq("email", email)
+        .limit(1)
+        .maybeSingle<AllowedUserRow>();
+
+      if (!allowedError && allowedRow) {
+        return {
+          name: allowedRow.full_name?.trim() || fallbackName,
+          planStatus: normalizePlanStatus(allowedRow.plan_status, fallbackPlanStatus),
+        };
+      }
+
+      if (allowedError) {
+        const allowedLegacyResult = await supabaseAdmin
+          .from("allowed_users")
+          .select("full_name,status")
+          .eq("email", email)
+          .limit(1)
+          .maybeSingle<AllowedUserLegacyRow>();
+
+        if (!allowedLegacyResult.error && allowedLegacyResult.data) {
+          return {
+            name: allowedLegacyResult.data.full_name?.trim() || fallbackName,
+            planStatus: normalizePlanStatus(allowedLegacyResult.data.status, fallbackPlanStatus),
+          };
+        }
+      }
+
+      const { data: dashboardAccessRow, error: dashboardAccessError } = await supabaseAdmin
+        .from("dashboard_users")
+        .select("full_name,is_paid")
+        .eq("email", email)
+        .limit(1)
+        .maybeSingle<DashboardAccessRow>();
+
+      if (!dashboardAccessError && dashboardAccessRow) {
+        return {
+          name: dashboardAccessRow.full_name?.trim() || fallbackName,
+          planStatus: dashboardAccessRow.is_paid ? "active" : "trial",
+        };
+      }
+    } catch {
+      // fall through to DB fallback
+    }
   }
 
   try {
-    const supabaseAdmin = createSupabaseAdminClient();
-
-    const { data: allowedRow, error: allowedError } = await supabaseAdmin
-      .from("allowed_users")
-      .select("full_name,plan_status")
-      .eq("email", email)
-      .limit(1)
-      .maybeSingle<AllowedUserRow>();
-
-    if (!allowedError && allowedRow) {
-      return {
-        name: allowedRow.full_name?.trim() || fallbackName,
-        planStatus: normalizePlanStatus(allowedRow.plan_status, fallbackPlanStatus),
-      };
-    }
-
-    if (allowedError) {
-      const allowedLegacyResult = await supabaseAdmin
-        .from("allowed_users")
-        .select("full_name,status")
-        .eq("email", email)
-        .limit(1)
-        .maybeSingle<AllowedUserLegacyRow>();
-
-      if (!allowedLegacyResult.error && allowedLegacyResult.data) {
-        return {
-          name: allowedLegacyResult.data.full_name?.trim() || fallbackName,
-          planStatus: normalizePlanStatus(allowedLegacyResult.data.status, fallbackPlanStatus),
-        };
-      }
-    }
-
-    const { data: dashboardAccessRow, error: dashboardAccessError } = await supabaseAdmin
-      .from("dashboard_users")
-      .select("full_name,is_paid")
-      .eq("email", email)
-      .limit(1)
-      .maybeSingle<DashboardAccessRow>();
-
-    if (!dashboardAccessError && dashboardAccessRow) {
-      return {
-        name: dashboardAccessRow.full_name?.trim() || fallbackName,
-        planStatus: dashboardAccessRow.is_paid ? "active" : "trial",
-      };
-    }
+    const accessDecision = await resolveAccessByEmail(email);
+    return {
+      name: fallbackName,
+      planStatus: normalizePlanStatus(accessDecision.planStatus, fallbackPlanStatus),
+    };
   } catch {
-    // fall through
+    // fall through to static fallback
   }
 
   return {
@@ -435,6 +441,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
 };

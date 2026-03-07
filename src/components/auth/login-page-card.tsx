@@ -35,10 +35,13 @@ export function LoginPageCard() {
   async function handleLogin(values: LoginValues) {
     setErrorMessage(null);
     setShowUpgradeCta(false);
+    const nextPath = searchParams.get("next");
+    const callbackUrl = nextPath && nextPath.startsWith("/app") ? nextPath : "/app/dashboard";
 
     const response = await signIn("credentials", {
       email: values.email,
       password: values.password,
+      callbackUrl,
       redirect: false
     });
 
@@ -48,11 +51,22 @@ export function LoginPageCard() {
     }
 
     if (response.error) {
+      if (response.error === "AccessDenied") {
+        await signOut({ redirect: false });
+        router.push("/private-access");
+        return;
+      }
+
       if (response.error === "Configuration") {
         setErrorMessage("Login is not configured yet. Please try again shortly.");
         return;
       }
       setErrorMessage("Invalid email or password.");
+      return;
+    }
+
+    if (response.url) {
+      router.push(response.url);
       return;
     }
 
@@ -68,14 +82,7 @@ export function LoginPageCard() {
       setShowUpgradeCta(true);
       return;
     }
-
-    const nextPath = searchParams.get("next");
-    if (nextPath && nextPath.startsWith("/app")) {
-      router.push(nextPath);
-      return;
-    }
-
-    router.push("/app/dashboard");
+    router.push(callbackUrl);
   }
 
   return (
