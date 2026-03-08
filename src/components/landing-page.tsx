@@ -125,8 +125,6 @@ const heroDemoOutputs: HeroOutputMetric[] = [
   { label: "GST due", value: "Rs 38,200" },
 ];
 
-const HERO_DEMO_SEQUENCE = [0, 1, 2, 3, 4, 5, 5, 5] as const;
-
 const productVisualCards = [
   {
     label: "Dashboard",
@@ -182,18 +180,6 @@ function metricTone(label: string) {
     label: "text-emerald-700",
     value: "text-emerald-800",
   };
-}
-
-function visualTone(label: string) {
-  if (label.toLowerCase().includes("gst")) {
-    return "border-rose-200 bg-rose-50 text-rose-700";
-  }
-
-  if (label.toLowerCase().includes("analysis") || label.toLowerCase().includes("ai")) {
-    return "border-blue-200 bg-blue-50 text-blue-700";
-  }
-
-  return "border-emerald-200 bg-emerald-50 text-emerald-700";
 }
 
 function heroItem(shouldReduceMotion: boolean, delay: number) {
@@ -422,118 +408,101 @@ function HeroInputAiClarity({ shouldReduceMotion }: { shouldReduceMotion: boolea
   );
 }
 
-function HeroFinanceFlowDemo({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
-  const [sequenceIndex, setSequenceIndex] = useState(0);
-  const currentStep = shouldReduceMotion ? 5 : HERO_DEMO_SEQUENCE[sequenceIndex] ?? 0;
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const interval = window.setInterval(() => {
-      setSequenceIndex((prev) => (prev + 1) % HERO_DEMO_SEQUENCE.length);
-    }, 900);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [shouldReduceMotion]);
-
+function WorkspaceUiDemo({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   return (
-    <div className="mx-auto w-full max-w-[760px]">
-      <div className="rounded-[26px] border border-slate-200 bg-[#f7f9fc] p-4 text-left shadow-[0_16px_34px_-24px_rgba(15,17,21,0.28)] backdrop-blur-xl sm:p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-          Product demo
-        </p>
-
-        <div className="mt-3 space-y-2">
-          {heroDemoInputs.map((event, index) => {
-            const isVisible = currentStep >= index;
-            const isActive = currentStep === index;
-
-            return (
-              <motion.div
-                key={event}
-                initial={false}
-                animate={{
-                  opacity: isVisible ? 1 : 0.25,
-                  y: isVisible ? 0 : 7,
-                  scale: isActive ? 1.015 : 1,
-                }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.32, ease: easing }}
-                className={`rounded-xl border px-3 py-2 text-sm font-medium ${
-                  isVisible
-                    ? "border-slate-200 bg-white text-slate-800"
-                    : "border-slate-200 bg-slate-100 text-slate-500"
+    <motion.div
+      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.45, ease: easing }}
+      className="w-full overflow-hidden rounded-[28px] border border-white/10 bg-[#161a22] shadow-[0_20px_40px_-24px_rgba(0,0,0,0.45)]"
+    >
+      <div className="grid min-h-[420px] lg:grid-cols-[220px_1fr]">
+        <aside className="border-b border-white/10 bg-[#141923] p-5 lg:border-b-0 lg:border-r">
+          <p className="text-2xl font-semibold tracking-tight text-white">
+            trai<span className="font-light">{"\\"}</span>
+          </p>
+          <p className="mt-1 text-xs uppercase tracking-[0.1em] text-slate-400">Workspace</p>
+          <div className="mt-6 space-y-2 text-sm">
+            {["Dashboard", "Reconciliation", "Alerts", "Integrations"].map((item, index) => (
+              <div
+                key={item}
+                className={`rounded-lg border px-3 py-2 ${
+                  index === 0
+                    ? "border-white/30 bg-white/12 text-white"
+                    : "border-white/10 bg-white/[0.03] text-slate-300"
                 }`}
               >
-                {event}
-              </motion.div>
-            );
-          })}
-        </div>
-
-        <p className="my-3 text-center text-xl text-blue-500/80">↓</p>
-
-        <AnimatePresence mode="wait">
-          {currentStep === 4 ? (
-            <motion.div
-              key="analyzing"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: easing }}
-              className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-4"
-            >
-              <p className="text-sm font-semibold text-slate-800">
-                trai\ analyzing
-                <motion.span
-                  aria-hidden="true"
-                  animate={shouldReduceMotion ? undefined : { opacity: [0.25, 1, 0.25] }}
-                  transition={{ duration: 1.1, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                  className="ml-1 inline-block text-blue-500"
-                >
-                  ...
-                </motion.span>
-              </p>
-            </motion.div>
-          ) : currentStep >= 5 ? (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: easing }}
-            >
-              <p className="mb-3 text-center text-xl text-blue-500/80">↓</p>
-              <div className="grid gap-2 sm:grid-cols-3">
-                {heroDemoOutputs.map((metric, index) => (
-                  <motion.div
-                    key={metric.label}
-                    initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : 0.28, delay: shouldReduceMotion ? 0 : index * 0.1, ease: easing }}
-                    className={`rounded-xl border px-3 py-3 ${metricTone(metric.label).card}`}
-                  >
-                    <p className={`text-[11px] font-semibold uppercase tracking-[0.1em] ${metricTone(metric.label).label}`}>
-                      {metric.label}
-                    </p>
-                    <p className={`mt-1 text-lg font-semibold ${metricTone(metric.label).value}`}>{metric.value}</p>
-                  </motion.div>
-                ))}
+                {item}
               </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+            ))}
+          </div>
+        </aside>
+
+        <div className="bg-[#161a22] p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-medium text-white">Acme Workspace</p>
+              <p className="text-xs text-slate-400">Live finance console</p>
+            </div>
+            <span className="rounded-full border border-blue-300/30 bg-blue-300/10 px-3 py-1 text-xs font-medium text-blue-200">
+              Sync active
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3">
+              <p className="text-xs text-emerald-700">Cash balance</p>
+              <p className="mt-1 text-xl font-semibold text-emerald-800">Rs 5,48,000</p>
+              <p className="text-xs text-emerald-700">↑ 8% this month</p>
+            </div>
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-3">
+              <p className="text-xs text-blue-700">Runway</p>
+              <p className="mt-1 text-xl font-semibold text-blue-800">6.2 months</p>
+              <p className="text-xs text-blue-700">Insight updated 2m ago</p>
+            </div>
+            <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-3">
+              <p className="text-xs text-rose-700">GST due</p>
+              <p className="mt-1 text-xl font-semibold text-rose-800">Rs 38,200</p>
+              <p className="text-xs text-rose-700">Due in 5 days</p>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Recent transactions</p>
+            <div className="mt-2 space-y-2 text-sm">
+              {[
+                ["Razorpay payout", "Rs 41,200", "insight"],
+                ["Vendor payment", "Rs 7,200", "alert"],
+                ["UPI collection", "Rs 12,400", "positive"],
+              ].map(([label, value, tone]) => (
+                <div key={label} className="flex items-center justify-between rounded-lg border border-white/8 bg-white/[0.04] px-3 py-2">
+                  <p className="text-slate-200">{label}</p>
+                  <p
+                    className={
+                      tone === "positive"
+                        ? "font-medium text-emerald-300"
+                        : tone === "alert"
+                          ? "font-medium text-rose-300"
+                          : "font-medium text-blue-300"
+                    }
+                  >
+                    {value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 export function LandingPage() {
   const shouldReduceMotion = useReducedMotion() ?? false;
   const calBookingUrl = normalizeBookingUrl(siteConfig.calcom30MinUrl);
+  const productDemoUrl = normalizeBookingUrl(siteConfig.productAppUrl);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [introPhase, setIntroPhase] = useState<IntroPhase>(shouldReduceMotion ? "get" : "typing");
@@ -601,7 +570,7 @@ export function LandingPage() {
             : "border-b border-transparent bg-[#0f1115]/66 backdrop-blur-lg"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-[1220px] items-center justify-between px-6 py-4 sm:px-8">
+        <div className="flex w-full items-center justify-between px-6 py-4 sm:px-8">
           <Link href="/" aria-label="trai\\ home">
             <BrandMark className="text-[1.1rem] font-semibold" />
           </Link>
@@ -667,9 +636,9 @@ export function LandingPage() {
         </AnimatePresence>
       </header>
 
-      <main className="relative mx-auto w-full max-w-[1220px] px-6 pt-26 sm:px-8 sm:pt-28">
+      <main className="relative w-full px-6 pt-26 sm:px-8 sm:pt-28">
         <section className="lev-hero-deep relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] flex min-h-[calc(100vh-8rem)] w-screen items-center justify-center px-6 py-14 sm:px-8 sm:py-18">
-          <div className="relative z-10 mx-auto w-full max-w-[1040px] text-center">
+          <div className="relative z-10 w-full text-center">
             <motion.div initial="hidden" animate="visible" variants={heroItem(shouldReduceMotion, 0)}>
               <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200">
                 <StarIcon />
@@ -759,13 +728,19 @@ export function LandingPage() {
           variants={revealInView(shouldReduceMotion)}
           className="lev-section lev-section--light mt-12"
         >
-          <div className="mb-6 max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Product demo</p>
-            <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-              Watch Trail process transactions like an in-house accountant
-            </h2>
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Product demo</p>
+              <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
+                Get demo from app.usetrailai.com workspace UI
+              </h2>
+            </div>
+            <a href={productDemoUrl} className="lev-button lev-button--dark">
+              Open App Demo
+              <ArrowIcon />
+            </a>
           </div>
-          <HeroFinanceFlowDemo shouldReduceMotion={shouldReduceMotion} />
+          <WorkspaceUiDemo shouldReduceMotion={shouldReduceMotion} />
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {productVisualCards.map((card, index) => (
               <motion.div
