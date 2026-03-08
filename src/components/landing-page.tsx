@@ -730,10 +730,7 @@ export function LandingPage() {
         >
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">Product demo</p>
-              <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">
-                Get demo from app.usetrailai.com workspace UI
-              </h2>
+              <h2 className="text-[clamp(1.9rem,4vw,3rem)] leading-[1.02] font-semibold text-white">trai\</h2>
             </div>
             <a href={productDemoUrl} className="lev-button lev-button--dark">
               Open App Demo
