@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { LandingPage } from "@/components/landing-page";
 
-const MAINTENANCE_DURATION_MS = 54 * 60 * 60 * 1000;
+const MAINTENANCE_DURATION_MS = 88 * 60 * 60 * 1000;
 const MAINTENANCE_START_KEY = "trail_maintenance_start_ms";
 
 type Countdown = {
