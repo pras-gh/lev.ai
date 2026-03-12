@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { LandingPage } from "@/components/landing-page";
 
-const MAINTENANCE_DURATION_MS = 88 * 60 * 60 * 1000;
-const MAINTENANCE_START_KEY = "trail_maintenance_start_ms";
+const MAINTENANCE_START_MS = 1771874099000;
+const MAINTENANCE_DURATION_MS = 24 * 60 * 60 * 1000;
+const MAINTENANCE_END_MS = MAINTENANCE_START_MS + MAINTENANCE_DURATION_MS;
 
 type Countdown = {
   hours: string;
@@ -15,9 +16,8 @@ type Countdown = {
   totalMs: number;
 };
 
-function getCountdown(maintenanceStartMs: number): Countdown {
-  const maintenanceEndMs = maintenanceStartMs + MAINTENANCE_DURATION_MS;
-  const totalMs = Math.max(0, maintenanceEndMs - Date.now());
+function getCountdown(): Countdown {
+  const totalMs = Math.max(0, MAINTENANCE_END_MS - Date.now());
   const totalSeconds = Math.floor(totalMs / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -29,28 +29,6 @@ function getCountdown(maintenanceStartMs: number): Countdown {
     seconds: String(seconds).padStart(2, "0"),
     totalMs,
   };
-}
-
-function getOrCreateMaintenanceStartMs(): number {
-  const now = Date.now();
-
-  if (typeof window === "undefined") {
-    return now;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(MAINTENANCE_START_KEY);
-    const parsed = raw ? Number(raw) : NaN;
-
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return parsed;
-    }
-
-    window.localStorage.setItem(MAINTENANCE_START_KEY, String(now));
-    return now;
-  } catch {
-    return now;
-  }
 }
 
 function TimerUnit({
@@ -85,16 +63,11 @@ function TimerUnit({
 
 export function HomeGate() {
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const [maintenanceStartMs, setMaintenanceStartMs] = useState<number>(() => Date.now());
-  const [countdown, setCountdown] = useState<Countdown>(() => getCountdown(Date.now()));
+  const [countdown, setCountdown] = useState<Countdown>(() => getCountdown());
 
   useEffect(() => {
-    const initialStartMs = getOrCreateMaintenanceStartMs();
-    setMaintenanceStartMs(initialStartMs);
-    setCountdown(getCountdown(initialStartMs));
-
     const timer = window.setInterval(() => {
-      setCountdown(getCountdown(initialStartMs));
+      setCountdown(getCountdown());
     }, 1000);
 
     return () => {
@@ -107,13 +80,6 @@ export function HomeGate() {
   }
 
   const progress = (countdown.totalMs / MAINTENANCE_DURATION_MS) * 100;
-  const maintenanceEnd = new Date(maintenanceStartMs + MAINTENANCE_DURATION_MS);
-  const maintenanceEndLabel = maintenanceEnd.toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050608] text-white">
@@ -137,7 +103,6 @@ export function HomeGate() {
           <p className="mt-4 max-w-2xl text-[clamp(1rem,2.2vw,1.22rem)] leading-relaxed text-slate-300">
             to deliver a stronger experience tomorrow.
           </p>
-          <p className="mt-2 text-sm text-slate-400">Expected to resume by {maintenanceEndLabel}</p>
 
           <div className="mt-10">
             <div className="flex flex-wrap gap-3">

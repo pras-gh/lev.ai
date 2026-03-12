@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f1115;
-  --surface: #161a22;
-  --foreground: #e8eaed;
-  --muted: #8b9098;
-  --accent: #2ecc71;
-  --accent-2: #4c8dff;
-  --danger: #ef4444;
+  --background: #0a0c10;
+  --foreground: #f4f7f6;
+  --muted: #a0a8b8;
+  --accent: #00ea64;
+  --accent-2: #1cd67a;
   --font-body: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   --font-display: "Inter", "Avenir Next", "Segoe UI", sans-serif;
 }
@@ -26,9 +24,9 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 18% 10%, rgba(76, 141, 255, 0.06), transparent 24%),
-    radial-gradient(circle at 82% 8%, rgba(46, 204, 113, 0.04), transparent 26%),
-    linear-gradient(180deg, #0f1115 0%, #10131a 52%, #0f1115 100%);
+    radial-gradient(circle at 16% 8%, rgba(0, 234, 100, 0.07), transparent 20%),
+    radial-gradient(circle at 84% 12%, rgba(0, 234, 100, 0.05), transparent 22%),
+    linear-gradient(180deg, #010203 0%, #020304 52%, #010203 100%);
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
 }
@@ -55,48 +53,48 @@ img {
 }
 
 ::selection {
-  background: rgba(76, 141, 255, 0.35);
-  color: #0f1115;
+  background: #00ea64;
+  color: #04140a;
 }
 
 .glass-panel {
-  background: linear-gradient(160deg, rgba(22, 26, 34, 0.92) 0%, rgba(22, 26, 34, 0.84) 100%);
-  border: 1px solid rgba(232, 234, 237, 0.08);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(158deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(8px);
 }
 
 .lev-page-backdrop {
   background:
-    radial-gradient(circle at 14% 10%, rgba(76, 141, 255, 0.06), transparent 26%),
-    radial-gradient(circle at 86% 16%, rgba(46, 204, 113, 0.04), transparent 28%),
+    radial-gradient(circle at 14% 10%, rgba(0, 234, 100, 0.08), transparent 24%),
+    radial-gradient(circle at 86% 16%, rgba(0, 234, 100, 0.05), transparent 26%),
     repeating-linear-gradient(
       132deg,
-      rgba(232, 234, 237, 0.02) 0px,
-      rgba(232, 234, 237, 0.02) 1px,
+      rgba(0, 234, 100, 0.04) 0px,
+      rgba(0, 234, 100, 0.04) 1px,
       transparent 1px,
-      transparent 84px
+      transparent 72px
     );
-  opacity: 0.28;
+  opacity: 0.42;
 }
 
 .lev-hero-deep {
   background:
-    radial-gradient(circle at 20% 16%, rgba(76, 141, 255, 0.06), transparent 30%),
-    radial-gradient(circle at 82% 18%, rgba(46, 204, 113, 0.05), transparent 32%),
+    radial-gradient(circle at 20% 16%, rgba(0, 234, 100, 0.08), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(0, 234, 100, 0.05), transparent 30%),
     repeating-linear-gradient(
       122deg,
-      rgba(232, 234, 237, 0.015) 0px,
-      rgba(232, 234, 237, 0.015) 1px,
+      rgba(0, 234, 100, 0.04) 0px,
+      rgba(0, 234, 100, 0.04) 1px,
       transparent 1px,
-      transparent 96px
+      transparent 88px
     ),
-    linear-gradient(180deg, #0f1115 0%, #0f1115 100%);
+    linear-gradient(180deg, #020304 0%, #020304 100%);
 }
 
 .lev-torch-text {
   color: #ffffff;
-  text-shadow: 0 4px 16px rgba(255, 255, 255, 0.08);
+  text-shadow:
+    0 0 22px rgba(255, 255, 255, 0.26),
+    0 0 44px rgba(255, 255, 255, 0.12);
 }
 
 .lev-highlight {
@@ -108,8 +106,10 @@ img {
 
 .lev-soft-outline {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.015) 100%);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+  box-shadow:
+    0 28px 70px -58px rgba(0, 234, 100, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
 }
 
 .lev-grid-field {
@@ -221,36 +221,35 @@ img {
 }
 
 .lev-button--emerald {
-  background: linear-gradient(130deg, #2ecc71 0%, #29b765 100%);
-  border: 1px solid rgba(46, 204, 113, 0.4);
-  color: #07120a;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(130deg, #00ea64 0%, #1cd67a 100%);
+  border: 1px solid rgba(0, 234, 100, 0.35);
+  color: #03150a;
+  box-shadow: 0 15px 32px -18px rgba(0, 234, 100, 0.75);
 }
 
 .lev-button--emerald:hover {
-  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 20px 42px -20px rgba(0, 234, 100, 0.92);
 }
 
 .lev-button--dark {
-  background: rgba(22, 26, 34, 0.92);
-  border: 1px solid rgba(232, 234, 237, 0.18);
-  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f4f7f6;
 }
 
 .lev-button--dark:hover {
-  border-color: rgba(76, 141, 255, 0.45);
-  background: rgba(22, 26, 34, 1);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .lev-button--outline {
   background: transparent;
-  border: 1px solid rgba(232, 234, 237, 0.26);
-  color: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #f4f7f6;
 }
 
 .lev-button--outline:hover {
-  border-color: rgba(76, 141, 255, 0.7);
-  background: rgba(76, 141, 255, 0.12);
+  border-color: rgba(0, 234, 100, 0.72);
+  background: rgba(0, 234, 100, 0.1);
 }
 
 .lev-button--light {
@@ -265,64 +264,32 @@ img {
 
 .lev-button--hero-dark {
   background:
-    linear-gradient(180deg, #10141b, #10141b) padding-box,
-    linear-gradient(132deg, rgba(46, 204, 113, 0.62), rgba(76, 141, 255, 0.56)) border-box;
+    linear-gradient(180deg, #050607, #050607) padding-box,
+    linear-gradient(132deg, rgba(0, 234, 100, 0.84), rgba(0, 234, 100, 0.26)) border-box;
   border: 1px solid transparent;
-  color: var(--foreground);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+  color: #f4f7f6;
+  box-shadow:
+    0 14px 34px -24px rgba(0, 234, 100, 0.45),
+    0 0 0 1px rgba(0, 234, 100, 0.14) inset;
 }
 
 .lev-button--hero-dark:hover {
-  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 20px 44px -24px rgba(0, 234, 100, 0.7),
+    0 0 0 1px rgba(0, 234, 100, 0.26) inset;
 }
 
 .lev-cta-pulse {
-  animation: none;
+  animation: levPulse 2.8s ease-in-out infinite;
 }
 
 .lev-login-box-glow {
-  border-color: rgba(76, 141, 255, 0.3) !important;
-  box-shadow: 0 18px 46px -28px rgba(0, 0, 0, 0.6);
-  animation: none;
-}
-
-.lev-section {
-  border-radius: 28px;
-  padding: clamp(1.25rem, 2.2vw, 2rem);
-}
-
-.lev-section--dark {
-  border: 1px solid rgba(232, 234, 237, 0.08);
-  background: rgba(22, 26, 34, 0.5);
-}
-
-.lev-section--light {
-  border: 1px solid #dbe2ec;
-  background: #f6f8fb;
-  box-shadow: 0 10px 24px rgba(15, 17, 21, 0.08);
-}
-
-.lev-section--light .glass-panel {
-  background: #ffffff;
-  border-color: #dbe2ec;
-  box-shadow: 0 10px 24px rgba(15, 17, 21, 0.08);
-}
-
-.lev-section--light .text-white {
-  color: #151a22 !important;
-}
-
-.lev-section--light .text-slate-400 {
-  color: #788190 !important;
-}
-
-.lev-section--light .text-slate-300 {
-  color: #5f6775 !important;
-}
-
-.lev-section--light .text-slate-200,
-.lev-section--light .text-slate-100 {
-  color: #232b39 !important;
+  border-color: rgba(0, 234, 100, 0.36) !important;
+  box-shadow:
+    0 24px 80px -28px rgba(0, 0, 0, 0.95),
+    0 16px 36px -22px rgba(0, 234, 100, 0.55),
+    0 0 0 0 rgba(0, 234, 100, 0.24);
+  animation: levLoginPulse 2.8s ease-in-out infinite;
 }
 
 .lev-marquee {
